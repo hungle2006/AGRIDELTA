@@ -1,0 +1,44 @@
+name: Import verified AGRIDELTA Living Roots v4
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/import-living-roots-v4.yml'
+permissions:
+  contents: write
+jobs:
+  import-release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: true
+      - name: Fetch exact reviewed release and validate integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fSL --retry 3 --max-time 180 'https://at.adobe.com/SyuAMgjFoU7xa6Ky' -o /tmp/agridelta-v4.zip
+          echo '4482397728094c93c83eaaca8e0d62de327f1345a2cce0b7e1efbec0e8452547  /tmp/agridelta-v4.zip' | sha256sum --check
+          unzip -tq /tmp/agridelta-v4.zip
+          unzip -o -q /tmp/agridelta-v4.zip -d .
+      - name: Verify JS syntax and 3D asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check main.js
+          node --check root-guide.js
+          node --check intro.js
+          test "$(head -c4 public/assets/agridelta_seed_to_harvest_model.glb)" = glTF
+          test "$(stat -c%s public/assets/agridelta_seed_to_harvest_model.glb)" -gt 300000
+      - name: Commit exact verified release
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/quality.yml .gitignore DEPLOY_GITHUB.md README.md blender/ enhance_seedling_model.py index.html intro.css intro.js main.js package.json public/assets/ root-guide.css root-guide.js start-mac-linux.sh start-windows.bat style.css vercel.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'feat: publish continuous living-roots onboarding and detailed 3D seedling'
+            git push origin HEAD:main
+          fi
