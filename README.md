@@ -1,60 +1,66 @@
-# AGRIDELTA — FROM SEED TO HARVEST
+# AGRIDELTA — Living Roots
 
-A responsive environmental web-app proof of concept with a **cinematic seed → roots → watering → leaves → golden harvest** opening sequence. This improves the previous flat SVG hero by making the story interactive, with an organic macro-soil canvas renderer, physically inspired shading, motion, mobile layouts, and scene progression.
+**AGRIDELTA** là bản thử nghiệm web app nông nghiệp xanh, có trang giới thiệu tương tác từ **cây non 3D đến hệ rễ hướng dẫn sử dụng**. Trang web được thiết kế để cuộn liên tục — không phải slideshow, không khóa cuộn và không có sidebar.
 
-## Features
+**Website:** https://agridelta.vercel.app
 
-- Opening story: automatic seed drop and germination; prompts for watering; growing foliage and positive-season finale. Skip, replay, keyboard Escape, session-based first-visit gating, reduced-motion skips by default.
-- Desktop top navigation and mobile bottom navigation (**no sidebar**).
-- Existing screens retained: sign in/register demo, dashboard, fields, tasks, crop seasons, image observation/upload preview, orders, profile.
-- Harvest imagery in dashboard is a screenshot of the cinematic canvas, *not* a Blender render.
-- On-demand 3D GLB viewer (requires loading Google's `<model-viewer>` web component from CDN); accessible download link for the 3D geometry even without CDN.
-- Standalone model `public/assets/agridelta_seed_to_harvest_model.glb` is valid glTF 2.0 geometry **generated procedurally with Trimesh, importable/editable in Blender**. It has soil, roots, seed, stalk, leaves and harvest grains, but **no embedded growth animation**.
-- Full Blender 4.x script: `blender/seed_to_harvest.py` creates textured soil, animated falling seed, roots, stem, unfolding leaf meshes, rain droplets, crop panicles, camera/light animation, and exports `.blend`, `.glb`, `.png` when run with Blender. **Blender is not available in the present build environment; those Blender-rendered files are not included**.
+## Trải nghiệm
 
-## Run & test
+- **Cây non 3D:** mô hình glTF `public/assets/agridelta_seed_to_harvest_model.glb` có lá cong, gân lá, giọt sương, đất và rễ. Người dùng có thể xoay/quan sát khi trình duyệt hỗ trợ WebGL.
+- **Bộ rễ theo vị trí cuộn:** cuộn xuống làm rễ chính và các rễ nhánh mở dần. Có 5 hướng dẫn: Cánh đồng, Mùa vụ, Công việc, Quan sát, Đơn hàng.
+- **Hướng dẫn tương tác:** mở từng phần “Xem cách sử dụng”, bấm nút đi thẳng đến chức năng.
+- **Laptop & điện thoại:** thanh điều hướng trên, bố cục tự điều chỉnh, ảnh thay thế khi 3D không tải được, hỗ trợ `prefers-reduced-motion`.
+- **Không gian demo:** trang tổng quan, quản lý khu canh tác, công việc, mùa vụ, xem trước ảnh, quản lý đơn hàng.
+- **Không dùng bộ chương trình 5 slide mở đầu:** `intro.js` và `intro.css` được giữ trong mã nguồn làm tư liệu tham khảo, nhưng không được nạp ở trang production.
+
+## Chạy trên máy
+
+Cần Node.js 22+ và npm:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open the local URL shown by Vite. On first opening, the story will play. On the water chapter, click **Tưới nước cho mầm cây**. Choose **Bước vào AGRIDELTA** to continue to sign-in. On later refreshes the intro is skipped once per browser tab; use **Xem hành trình từ hạt giống** on the login panel, or **Xem hành trình ươm mầm** in the dashboard, to replay.
-
-Production static build:
+Truy cập URL do Vite hiển thị. Kiểm tra build:
 
 ```bash
+node --check main.js
+node --check root-guide.js
 npm run build
 ```
 
-For preview deployment on Vercel, use `dist/` after build. Do not promote the demo auth to production for real users.
+## Thư mục quan trọng
 
-## Generate true Blender animation
+```text
+index.html              Entry point: root-guide + ứng dụng
+root-guide.js/.css      Scrollytelling với SVG và hướng dẫn
+main.js/style.css       Giao diện và chức năng quản lý demo
+public/assets/          GLB 3D và ảnh poster
+blender/                Script tạo cảnh và animation trong Blender
+enhance_seedling_model.py  Công cụ tạo thêm chi tiết hình học vào GLB
+.github/workflows/      Kiểm tra nguồn và build
+vercel.json             Cấu hình deploy
+```
 
-Install Blender **4.2 or later** with the official executable, then:
+## Kết nối GitHub → Vercel
+
+Repo **`hungle2006/AGRIDELTA`** được kết nối với dự án **`agridelta`** trong Vercel. Mỗi lần push lên `main` sẽ kích hoạt Vercel build/deploy vào domain hiện tại. Kiểm tra trạng thái deployment và build logs trong Vercel trước khi xác nhận phát hành.
+
+## Blender và tính chân thực
+
+`blender/seed_to_harvest.py` là script dựng cảnh sinh trưởng 3D với keyframe, chạy bằng Blender được cài trên máy:
 
 ```bash
 blender --background --python blender/seed_to_harvest.py
 ```
 
-Expected outputs (after executing the script on a Blender-capable machine):
+**Giới hạn:** GLB dùng trên trang web hiện là hình học 3D được tạo bằng code (Trimesh), **không phải video render Blender** và **chưa chứa animation sinh trưởng đầy đủ**. Hoạt ảnh rễ khi cuộn là SVG điều khiển bằng JavaScript. Cần một bước render/export và tích hợp animation glTF riêng nếu muốn cây 3D thực sự mọc theo thời gian.
 
-```text
-public/assets/seed_to_harvest.blend
-public/assets/seed_to_harvest.glb
-public/assets/seed_to_harvest_poster.png
-```
+## Bảo mật và dữ liệu
 
-The `.glb` generated by Blender is separate from the existing procedural static `.glb`. To integrate the animation into the live intro, export compatible animated transforms from Blender, use a glTF loader with stage seek controls, and keep the canvas renderer as fallback. This **integration is not yet implemented**; do not imply the HTML scene is rendered by Blender.
+Đây là **bản demo công khai**, không phải ứng dụng có backend xác thực an toàn. Dữ liệu mẫu và tài khoản demo được lưu ở trình duyệt, không đồng bộ giữa thiết bị. **Không sử dụng mật khẩu thật, thông tin khách hàng hay dữ liệu canh tác riêng tư.** Cần tích hợp Auth và database có phân quyền server-side trước khi sử dụng thực tế. Ảnh chỉ được xem trước; ứng dụng không chẩn đoán bệnh bằng AI.
 
-## Product and data security
+## Kiểm tra
 
-This is **a frontend prototype**, not a live production backend. Login stores a client-side salted SHA-256 digest and session data in `localStorage`; it is not secure authentication and all data is local to the current browser. Never use real passwords or private field records. Replace with hosted Auth (e.g. Supabase Auth/Neon-auth) and server-side user-scoped storage before public production release. Monitoring numbers, weather-like chips and crop quantities are demonstration values, not sensor readings. Camera/upload only previews images and does not diagnose plant disease.
-
-## Visual QA
-
-Playwright in headless Chromium used to inspect desktop 1440×900 and mobile 390×844, including seed stage, watering and harvest stage, and skip to login. Captures included as `previews/`. UI guidelines applied from `nextlevelbuilder/ui-ux-pro-max-skill` and `Leonxlnx/taste-skill` with attention to type contrast, 320+ viewport, editorial visual hierarchy, reduced motion, and independent mobile layout.
-
-## Notes on external builder connectors
-
-MagicPath interactive design is built separately. Lovable editing was unavailable because its workspace had no credits. Adobe image-generation initialization returned a tool error and no Adobe asset is falsely included. The Product Design Work-mode workflow is not callable in standard chat. No GitHub repository or Vercel production deployment has been created by this source ZIP.
+Kiểm tra trên màn hình 1440px (laptop), 390px và 320px (điện thoại): hiển thị cây, cuộn phát triển rễ, mở chi tiết hướng dẫn, điều hướng vào app, bàn phím, không tràn ngang. CI và Vercel kiểm tra build của mã nguồn mỗi khi cập nhật.
