@@ -17,12 +17,11 @@ import menuIcon from '@phosphor-icons/core/assets/regular/list.svg?raw';
 import playIcon from '@phosphor-icons/core/assets/regular/play-circle.svg?raw';
 import seedIcon from '@phosphor-icons/core/assets/regular/grains.svg?raw';
 import flowerIcon from '@phosphor-icons/core/assets/regular/flower-lotus.svg?raw';
-import logoIcon from '@phosphor-icons/core/assets/fill/recycle-fill.svg?raw';
 import homeIcon from '@phosphor-icons/core/assets/fill/house-fill.svg?raw';
 (() => {
 'use strict';
 
-const icons={farm:farmIcon,calendar:calendarIcon,clipboard:clipboardIcon,plant:plantIcon,cube:cubeIcon,leaf:leafIcon,grid:gridIcon,book:bookIcon,chart:chartIcon,search:searchIcon,right:rightIcon,left:leftIcon,down:downIcon,close:closeIcon,menu:menuIcon,play:playIcon,seed:seedIcon,flower:flowerIcon,home:homeIcon,logo:logoIcon};
+const icons={farm:farmIcon,calendar:calendarIcon,clipboard:clipboardIcon,plant:plantIcon,cube:cubeIcon,leaf:leafIcon,grid:gridIcon,book:bookIcon,chart:chartIcon,search:searchIcon,right:rightIcon,left:leftIcon,down:downIcon,close:closeIcon,menu:menuIcon,play:playIcon,seed:seedIcon,flower:flowerIcon,home:homeIcon,logo:leafIcon};
 const icon=(name,cls='')=>`<span class="earth-icon ${cls}" aria-hidden="true">${icons[name]||leafIcon}</span>`;
 const titles=['Quản lý Cánh đồng','Quản lý Mùa vụ','Công việc Hằng ngày','Quan sát Cây trồng','Quản lý Đơn hàng'];
 const summaries=['Theo dõi, phân vùng và quản lý khu canh tác','Lập kế hoạch, theo dõi tiến độ và năng suất','Giao việc, nhắc việc và kiểm soát quy trình','Nhận diện, theo dõi sinh trưởng và cảnh báo sớm','Kết nối thị trường và theo dõi đơn hàng'];
@@ -31,7 +30,7 @@ const stages=['Hạt giống','Nảy mầm','Sinh trưởng','Ra hoa','Thu hoạ
 const stageIcons=['seed','plant','leaf','flower','seed'];
 // These positions are projected from the Blender camera, then checked against the reference.
 const anchors=[{x:16.22,y:66.2},{x:32.34,y:72.6},{x:50,y:75.8},{x:67.48,y:72.3},{x:83.78,y:66.2}];
-const brand=`${icon('logo','brand-mark')}<span class="earth-brand-name">AGRIDELTA<small>Nông nghiệp thông minh · Bền vững · Hiệu quả</small></span>`;
+const brand=`<img class="brand-mark" src="/assets/agridelta-brand-mark.webp" alt="" width="48" height="48"><span class="earth-brand-name">AGRIDELTA<small>Nông nghiệp thông minh · Bền vững · Hiệu quả</small></span>`;
 const html=`<div id="rg-site" class="rg-site earth-site"><a class="earth-skip" href="#rg-roots">Đi đến các hướng dẫn</a>
 <main><section class="earth-stage" id="rg-top" aria-label="AGRIDELTA — Từ hạt giống đến mùa vụ bền vững">
 <div class="scene-illustration" aria-hidden="true"><img class="scene-landscape" src="/assets/reference-landscape-v2.webp" alt="" fetchpriority="high"><img class="scene-earth" src="/assets/earth-ground-v2.webp" alt="" fetchpriority="high"><img class="scene-plant" id="earth-plant" src="/assets/earth-plant-1.webp" alt="" fetchpriority="high">${FEATURES.map((_,i)=>`<img class="scene-root-focus" data-root-focus="${i}" src="/assets/earth-root-focus-${i}.webp" alt="" loading="lazy">`).join('')}</div>

@@ -1,52 +1,45 @@
-# AGRIDELTA · Living Growth
+# AGRIDELTA · Reference Earth
 
-Vietnamese agriculture frontend with an editorial landing page, a genuine Blender-authored germination animation and a browser-local farm-management demo.
+Live: https://agridelta.vercel.app
 
-**Production:** https://agridelta.vercel.app
+A faithful reconstruction of the supplied 905 × 505 AGRIDELTA visual, with genuinely Blender-authored plant, earth cutaway, branching roots, dew and glass guide nodes. The visible UI remains real HTML; the source screenshot is not flattened into the interface.
 
-**Source:** https://github.com/hungle2006/AGRIDELTA
+## Main experience
 
-## This release
+- Source headline, green typography, overlaid navigation, glass plant-journey panel and five root-connected feature cards.
+- Five Blender-rendered plant stages: seed, three-leaf seedling, growth, flowering and pod development. Fixed camera, no model spinning.
+- Click a root node to reveal its three-step guide and open the corresponding farm workflow.
+- Previous/next buttons, ArrowLeft/ArrowRight and horizontal wheel/swipe navigation cycle through the five guides.
+- On mobile, a scroll-snap feature rail updates the visible guide after a horizontal swipe. The guide sheet appears below the scene and remains keyboard accessible.
+- Search accepts accented and unaccented Vietnamese. Navigation, knowledge panel, modal Escape/focus trapping and demo entry work.
+- Existing fields, seasons, tasks, image preview and orders workflows are retained. This is still browser-local demo data, not secure authentication or server synchronization.
 
-- Calm ivory and forest-green layout with readable mobile typography and a compact mobile menu.
-- One synchronized 16-second GLB animation: seed coat separates, stem internodes extend, cotyledons open, and true leaves unfold from their attachment points. The camera and soil remain stationary. Playback stops at the mature seedling.
-- Three chapter controls, pause/resume and replay. Playback pauses when the scene is offscreen or the tab is hidden. Reduced-motion users see the completed plant initially. There is no automatic loop.
-- A WebP poster rendered from the same Blender scene supplies a static fallback while 3D loads. No CSS scaling is used to imitate biological growth.
-- The landing uses a 640 px H.264 Blender render (16 seconds, about 200 KB) for reliable playback on iOS and devices without WebGL. The same animated GLB is available in the workspace viewer. Model-viewer is bundled locally and loaded only when the optional 3D viewer is opened. No external runtime CDN is required.
-- Five accessible guide accordions with illustrated context and working demo routes.
-- Existing dashboard, fields, seasons, tasks, image preview and orders remain browser-local demo workflows. Login opens an accurately labelled demo entry; real accounts and server synchronization are not implemented.
+## Art and rendering
 
-## Development
+`blender/reference_earth.py` authors real geometry/materials, packs the leaf and soil texture images, creates the fixed studio and saves an editable `.blend`. It renders independent RGBA plant, soil/root and guide-focus layers at 1600 × 893, plus a 256 px physical glass orb. These are converted to WebP for fast, WebGL-independent display.
 
-Node 22+:
+The distant mountain landscape is a generated photographic backdrop. It is deliberately separate from the Blender plant/soil. Texture and backdrop assets are included so the scene is reproducible. Root button coordinates are projected from the actual Blender camera into `earth-layout.json`.
+
+```bash
+blender -b -t 6 --python blender/reference_earth.py
+python3 scripts/convert-earth-assets.py
+```
+
+Blender 4.3+ and Python Pillow are needed for regeneration. Intermediate PNGs and the generated `.blend` are reproducible and ignored by git. The `.py` authoring source and web-ready layers are versioned.
+
+## Development and checks
 
 ```bash
 npm ci
-npm run dev -- --host 127.0.0.1
+npm run dev -- --host 0.0.0.0 --port 4173 --strictPort
 node --check main.js
 node --check root-guide.js
 node --test tests/*.test.mjs
 npm run build
 ```
 
-## Blender source
+The dev wrapper handles managed Linux environments where network-interface enumeration is unavailable. It does not affect the production build.
 
-`blender/living_growth.py` creates the scene, meshes, physical materials, embedded leaf texture, growth keyframes, GLB and rendered PNG poster. Requires Blender 4.3+ and its bundled NumPy.
+`tests/layout-check.html` is a development-only responsive capture helper. Copy it temporarily to public/ for a preview deployment, then remove that public copy before production. The reference capture mode hides only the footer/scrollbar for equal-size visual comparison.
 
-```bash
-blender -b -t 4 --python blender/living_growth.py
-python3 -c "from PIL import Image; Image.open('public/assets/living-growth-poster.png').save('public/assets/living-growth-poster.webp',quality=88)"
-```
-
-The generated editable `.blend` and intermediate PNGs are reproducible and ignored by git. The web-ready GLB and WebP are versioned. The export script merges object animation sampler/channel tables into a single synchronized clip without modifying vertex/accessor buffers.
-
-Render the matching video with Blender and FFmpeg:
-
-```bash
-blender -b -t 6 --python blender/render_growth_video.py
-ffmpeg -y -framerate 12 -i blender/render_frames/frame_%04d.png -f lavfi -i color=c=0xf8f7ef:s=640x640:r=12 -filter_complex "[1:v][0:v]overlay=shortest=1:format=auto,hqdn3d=2:2:3:3,format=yuv420p" -c:v libx264 -preset slow -crf 19 -movflags +faststart -an public/assets/living-growth.mp4
-```
-
-## Scope
-
-Field/sensor values are sample values. Edits persist in the current browser only. The image preview does not diagnose plant disease. There is no secure authentication, database, cross-device synchronization or backend in this frontend project.
+Fonts: Be Vietnam Pro with genuine italic 800. Icons: Phosphor, chosen to match the source's rounded line symbols. No telemetry or analytics are added.

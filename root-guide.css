@@ -17,3 +17,19 @@ body.earth-modal-open{overflow:hidden}.earth-modal{position:fixed;inset:0;z-inde
 .root-gesture-plane{position:absolute;left:0;right:0;top:55%;bottom:0;pointer-events:auto}
 .reference-capture .earth-footer{display:none}
 @media(max-width:719px){.root-gesture-plane{top:0}}
+
+/* Reference QA fixes: exact capture size, source headline baseline and navigation rhythm. */
+.earth-kicker{display:block;line-height:1.4}
+.earth-intro h1{font-weight:800}
+.earth-intro h1 em{font-weight:800}
+.earth-intro-actions{margin-top:1.2vw}
+.earth-nav{gap:2.4vw}
+.reference-capture,.reference-capture body{overflow:hidden;height:100vh}
+@media(max-width:1150px) and (min-width:850px){.earth-header{left:8.8%;right:7.5%}.earth-nav{gap:2.4vw}}
+@media(max-width:719px){.earth-intro-actions{margin-top:19px}.earth-nav{gap:0}}
+/* Keep the glass node centres aligned with the rendered branch tips. */
+@media(min-width:720px){.root-orb{width:8.6vw;height:8.6vw}.root-feature{top:calc(var(--root-y) - 4.3vw)}.root-card>strong{font-size:clamp(8px,1.05vw,17px)}}
+@media(max-width:719px){.earth-stage{height:1100px}.scene-illustration>img:not(.scene-landscape){top:340px}.scene-illustration>.scene-landscape{height:715px}.plant-journey{top:318px;left:7%;right:7%;width:auto;max-width:350px}.earth-scroll{top:655px}.root-features{top:733px}.plant-stages>button{font-size:8px!important}.plant-stages>button:not(:last-child):after{right:-8px}.plant-journey h2{font-size:10px}}
+@media(max-width:335px){.earth-intro h1{font-size:26px}.earth-cta,.earth-secondary{font-size:8px!important;gap:5px;padding:10px 9px}.earth-cta>.earth-icon,.earth-secondary>.earth-icon{width:12px;height:12px}}
+
+.earth-brand>.brand-mark{display:block;object-fit:contain}

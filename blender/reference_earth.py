@@ -13,7 +13,7 @@ bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=Fals
 s=bpy.context.scene;s.render.engine='CYCLES';s.cycles.samples=48;s.cycles.use_denoising=False
 s.render.resolution_x=1600;s.render.resolution_y=893;s.render.resolution_percentage=100
 s.render.image_settings.file_format='PNG';s.render.image_settings.color_mode='RGBA';s.render.film_transparent=True
-s.view_settings.view_transform='AgX';s.render.fps=24
+s.view_settings.view_transform='AgX';s.view_settings.look='AgX - Medium High Contrast';s.render.fps=24
 # Warm backlight and a physically lit sky remain active even with transparent film.
 s.world.use_nodes=True;wn=s.world.node_tree.nodes;wb=wn.get('Background');sky=wn.new('ShaderNodeTexSky');sky.sky_type='NISHITA';sky.sun_elevation=.12;sky.sun_rotation=2.6;sky.sun_disc=False;wb.inputs['Strength'].default_value=.14;s.world.node_tree.links.new(sky.outputs['Color'],wb.inputs['Color'])
 COL={}
@@ -42,14 +42,14 @@ l.new(coords.outputs['Generated'],mapping.inputs['Vector']);l.new(mapping.output
 clods=[mat('Earth aggregate %d'%i,(.013+i*.006,.004+i*.0026,.001+i*.0007),.96) for i in range(12)]
 stemmat=mat('Soft translucent green stem',(.29,.43,.035),.43);stemmat.node_tree.nodes.get('Principled BSDF').inputs['Subsurface Weight'].default_value=.18
 vein=mat('Raised yellow-green midrib',(.46,.55,.14),.48)
-rootmat=mat('Living roots - warm ivory',(.50,.25,.07),.62,.72)
+rootmat=mat('Living roots - warm ivory',(.74,.31,.075),.56,1.75)
 fineroot=mat('Root hairs - fine cream',(.42,.20,.061),.8,.65)
 brightroot=mat('Selected root illumination',(.9,.53,.16),.4,5)
 seedmat=mat('Brown seed husk',(.25,.10,.025),.52)
 seedmat.node_tree.nodes.get('Principled BSDF').inputs['Subsurface Weight'].default_value=.08
-leafmat=mat('Young leaf - real lamina texture',(.4,.55,.08),.4)
-p=leafmat.node_tree.nodes.get('Principled BSDF');p.inputs['Subsurface Weight'].default_value=.10;p.inputs['Subsurface Radius'].default_value=(.16,.26,.04);p.inputs['Transmission Weight'].default_value=.08
-im=bpy.data.images.load(OUT+'/leaf-albedo-v2.webp');im.pack();tex=leafmat.node_tree.nodes.new('ShaderNodeTexImage');tex.image=im;mix=leafmat.node_tree.nodes.new('ShaderNodeMixRGB');mix.blend_type='MULTIPLY';mix.inputs[0].default_value=1;mix.inputs[2].default_value=(.66,.79,.44,1);leafmat.node_tree.links.new(tex.outputs['Color'],mix.inputs[1]);leafmat.node_tree.links.new(mix.outputs[0],p.inputs['Base Color'])
+leafmat=mat('Young leaf - real lamina texture',(.4,.55,.08),.24)
+p=leafmat.node_tree.nodes.get('Principled BSDF');p.inputs['Subsurface Weight'].default_value=.06;p.inputs['Subsurface Radius'].default_value=(.16,.26,.04);p.inputs['Transmission Weight'].default_value=.08
+im=bpy.data.images.load(OUT+'/leaf-albedo-v2.webp');im.pack();tex=leafmat.node_tree.nodes.new('ShaderNodeTexImage');tex.image=im;mix=leafmat.node_tree.nodes.new('ShaderNodeMixRGB');mix.blend_type='MULTIPLY';mix.inputs[0].default_value=1;mix.inputs[2].default_value=(.46,.73,.30,1);leafmat.node_tree.links.new(tex.outputs['Color'],mix.inputs[1]);leafmat.node_tree.links.new(mix.outputs[0],p.inputs['Base Color'])
 b=leafmat.node_tree.nodes.new('ShaderNodeBump');b.inputs['Strength'].default_value=.14;b.inputs['Distance'].default_value=.009;leafmat.node_tree.links.new(tex.outputs['Color'],b.inputs['Height']);leafmat.node_tree.links.new(b.outputs['Normal'],p.inputs['Normal'])
 water=mat('Clear surface-tension dew',(.94,.98,1),.025);p=water.node_tree.nodes.get('Principled BSDF');p.inputs['IOR'].default_value=1.333;p.inputs['Transmission Weight'].default_value=1
 petal=mat('Bean blossom - warm ivory',(.88,.83,.57),.58)
@@ -127,11 +127,13 @@ curve('Shoot highlight',[(-.022,-.001,.25),(-.018,.003,.82),(-.056,.003,1.45)],.
 def leaf(name,base,tip,width,col='Plant',dew=True):
  base=Vector(base);tip=Vector(tip);axis=tip-base;side=axis.normalized().cross(Vector((0,-1,.18))).normalized()
  if side.z<0:side=-side
+ from mathutils import Matrix
+ side=Matrix.Rotation(math.radians(32),3,axis.normalized()) @ side
  up=axis.normalized().cross(side).normalized()
  if up.z<0:up=-up
  NX=62;NY=24;verts=[];faces=[]
  def point(t,q):
-  center=base+axis*t;profile=sin(pi*t)**.74
+  center=base+axis*t+Vector((0,0,.26*sin(pi*t)-.09*t**5));profile=sin(pi*t)**.74
   width_here=width*profile*(1+.05*sin(17*pi*t)*abs(q))
   return center+side*(q*width_here)+up*(.12*sin(pi*t)-.10*t**5+.045*(1-q*q)*sin(pi*t)+.018*q*sin(4*pi*t))
  for i in range(NX+1):
@@ -150,9 +152,9 @@ def leaf(name,base,tip,width,col='Plant',dew=True):
    r=random.uniform(.012,.031);o=sphere(name+' dew %02d'%k,tuple(pos),(r,r,r*.63),water,col,16,10)
  return point
 # Direction and proportions follow the supplied three-leaf silhouette.
-left=leaf('Primary left leaf',(-.09,.04,1.40),(-1.62,.10,1.71),.35)
-right=leaf('Primary right leaf',(-.07,.06,1.48),(1.43,.17,2.37),.42)
-leaf('Young right leaf',(-.025,.035,.72),(.92,-.025,1.03),.22)
+left=leaf('Primary left leaf',(-.09,.04,1.40),(-1.62,.10,1.60),.25)
+right=leaf('Primary right leaf',(-.07,.06,1.48),(1.43,.17,2.37),.34)
+leaf('Young right leaf',(-.025,.035,.72),(.92,-.025,1.03),.16)
 curve('Left petiole',[(-.07,.04,1.38),(-.30,.04,1.52),(-.48,.04,1.58)],.018,stemmat,'Plant')
 # A pendant droplet hangs from the right tip in the reference.
 sphere('Pendant dew at right tip',(1.43,.17,2.295),(.037,.037,.058),water,'Plant',24,16)
@@ -188,19 +190,19 @@ for i,(x,y,z) in enumerate(anchors):
 # The central taproot continues past the large branch junctions.
 curve('Taproot connection',[(0,-.10,.14),(.015,-.13,-.40),(-.015,-.15,-1.30),(.04,-.16,-2.30)],.040,rootmat)
 # Out-of-focus foreground foliage frames the scene as in the photograph.
-for base,tip,w in [((-5.9,-2.8,-.55),(-4.2,-3.0,-.30),.48),((-5.5,-3,-2.1),(-3.2,-3.2,-1.82),.52),((5.9,-3,1.95),(4.3,-3.1,2.25),.58),((5.8,-3,-2.2),(3.9,-3.2,-2.0),.48),((-5.6,-3,2.0),(-4.5,-3.1,2.25),.40)]:leaf('Foreground leaf',base,tip,w,'Foreground',False)
+for base,tip,w in [((-6.8,-4,1.3),(-5.3,-4.1,2.2),.5),((-6.4,-4,-.2),(-5.2,-4.1,1.2),.65),((-6.5,-4,-2.3),(-3.6,-4.2,-2.0),.45),((6.8,-4,1.6),(5.2,-4.1,2.8),.55),((6.5,-4,-.4),(5.0,-4.1,.8),.55),((6.4,-4,-3.2),(3.8,-4.2,-2.3),.55)]:leaf('Foreground leaf',base,tip,w,'Foreground',False)
 
 # Fixed camera: the top of the soil falls at about 47% of frame height.
 bpy.ops.object.camera_add(location=(0,-13,2.2));cam=into(bpy.context.object,'Studio');cam.name='Reference fixed camera';target=Vector((0,0,-.16));cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.type='ORTHO';cam.data.ortho_scale=11.1;s.camera=cam
-focus=bpy.data.objects.new('Focus seedling',None);COL['Studio'].objects.link(focus);focus.location=(0,0,.55);cam.data.dof.use_dof=True;cam.data.dof.focus_object=focus;cam.data.dof.aperture_fstop=3.8
+focus=bpy.data.objects.new('Focus seedling',None);COL['Studio'].objects.link(focus);focus.location=(0,0,.55);cam.data.dof.use_dof=True;cam.data.dof.focus_object=focus;cam.data.dof.aperture_fstop=.7
 
 def area(name,loc,power,color,size,target=(0,0,.3)):
  bpy.ops.object.light_add(type='AREA',location=loc);o=into(bpy.context.object,'Studio');o.name=name;o.data.energy=power;o.data.color=color;o.data.shape='DISK';o.data.size=size;o.rotation_euler=(Vector(target)-o.location).to_track_quat('-Z','Y').to_euler()
-area('Golden morning rim',(-3.6,2.2,3.8),800,(1,.68,.32),2.5)
-area('Open sky fill',(-2.5,-4,5),300,(.7,.84,1),5)
+area('Golden morning rim',(-3.6,2.2,3.8),1700,(1,.62,.24),1.6)
+area('Open sky fill',(-2.5,-4,5),180,(.75,.85,1),5)
 area('Soft leaf-side bounce',(4,-1,3.8),190,(.90,1,.65),3)
 # Gentle optical bloom on warm roots and dew glints, not an interface gradient.
-s.use_nodes=True;nodes=s.node_tree.nodes;nodes.clear();rl=nodes.new('CompositorNodeRLayers');gl=nodes.new('CompositorNodeGlare');gl.glare_type='FOG_GLOW';gl.quality='HIGH';gl.threshold=1.8;gl.size=7;gl.mix=-.88;co=nodes.new('CompositorNodeComposite');s.node_tree.links.new(rl.outputs['Image'],gl.inputs['Image']);s.node_tree.links.new(gl.outputs['Image'],co.inputs['Image'])
+s.use_nodes=True;nodes=s.node_tree.nodes;nodes.clear();rl=nodes.new('CompositorNodeRLayers');gl=nodes.new('CompositorNodeGlare');gl.glare_type='FOG_GLOW';gl.quality='HIGH';gl.threshold=1.8;gl.size=7;gl.mix=-.60;co=nodes.new('CompositorNodeComposite');s.node_tree.links.new(rl.outputs['Image'],gl.inputs['Image']);s.node_tree.links.new(gl.outputs['Image'],co.inputs['Image'])
 # UI anchors are projected from the actual scene, so clickable guides meet roots.
 layout=[]
 for p in anchors:
