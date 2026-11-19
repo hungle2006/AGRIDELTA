@@ -3,18 +3,22 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 import {LIFECYCLE_SECONDS,STAGE_TIMES,stageAt} from './lifecycle-state.js';
+import {createVideoEarth} from './video-earth.js';
 
 /** Actual Blender geometry/animation rendered live; no plant or soil image planes. */
 export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinished=()=>{},onError=()=>{}}={}){
+ const canvas=document.createElement('canvas');
+ const context=canvas.getContext('webgl2',{alpha:true,antialias:true});
+ if(!context)return createVideoEarth(host,{onStage,onReady,onRootFinished,onError});
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const actions=[];
- let renderer,scene,camera,mixer,model,clock=0,last=0,running=!reduced,visible=true,lastStage=-1,ready=false,manualTarget=null,frameCount=0;
+ let renderer,scene,camera,mixer,model,clock=0,last=0,running=!reduced,visible=true,lastStage=-1,ready=false,manualTarget=null,frameCount=0,lastRender=0;
  const branches=Array.from({length:5},()=>({meshes:[],uniform:{value:0},progress:0,target:0,done:false}));
  const trunk={meshes:[],uniform:{value:0}};
  const control={revealRoot(i){if(i>=0&&i<5)branches[i].target=1;},seekStage(i){manualTarget=STAGE_TIMES[i]??0;running=false;},replay(){clock=0;manualTarget=null;running=true;lastStage=-1;},toggle(){running=!running;return running;},setVisible(v){visible=v;last=0;},get ready(){return ready;}};
  function fail(e){host.dataset.sceneState='error';onError(e);}
  try{
-  renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'high-performance'});
+  renderer=new THREE.WebGLRenderer({canvas,context,alpha:true,antialias:true,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(devicePixelRatio,innerWidth<720?1.65:2));renderer.setClearColor(0,0);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.14;
   host.append(renderer.domElement);renderer.domElement.setAttribute('aria-hidden','true');
   scene=new THREE.Scene();camera=new THREE.OrthographicCamera(-5.55,5.55,3.1,-3.1,.1,60);camera.position.set(0,2.2,13);camera.lookAt(0,-.16,0);
@@ -35,7 +39,7 @@ export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinish
      for(let i=0;i<travel.length;i++)travel[i]/=max||1;o.geometry.setAttribute('aRootTravel',new THREE.BufferAttribute(travel,1));
      const materials=Array.isArray(o.material)?o.material:[o.material];const mapped=materials.map(m=>{m=m.clone();m.emissive?.set(0xcd731c);m.emissiveIntensity=.65;m.roughness=.65;
       m.onBeforeCompile=shader=>{shader.uniforms.uRootGrowth=branch.uniform;shader.vertexShader='attribute float aRootTravel; varying float vRootTravel;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvRootTravel=aRootTravel;');shader.fragmentShader='uniform float uRootGrowth; varying float vRootTravel;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <clipping_planes_fragment>','#include <clipping_planes_fragment>\nif(vRootTravel>uRootGrowth) discard;');};m.customProgramCacheKey=()=>`root-growth-${idx}`;return m;});o.material=Array.isArray(o.material)?mapped:mapped[0];
-    }else{const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>{if(/leaf|lamina/i.test(m.name)){m.side=THREE.DoubleSide;m.roughness=.52;}if(m.map)m.map.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());});}
+    }else{const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>{if(/leaf|lamina/i.test(m.name)){m.side=THREE.DoubleSide;m.roughness=.52;m.color.setRGB(.55,.76,.32);}if(m.map)m.map.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());});}
    });
    mixer=new THREE.AnimationMixer(model);for(const clip of g.animations){const action=mixer.clipAction(clip);action.setLoop(THREE.LoopOnce,1);action.clampWhenFinished=true;action.play();actions.push(action);}
    ready=true;clock=0;mixer.setTime(0);host.dataset.sceneState='ready';host.dataset.geometry='blender-glb';resize();onReady();
@@ -45,7 +49,7 @@ export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinish
    else{camera.left=-5.55;camera.right=5.55;camera.top=11.1*h/w/2;camera.bottom=-camera.top;}camera.updateProjectionMatrix();
    if(model){model.traverse(o=>{if(Number.isInteger(o.userData.rootIndex))o.scale.x=mobile?.39:1;});model.updateMatrixWorld(true);}
   }
-  renderer.setAnimationLoop(now=>{if(!last)last=now;const dt=Math.min((now-last)/1000,.05);last=now;if(!visible||document.hidden||host.closest('[hidden]'))return;
+  renderer.setAnimationLoop(now=>{if(!last)last=now;let dt=Math.min((now-last)/1000,.05);last=now;if(!visible||document.hidden||host.closest('[hidden]'))return;if(now-lastRender<1000/30)return;const renderDelta=Math.min((now-lastRender)/1000,.12);lastRender=now;dt=renderDelta;
    if(ready){if(manualTarget!==null){const diff=manualTarget-clock;clock+=diff*(1-Math.exp(-dt*6));if(Math.abs(diff)<.015){clock=manualTarget;manualTarget=null;}}
     else if(running)clock=Math.min(LIFECYCLE_SECONDS,clock+dt);actions.forEach(a=>a.paused=false);mixer.setTime(clock);const st=stageAt(clock);if(st!==lastStage){lastStage=st;host.dataset.plantStage=String(st);onStage(st);}if(clock>=LIFECYCLE_SECONDS)running=false;
     trunk.uniform.value=Math.min(.31,clock*.065);
