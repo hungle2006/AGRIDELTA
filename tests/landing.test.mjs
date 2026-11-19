@@ -23,7 +23,8 @@ test('growth is one synchronized 16-second clip with independently growing plant
 test('each guide opens the corresponding working app route',()=>{
  for(const p of ['fields','season','home','scan','orders'])assert.ok(source.includes(`page:'${p}'`));
  assert.ok(!source.includes('auto-rotate'));
- assert.ok(source.includes('repetitions:1'));
+ assert.ok(!source.includes('loop='));
+ assert.ok(source.includes("addEventListener('ended'"));
  assert.ok(source.includes('prefers-reduced-motion'));
  assert.ok(source.includes('IntersectionObserver'));
 });
