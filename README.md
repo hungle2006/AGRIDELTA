@@ -1,45 +1,53 @@
-# AGRIDELTA · Reference Earth
+# AGRIDELTA · Living Start
 
 Live: https://agridelta.vercel.app
 
-A faithful reconstruction of the supplied 905 × 505 AGRIDELTA visual, with genuinely Blender-authored plant, earth cutaway, branching roots, dew and glass guide nodes. The visible UI remains real HTML; the source screenshot is not flattened into the interface.
+Start retains the supplied reference's typography, navigation, dawn valley and root-linked guide layout. The foreground is an actual Blender model with a continuous botanical lifecycle, rather than interchangeable plant/soil photographs.
 
-## Main experience
+## Experience
 
-- Source headline, green typography, overlaid navigation, glass plant-journey panel and five root-connected feature cards.
-- Five Blender-rendered plant stages: seed, three-leaf seedling, growth, flowering and pod development. Fixed camera, no model spinning.
-- Click a root node to reveal its three-step guide and open the corresponding farm workflow.
-- Previous/next buttons, ArrowLeft/ArrowRight and horizontal wheel/swipe navigation cycle through the five guides.
-- On mobile, a scroll-snap feature rail updates the visible guide after a horizontal swipe. The guide sheet appears below the scene and remains keyboard accessible.
-- Search accepts accented and unaccented Vietnamese. Navigation, knowledge panel, modal Escape/focus trapping and demo entry work.
-- Existing fields, seasons, tasks, image preview and orders workflows are retained. This is still browser-local demo data, not secure authentication or server synchronization.
+- The original Blender germination animation grows automatically into a leafy plant, opens three blossoms and develops three bean pods over 28 seconds. The camera remains fixed.
+- Replay, pause/resume and five stage controls operate on the same timeline. Reduced-motion users can choose stages manually.
+- The five guide roots and feature cards start hidden. One deliberate wheel gesture, horizontal drag/swipe, Right Arrow or grow button reveals one new branch from trunk to tip. Its card and three-step instructions appear after the growth finishes. Earlier roots stay visible.
+- Horizontal gestures cycle existing guides after all five have grown. Search and navigation can reveal a requested guide; unrevealed preceding branches grow sequentially.
+- Mobile places the journey panel above the growing crown, compresses the root spread, uses a feature rail and scrolls the resulting guide into view.
+- The distant valley is a separate photographic background, revised for clearer fields/mountains and fresh greens.
 
-## Art and rendering
+## Real geometry and compatible motion
 
-`blender/reference_earth.py` authors real geometry/materials, packs the leaf and soil texture images, creates the fixed studio and saves an editable `.blend`. It renders independent RGBA plant, soil/root and guide-focus layers at 1600 × 893, plus a 256 px physical glass orb. These are converted to WebP for fast, WebGL-independent display.
+`blender/start_lifecycle.py` preserves the original botanical animation from `blender/living_growth.py`, extends it with flowering and fruit, and appends the real soil cutaway and five independently identified roots from `blender/reference_earth.py`. Leaf midribs retain their botanical parents. The GLB is meshopt-compressed to about 1.5 MB while preserving its six root groups, animation channels and metadata.
 
-The distant mountain landscape is a generated photographic backdrop. It is deliberately separate from the Blender plant/soil. Texture and backdrop assets are included so the scene is reproducible. Root button coordinates are projected from the actual Blender camera into `earth-layout.json`.
+`live-earth.js` uses Three.js, GLTFLoader, MeshoptDecoder and AnimationMixer to render that GLB directly with physical materials. A growth attribute reveals each actual root mesh progressively. It uses a fixed camera, capped pixel density and a 30fps render budget; hidden app states suspend rendering.
+
+Some browsers, including the cloud QA browser, have WebGL disabled. `video-earth.js` uses transparent animated movies rendered from the same Blender scene in that case. The plant movie contains the full seed-to-fruit motion and real soil geometry; five separate root movies retain independent reveal timing. These are moving Blender renders, not copied plant photographs. No static plant or soil image layers remain in the Start markup.
+
+To regenerate (Blender 4.3+, Python and ffmpeg required):
 
 ```bash
+blender -b -t 6 --python blender/living_growth.py
 blender -b -t 6 --python blender/reference_earth.py
-python3 scripts/convert-earth-assets.py
+blender -b -t 6 --python blender/start_lifecycle.py
+npm exec --yes --package=@gltf-transform/cli -- gltf-transform webp public/assets/start-lifecycle.glb /tmp/start-lifecycle-webp.glb --quality 90
+npm exec --yes --package=@gltf-transform/cli -- gltf-transform meshopt /tmp/start-lifecycle-webp.glb public/assets/start-lifecycle-live.glb --level high
+blender -b -t 4 --python blender/render_start_fallback.py
+blender -b -t 3 --python blender/render_root_fallback.py
+bash scripts/encode-start-fallback.sh
 ```
 
-Blender 4.3+ and Python Pillow are needed for regeneration. Intermediate PNGs and the generated `.blend` are reproducible and ignored by git. The `.py` authoring source and web-ready layers are versioned.
+The meshopt-only compression step deliberately avoids joining the separate root nodes. Editable `.blend` files, raw frames and uncompressed exports are reproducible intermediates; authoring scripts and web assets are versioned.
 
-## Development and checks
+## Development and validation
 
 ```bash
 npm ci
 npm run dev -- --host 0.0.0.0 --port 4173 --strictPort
-node --check main.js
 node --check root-guide.js
+node --check live-earth.js
+node --check video-earth.js
 node --test tests/*.test.mjs
 npm run build
 ```
 
-The dev wrapper handles managed Linux environments where network-interface enumeration is unavailable. It does not affect the production build.
+`tests/layout-check.html` is a development-only viewport helper. Temporarily copy it to public for a preview and remove the public copy before production. The design QA report records the actual browser-tested rendering path and any environment limitations.
 
-`tests/layout-check.html` is a development-only responsive capture helper. Copy it temporarily to public/ for a preview deployment, then remove that public copy before production. The reference capture mode hides only the footer/scrollbar for equal-size visual comparison.
-
-Fonts: Be Vietnam Pro with genuine italic 800. Icons: Phosphor, chosen to match the source's rounded line symbols. No telemetry or analytics are added.
+Existing fields, seasons, tasks, observation and orders workflows are retained. Their data remains browser-local demo data. Fonts: Be Vietnam Pro with genuine italic 800. Icons: Phosphor.

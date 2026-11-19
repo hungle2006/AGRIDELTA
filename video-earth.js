@@ -1,12 +1,13 @@
 import {STAGE_TIMES,stageAt} from './lifecycle-state.js';
 
 /** Real moving Blender renders for clients without a WebGL2 context. */
-export function createVideoEarth(host,{onStage,onReady,onRootFinished,onError}){
+export function createVideoEarth(host,{onStage,onReady,onRootFinished,onComplete,onError}){
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
- const plant=document.createElement('video');plant.className='blender-lifecycle-video';plant.src='/assets/start-lifecycle-motion.webm';plant.muted=true;plant.playsInline=true;plant.preload='auto';plant.autoplay=!reduced;plant.setAttribute('aria-hidden','true');host.append(plant);
+ const plant=document.createElement('video');plant.className='blender-lifecycle-video';plant.src='/assets/start-lifecycle-film.webm';plant.muted=true;plant.playsInline=true;plant.preload='auto';plant.autoplay=!reduced;plant.setAttribute('aria-hidden','true');host.append(plant);
  const roots=Array.from({length:5},()=>null);let lastStage=-1,ready=false,visible=true,wasPlaying=!reduced,lastUpdate=0;
  function update(now=0){if(ready&&visible&&!document.hidden&&now-lastUpdate>100){lastUpdate=now;const stage=stageAt(plant.currentTime);if(stage!==lastStage){lastStage=stage;onStage(stage);host.dataset.plantStage=String(stage);}host.dataset.lifecycleTime=plant.currentTime.toFixed(1);}requestAnimationFrame(update);}
  plant.addEventListener('loadeddata',()=>{if(ready)return;ready=true;host.dataset.sceneState='ready';host.dataset.geometry='blender-animated-video';onReady();if(!reduced)plant.play().catch(()=>{});update();});
+ plant.addEventListener('ended',()=>onComplete());
  plant.addEventListener('error',()=>onError(new Error('Blender motion video could not load')));
  document.addEventListener('visibilitychange',()=>{if(document.hidden){wasPlaying=!plant.paused;plant.pause();}else if(visible&&wasPlaying)plant.play().catch(()=>{});});
  return {

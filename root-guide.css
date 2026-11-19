@@ -76,3 +76,4 @@ body.earth-modal-open{overflow:hidden}.earth-modal{position:fixed;inset:0;z-inde
 .blender-lifecycle-video,.blender-root-video{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
 .blender-root-video{z-index:1}
 @media(max-width:719px){.blender-lifecycle-video,.blender-root-video{inset:0 auto;left:50%;width:1164px;height:650px;max-width:none;transform:translateX(-50%)}.blender-root-video{transform:translateX(-50%) scaleX(.39)}}
+@media(max-width:719px){.earth-stage{height:1220px}.live-earth{top:410px}.scene-illustration>.scene-landscape{height:790px}.earth-scroll{top:715px}.root-features{top:790px}}

@@ -12,7 +12,8 @@ for o in list(bpy.data.objects):
  if o.type in {'CAMERA','LIGHT'} or o.name.startswith(('Soil','Primary radicle','Lateral root')):bpy.data.objects.remove(o,do_unlink=True)
 plants=list(s.objects)
 rig=bpy.data.objects.new('Botanical lifecycle',None);s.collection.objects.link(rig);rig.scale=(1.27,)*3;rig.location=(0,.03,.15)
-for o in plants:o.parent=rig
+for o in plants:
+ if o.parent is None:o.parent=rig
 # Hold the original mature keyframes through flowering and fruiting.
 for o in plants:
  if o.animation_data and o.animation_data.action:
