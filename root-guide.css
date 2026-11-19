@@ -33,3 +33,5 @@ body.earth-modal-open{overflow:hidden}.earth-modal{position:fixed;inset:0;z-inde
 @media(max-width:335px){.earth-intro h1{font-size:26px}.earth-cta,.earth-secondary{font-size:8px!important;gap:5px;padding:10px 9px}.earth-cta>.earth-icon,.earth-secondary>.earth-icon{width:12px;height:12px}}
 
 .earth-brand>.brand-mark{display:block;object-fit:contain}
+
+.earth-scroll small{text-shadow:0 1px 2px #000,0 0 5px #000}

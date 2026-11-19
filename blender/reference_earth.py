@@ -70,7 +70,7 @@ def curve(name,pts,r,material,col='Roots'):
  c=bpy.data.curves.new(name,'CURVE');c.dimensions='3D';c.resolution_u=12;c.bevel_depth=r;c.bevel_resolution=2
  sp=c.splines.new('BEZIER');sp.bezier_points.add(len(pts)-1)
  for p,co in zip(sp.bezier_points,pts):p.co=co;p.handle_left_type='AUTO';p.handle_right_type='AUTO'
- for i,p in enumerate(sp.bezier_points):p.radius=max(.09,1-(i/max(1,len(pts)-1))*.88)
+ for i,p in enumerate(sp.bezier_points):p.radius=max(.55 if col=='Plant' else .09,1-(i/max(1,len(pts)-1))*(.45 if col=='Plant' else .88))
  o=bpy.data.objects.new(name,c);COL[col].objects.link(o);o.data.materials.append(material);return o
 
 def h(x,y):return .17*math.exp(-x*x/1.05)+.028*sin(4*x)+.024*sin(11*x+2*y)+.015*cos(17*x-4*y)-.02*y
@@ -115,11 +115,15 @@ for face,mi in zip(o.data.polygons,materials):face.material_index=mi
 for i in range(29):
  x=random.uniform(-5.3,5.3);y=random.uniform(.1,.9)
  o=sphere('Dew on soil %02d'%i,(x,y,h(x,y)+.06),(.032,.032,.028),water,'Earth',16,10)
+grassmat=mat('Soft moss and new grass',(.095,.16,.012),.72)
+for i in range(190):
+ x=random.uniform(-6.3,6.3);y=random.uniform(.65,1.45);z=h(x,y);height=random.uniform(.035,.13)
+ curve('Small field grass %03d'%i,[(x,y,z),(x+.015,y,z+height*.65),(x+.025,y+.02,z+height)],.005,grassmat,'Earth')
 # Seed left of the emergent shoot: crease and shell highlights.
 seed=sphere('Opened bean seed',(-.31,.04,.25),(.30,.18,.17),seedmat,'Plant',40,24);seed.rotation_euler=(.15,.12,-.24)
 curve('Seed coat crease',[(-.54,-.09,.27),(-.34,-.135,.32),(-.12,-.07,.27)],.012,mat('Husk crease',(.065,.017,.004),.75),'Plant')
 # The shoot curves gently, without whole-object scaling or spinning.
-curve('Primary shoot',[(0,.03,.19),(.015,.035,.58),(-.025,.035,1.13),(-.07,.035,1.48),(-.065,.035,1.51)],.043,stemmat,'Plant')
+curve('Primary shoot',[(0,.03,.19),(.015,.035,.58),(-.025,.035,1.13),(-.07,.035,1.48),(-.065,.035,1.51)],.060,stemmat,'Plant')
 curve('Shoot highlight',[(-.022,-.001,.25),(-.018,.003,.82),(-.056,.003,1.45)],.008,vein,'Plant')
 
 # Leaf mesh is modelled around its own botanical attachment, with a tapered lamina,
@@ -133,7 +137,7 @@ def leaf(name,base,tip,width,col='Plant',dew=True):
  if up.z<0:up=-up
  NX=62;NY=24;verts=[];faces=[]
  def point(t,q):
-  center=base+axis*t+Vector((0,0,.26*sin(pi*t)-.09*t**5));profile=sin(pi*t)**.74
+  center=base+axis*t+Vector((0,0,.12*sin(pi*t)-.09*t**5));profile=sin(pi*t)**.74
   width_here=width*profile*(1+.05*sin(17*pi*t)*abs(q))
   return center+side*(q*width_here)+up*(.12*sin(pi*t)-.10*t**5+.045*(1-q*q)*sin(pi*t)+.018*q*sin(4*pi*t))
  for i in range(NX+1):
@@ -153,11 +157,11 @@ def leaf(name,base,tip,width,col='Plant',dew=True):
  return point
 # Direction and proportions follow the supplied three-leaf silhouette.
 left=leaf('Primary left leaf',(-.09,.04,1.40),(-1.62,.10,1.60),.25)
-right=leaf('Primary right leaf',(-.07,.06,1.48),(1.43,.17,2.37),.34)
+right=leaf('Primary right leaf',(-.07,.06,1.48),(1.60,.17,2.28),.34)
 leaf('Young right leaf',(-.025,.035,.72),(.92,-.025,1.03),.16)
 curve('Left petiole',[(-.07,.04,1.38),(-.30,.04,1.52),(-.48,.04,1.58)],.018,stemmat,'Plant')
 # A pendant droplet hangs from the right tip in the reference.
-sphere('Pendant dew at right tip',(1.43,.17,2.295),(.037,.037,.058),water,'Plant',24,16)
+sphere('Pendant dew at right tip',(1.60,.17,2.145),(.037,.037,.058),water,'Plant',24,16)
 leaf('Later left leaf',(0,.08,.95),(-.97,.13,1.21),.27,'Extra leaves')
 leaf('Later crown leaf',(-.06,.08,1.62),(.35,.12,2.03),.20,'Extra leaves')
 for i in range(5):
@@ -202,7 +206,7 @@ area('Golden morning rim',(-3.6,2.2,3.8),1700,(1,.62,.24),1.6)
 area('Open sky fill',(-2.5,-4,5),180,(.75,.85,1),5)
 area('Soft leaf-side bounce',(4,-1,3.8),190,(.90,1,.65),3)
 # Gentle optical bloom on warm roots and dew glints, not an interface gradient.
-s.use_nodes=True;nodes=s.node_tree.nodes;nodes.clear();rl=nodes.new('CompositorNodeRLayers');gl=nodes.new('CompositorNodeGlare');gl.glare_type='FOG_GLOW';gl.quality='HIGH';gl.threshold=1.8;gl.size=7;gl.mix=-.60;co=nodes.new('CompositorNodeComposite');s.node_tree.links.new(rl.outputs['Image'],gl.inputs['Image']);s.node_tree.links.new(gl.outputs['Image'],co.inputs['Image'])
+s.use_nodes=True;nodes=s.node_tree.nodes;nodes.clear();rl=nodes.new('CompositorNodeRLayers');gl=nodes.new('CompositorNodeGlare');gl.glare_type='FOG_GLOW';gl.quality='HIGH';gl.threshold=.65;gl.size=7;gl.mix=-.52;co=nodes.new('CompositorNodeComposite');s.node_tree.links.new(rl.outputs['Image'],gl.inputs['Image']);s.node_tree.links.new(gl.outputs['Image'],co.inputs['Image'])
 # UI anchors are projected from the actual scene, so clickable guides meet roots.
 layout=[]
 for p in anchors:
@@ -233,9 +237,9 @@ for i,o in enumerate(primary):
 COL['Roots'].hide_render=True
 for c in ['Earth','Foreground']:COL[c].hide_render=True
 orb=collection('Guide orb')
-glass=mat('Orb - smoky green glass',(.31,.42,.13),.11);p=glass.node_tree.nodes.get('Principled BSDF');p.inputs['Transmission Weight'].default_value=.70;p.inputs['IOR'].default_value=1.44
+glass=mat('Orb - smoky green glass',(.09,.16,.015),.07);p=glass.node_tree.nodes.get('Principled BSDF');p.inputs['Transmission Weight'].default_value=.90;p.inputs['IOR'].default_value=1.44
 sphere('Guide glass sphere',(0,0,0),(.85,.85,.85),glass,'Guide orb',64,40)
-inner=mat('Orb inner warmth',(.095,.14,.018),.35,.15);sphere('Orb subtle interior',(0,.2,0),(.75,.62,.75),inner,'Guide orb',40,24)
+inner=mat('Orb inner warmth',(.015,.025,.002),.35,.05);sphere('Orb subtle interior',(0,.2,0),(.75,.62,.75),inner,'Guide orb',40,24)
 bpy.ops.mesh.primitive_torus_add(major_radius=.85,minor_radius=.012,major_segments=96,minor_segments=12,location=(0,-.06,0),rotation=(pi/2,0,0));o=into(bpy.context.object,'Guide orb');o.data.materials.append(mat('Orb luminous rim',(.70,.79,.20),.2,2.2))
 cam.location=(0,-5,.3);cam.rotation_euler=(Vector((0,0,0))-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.ortho_scale=2.15;cam.data.dof.use_dof=False;s.render.resolution_x=256;s.render.resolution_y=256;s.cycles.samples=64;render('guide-orb-v2')
 print('REFERENCE EARTH ASSETS COMPLETE',flush=True)
