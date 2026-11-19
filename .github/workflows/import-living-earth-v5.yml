@@ -1,0 +1,51 @@
+name: Import AGRIDELTA Living Earth v5
+on:
+  push:
+    paths:
+      - '.github/workflows/import-living-earth-v5.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import-reviewed-release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Download checksum-verified website release
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fSL --retry 3 --retry-all-errors --max-time 180 'https://at.adobe.com/QcnfYYZF9AEfclin' -o /tmp/agridelta-living-earth-v5.zip
+          echo '7c23d3e1483e748b3dd3e46f672b52af830401c543284fc293f302fa27a7c15a  /tmp/agridelta-living-earth-v5.zip' | sha256sum --check
+          unzip -tq /tmp/agridelta-living-earth-v5.zip
+          unzip -oq /tmp/agridelta-living-earth-v5.zip -d .
+      - name: Check functionality and build
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check main.js
+          node --check root-guide.js
+          node --test tests/*.test.mjs
+          test "$(head -c 4 public/assets/agridelta_seed_to_harvest_model.glb)" = glTF
+          test "$(stat -c%s public/assets/agridelta_seed_to_harvest_model.glb)" -gt 250000
+          test -s public/assets/sunrise-farm.webp
+          test -s public/assets/seedling-photo.png
+          npm install --no-audit --no-fund
+          npm run build
+      - name: Commit reviewed site and visual assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m 'feat: rebuild AGRIDELTA homepage from reference with living roots and new logo'
+            git push origin HEAD:main
+          fi
