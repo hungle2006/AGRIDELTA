@@ -56,3 +56,14 @@ window.AGRIDELTAOpenDemo=function(page='home'){
   state.modal=null;render();
   window.scrollTo({top:0,behavior:'instant'});
 };
+
+// An explicit login action from the marketing page opens the existing demo auth UI.
+// Real production authentication still requires a secure backend.
+window.AGRIDELTAOpenAuth=function(){
+  state.user=null;
+  store('user',null);
+  state.auth='login';
+  state.modal=null;
+  render();
+  window.scrollTo({top:0,behavior:'instant'});
+};
