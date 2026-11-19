@@ -77,3 +77,5 @@ body.earth-modal-open{overflow:hidden}.earth-modal{position:fixed;inset:0;z-inde
 .blender-root-video{z-index:1}
 @media(max-width:719px){.blender-lifecycle-video,.blender-root-video{inset:0 auto;left:50%;width:1164px;height:650px;max-width:none;transform:translateX(-50%)}.blender-root-video{transform:translateX(-50%) scaleX(.39)}}
 @media(max-width:719px){.earth-stage{height:1220px}.live-earth{top:410px}.scene-illustration>.scene-landscape{height:790px}.earth-scroll{top:715px}.root-features{top:790px}}
+@media(min-width:720px){.root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{left:8.9%;transform:none;align-items:flex-start;bottom:3%}.root-features[data-revealed]:not([data-revealed="0"]) .root-grow-next{font-size:clamp(8px,.7vw,11px)!important;padding:8px 11px;min-height:34px}}
+@media(max-width:719px){.earth-stage{height:1110px}.root-feature-track{scrollbar-width:none}.root-feature-track::-webkit-scrollbar{display:none}.guide-sheet{margin-top:6px}}
