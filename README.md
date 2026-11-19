@@ -2,7 +2,8 @@
 
 Vietnamese agriculture frontend with an editorial landing page, a genuine Blender-authored germination animation and a browser-local farm-management demo.
 
-**Production:** https://agridelta.vercel.app  
+**Production:** https://agridelta.vercel.app
+
 **Source:** https://github.com/hungle2006/AGRIDELTA
 
 ## This release
