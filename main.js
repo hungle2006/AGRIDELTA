@@ -35,16 +35,14 @@ render();
 window.AGRIDELTAOpen3D=function(){
  if(document.getElementById('agri-3d-modal'))return;
  const wrapper=document.createElement('div');wrapper.id='agri-3d-modal';wrapper.className='agri-3d-overlay';
- wrapper.innerHTML=`<section class="agri-3d-dialog" role="dialog" aria-modal="true" aria-labelledby="agri-3d-title"><header><div><span class="eyebrow dark">AGRIDELTA / MÔ HÌNH CÂY 3D</span><h2 id="agri-3d-title">Một mầm cây, muôn khả năng.</h2></div><button type="button" id="agri-3d-close" aria-label="Đóng mô hình 3D">×</button></header><model-viewer src="/assets/agridelta_seed_to_harvest_model.glb" alt="Mô hình 3D với đất, rễ, thân cây và lá xanh" camera-controls auto-rotate shadow-intensity="0.8" exposure="1.25" environment-image="neutral" poster="/assets/harvest-hero.webp" loading="eager"><div slot="poster" class="agri-3d-poster"><img src="/assets/harvest-hero.webp" alt="Minh họa mầm cây"/><p>Đang chuẩn bị trình xem 3D…</p></div></model-viewer><footer><p>Có thể xoay bằng chuột hoặc cảm ứng. Đây là mô hình 3D GLB của bản demo; file Blender tạo hoạt ảnh nằm trong thư mục <strong>blender/</strong>.</p><a href="/assets/agridelta_seed_to_harvest_model.glb" download="agridelta-model.glb">Tải mô hình .glb ↗</a></footer></section>`;
+ wrapper.innerHTML=`<section class="agri-3d-dialog" role="dialog" aria-modal="true" aria-labelledby="agri-3d-title"><header><div><span class="eyebrow dark">AGRIDELTA / MÔ HÌNH CÂY 3D</span><h2 id="agri-3d-title">Một mầm cây, muôn khả năng.</h2></div><button type="button" id="agri-3d-close" aria-label="Đóng mô hình 3D">×</button></header><model-viewer src="/assets/living-growth.glb" alt="Mô hình 3D với đất, rễ, thân cây và lá xanh"  shadow-intensity="0.8" exposure="1.25" environment-image="neutral" poster="/assets/living-growth-poster.webp" loading="eager" camera-orbit="7deg 76deg 4.7m" camera-target="0m 0.78m 0m"><div slot="poster" class="agri-3d-poster"><img src="/assets/harvest-hero.webp" alt="Minh họa mầm cây"/><p>Đang chuẩn bị trình xem 3D…</p></div></model-viewer><footer><p>Hạt tách vỏ, thân vươn lên và từng lá mở dần. Hoạt ảnh phát một lần với góc nhìn cố định.</p><a href="/assets/living-growth.glb" download="agridelta-model.glb">Tải mô hình .glb ↗</a></footer></section>`;
  document.body.appendChild(wrapper);
  const close=()=>wrapper.remove();
  wrapper.querySelector('#agri-3d-close').onclick=close;
  wrapper.addEventListener('click',e=>{if(e.target===wrapper)close()});
  const onEsc=e=>{if(e.key==='Escape'){close();document.removeEventListener('keydown',onEsc)}};
  document.addEventListener('keydown',onEsc);
- if(!document.getElementById('agri-model-viewer-module')){
-  const script=document.createElement('script');script.id='agri-model-viewer-module';script.type='module';script.src='https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js';document.head.appendChild(script);
- }
+ import('@google/model-viewer').then(()=>{const m=wrapper.querySelector('model-viewer');m.addEventListener('load',()=>m.play({repetitions:1}),{once:true});});
 };
 
 // Public demonstration entry: no passwords, no real user accounts, no server session.

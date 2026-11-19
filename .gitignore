@@ -5,3 +5,7 @@ dist/
 # Generated transfer snapshots (not part of application)
 deploy-manifest.json
 deploy-manifest.gz
+# Reproducible Blender working files / intermediates
+blender/*.blend*
+public/assets/leaf-lamina.png
+public/assets/living-growth-poster.png
