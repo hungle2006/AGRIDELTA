@@ -14,3 +14,6 @@ blender/render_frames/
 # Blender-generated intermediate render layers
 public/assets/earth-*.png
 public/assets/guide-orb-v2.png
+# Reproducible uncompressed lifecycle export
+public/assets/start-lifecycle.glb
+public/assets/start-lifecycle-optimized.glb

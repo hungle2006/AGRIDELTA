@@ -35,3 +35,41 @@ body.earth-modal-open{overflow:hidden}.earth-modal{position:fixed;inset:0;z-inde
 .earth-brand>.brand-mark{display:block;object-fit:contain}
 
 .earth-scroll small{text-shadow:0 1px 2px #000,0 0 5px #000}
+
+/* Live Blender scene: crisp geometry replaces all foreground raster layers. */
+.live-earth{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.live-earth canvas{display:block;width:100%;height:100%;pointer-events:none}
+.scene-illustration>.scene-landscape{height:60%;filter:saturate(1.16) contrast(1.045) brightness(1.04);image-rendering:auto}
+.scene-load-status{position:absolute;left:50%;top:42%;transform:translateX(-50%);font-size:11px;padding:10px 16px;border-radius:20px;background:#f4f8e9dc;color:#2b5a29;z-index:7;white-space:nowrap}
+.scene-load-status button{color:#226a27;background:none;text-decoration:underline;margin-left:6px}
+.lifecycle-controls{display:flex;align-items:center;gap:.6vw;margin-top:.9vw;padding-top:.65vw;border-top:1px solid #e5eddc33;font-size:clamp(6px,.65vw,10px);color:#f3f7ea}
+.lifecycle-controls>span{flex:1;line-height:1.5}.lifecycle-controls button{font-size:inherit;color:#e9f4cb;background:#1f412244;border-radius:12px;padding:.3vw .5vw;min-height:23px;white-space:nowrap}
+.root-discovery{position:absolute;left:50%;top:57%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;color:#eef4ce;pointer-events:auto;z-index:9;text-shadow:0 1px 3px #000;white-space:nowrap}
+.root-discovery>span{font-size:clamp(8px,.75vw,12px);letter-spacing:.06em}
+.root-discovery>small{font-size:clamp(7px,.65vw,11px);color:#d1d7b7}
+.root-grow-next{display:flex;gap:9px;align-items:center;color:#eff8cf;background:#38532add;border:1px solid #bdde7e66!important;border-radius:25px;padding:10px 16px;font-size:clamp(10px,.82vw,13px)!important;min-height:40px;box-shadow:0 4px 16px #0003;transition:background .2s,transform .2s}
+.root-grow-next:hover{background:#486c32;transform:translateY(-1px)}.root-grow-next:disabled{cursor:progress;opacity:.8}
+.root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{top:auto;bottom:2.7%;gap:6px}
+.root-features[data-revealed]:not([data-revealed="0"]) .root-discovery>small{display:none}
+.root-features[data-revealed="5"] .root-grow-next{display:none}
+.root-feature.is-revealed{animation:root-card-arrives .6s cubic-bezier(.2,.7,.2,1) both}
+@keyframes root-card-arrives{from{opacity:0;filter:blur(3px)}to{opacity:1;filter:blur(0)}}
+.root-features:focus-visible{outline:0}.root-features:focus-visible .root-grow-next{outline:2px solid #dded8c;outline-offset:4px}
+.earth-scroll{top:47.5%}.earth-scroll small{max-width:150px;text-align:center}.root-feature{z-index:4}
+@media(max-width:719px){
+ .earth-stage{height:1160px}
+ .live-earth{inset:auto 0;top:350px;width:100%;height:650px}
+ .scene-illustration>.scene-landscape{height:700px;object-position:42% 68%;filter:saturate(1.12) contrast(1.04)}
+ .plant-journey{top:318px;left:7%;right:7%;padding:12px 13px;max-width:none}
+ .lifecycle-controls{margin-top:11px;padding-top:8px;gap:8px;font-size:8px}.lifecycle-controls button{padding:5px 7px;min-height:27px}
+ .plant-stages>button{font-size:7px!important}.plant-journey h2{font-size:10px}
+ .earth-scroll{top:655px}.root-features{top:730px;touch-action:pan-y}
+ .root-discovery{top:52px;gap:12px;width:100%;white-space:normal;text-align:center;padding:0 20px}
+ .root-discovery>span{font-size:10px}.root-discovery>small{font-size:9px;max-width:240px;line-height:1.7}.root-grow-next{font-size:11px!important;min-height:43px;padding:12px 17px}
+ .root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{bottom:12px;top:auto;gap:8px}
+ .root-feature-track{position:relative;padding-top:5px;min-height:250px;z-index:5;touch-action:pan-y;scroll-snap-type:x mandatory}
+ .root-feature[hidden]{display:none!important}
+ .scene-load-status{top:590px;font-size:10px;max-width:90%;white-space:normal;text-align:center}
+ .guide-sheet{margin-top:-16px}
+}
+@media(prefers-reduced-motion:reduce){.root-feature.is-revealed{animation:none}}
