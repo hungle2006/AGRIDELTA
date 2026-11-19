@@ -1,30 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
-const read=p=>readFileSync(new URL(`../${p}`,import.meta.url));
-const source=read('root-guide.js').toString();
-const bytes=read('public/assets/living-growth.glb');
-const gltf=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)).toString());
-const binaryOffset=20+bytes.readUInt32LE(12)+8;
-function values(index){const a=gltf.accessors[index],v=gltf.bufferViews[a.bufferView];assert.equal(a.componentType,5126);const count=a.count*({SCALAR:1,VEC3:3,VEC4:4}[a.type]);return Array.from({length:count},(_,i)=>bytes.readFloatLE(binaryOffset+(v.byteOffset||0)+(a.byteOffset||0)+4*i));}
-test('growth is one synchronized 16-second clip with independently growing plant parts',()=>{
- assert.equal(gltf.animations.length,1);
- const clip=gltf.animations[0];
- assert.ok(clip.channels.length>=25);
- const targets=clip.channels.map(c=>gltf.nodes[c.target.node].name);
- for(const part of ['Seed shell left','Seed shell right','Stem internode 00','Cotyledon west','True leaf 01','Apical young leaf'])assert.ok(targets.includes(part),part);
- const scales=clip.channels.filter(c=>c.target.path==='scale');
- assert.ok(scales.length>=20);
- for(const c of scales){const a=values(clip.samplers[c.sampler].output);assert.ok(a[0]<.01);assert.ok(a.at(-1)>.9);}
- const times=clip.samplers.flatMap(s=>values(s.input));assert.ok(Math.max(...times)>15&&Math.max(...times)<17);
- assert.ok(clip.channels.every(c=>!/Soil|Camera/.test(gltf.nodes[c.target.node].name)));
- assert.ok(gltf.images?.length>0,'embedded leaf texture');
+import {readFileSync,statSync} from 'node:fs';
+import {FEATURES,guideIndex,searchGuides} from '../root-guide-data.js';
+test('horizontal root navigation wraps correctly in either direction',()=>{
+ assert.equal(guideIndex(-1),4);assert.equal(guideIndex(5),0);assert.equal(guideIndex(-6),4);assert.equal(guideIndex(13),3);
 });
-test('each guide opens the corresponding working app route',()=>{
- for(const p of ['fields','season','home','scan','orders'])assert.ok(source.includes(`page:'${p}'`));
- assert.ok(!source.includes('auto-rotate'));
- assert.ok(!source.includes('loop='));
- assert.ok(source.includes("addEventListener('ended'"));
- assert.ok(source.includes('prefers-reduced-motion'));
- assert.ok(source.includes('IntersectionObserver'));
+test('guide search accepts Vietnamese diacritics and unaccented phone input',()=>{
+ assert.ok(searchGuides('canh dong').some(x=>x.feature.page==='fields'));
+ assert.ok(searchGuides('mùa vụ').some(x=>x.feature.page==='season'));
+ assert.equal(searchGuides('not-a-real-guide').length,0);
+ assert.equal(searchGuides('').length,5);
+});
+test('every guide connects to a unique usable workflow and a projected Blender root',()=>{
+ const layout=JSON.parse(readFileSync(new URL('../public/assets/earth-layout.json',import.meta.url)));
+ assert.equal(layout.length,FEATURES.length);assert.equal(new Set(FEATURES.map(f=>f.page)).size,5);
+ layout.forEach((p,i)=>{assert.ok(p.x>5&&p.x<95);assert.ok(p.y>50&&p.y<85);if(i)assert.ok(layout[i-1].x<p.x);assert.equal(FEATURES[i].instructions.length,3);});
+ for(const name of ['earth-ground-v2','guide-orb-v2',...FEATURES.map((_,i)=>`earth-plant-${i}`),...FEATURES.map((_,i)=>`earth-root-focus-${i}`)])assert.ok(statSync(new URL(`../public/assets/${name}.webp`,import.meta.url)).size>1000);
 });

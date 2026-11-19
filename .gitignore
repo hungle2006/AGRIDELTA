@@ -10,3 +10,7 @@ blender/*.blend*
 public/assets/leaf-lamina.png
 public/assets/living-growth-poster.png
 blender/render_frames/
+
+# Blender-generated intermediate render layers
+public/assets/earth-*.png
+public/assets/guide-orb-v2.png

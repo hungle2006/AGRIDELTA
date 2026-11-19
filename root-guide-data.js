@@ -1,0 +1,11 @@
+export const FEATURES = [
+    {label:'Cánh đồng',name:'Mỗi thửa đất, một khởi đầu.',eyebrow:'01 · BẮT ĐẦU TỪ ĐẤT',summary:'Ghi nhận vị trí, diện tích, loại cây và tình trạng khu vườn trên một màn hình rõ ràng.',instructions:['Vào Cánh đồng từ thanh điều hướng.','Chọn Thêm khu vườn rồi nhập thông tin.','Mở thẻ khu vườn để xem và cập nhật.'],page:'fields',image:'fields',symbol:'field',side:'left'},
+    {label:'Mùa vụ',name:'Gieo đúng mùa, hái đúng lúc.',eyebrow:'02 · LẬP KẾ HOẠCH',summary:'Lên lịch gieo trồng, theo dõi tiến độ và lưu lại những cột mốc quan trọng.',instructions:['Mở Mùa vụ trong ứng dụng.','Tạo mùa vụ, chọn khu vực và thời gian.','Theo dõi danh sách mùa vụ đang diễn ra.'],page:'season',image:'seasons',symbol:'calendar',side:'right'},
+    {label:'Công việc',name:'Chăm từng điều nhỏ mỗi ngày.',eyebrow:'03 · CHĂM SÓC',summary:'Đặt lịch tưới, quan sát cây và đánh dấu công việc đã hoàn thành.',instructions:['Vào Tổng quan, tìm Việc cần làm.','Nhấn nút Thêm công việc và điền thông tin.','Đánh dấu hoàn thành khi đã xử lý.'],page:'home',image:'tasks',symbol:'check',side:'left'},
+    {label:'Quan sát',name:'Lắng nghe lời của chiếc lá.',eyebrow:'04 · QUAN SÁT',summary:'Chụp ảnh hoặc tải ảnh lên để ghi nhận thay đổi trong vườn theo thời gian.',instructions:['Mở mục Góc quan sát.','Chọn chụp ảnh hoặc tải ảnh có sẵn.','Xem trước ảnh. Bản demo chưa có chẩn đoán AI.'],page:'scan',image:'observation',symbol:'scan',side:'right'},
+    {label:'Đơn hàng',name:'Đưa trái ngọt đến mọi nhà.',eyebrow:'05 · THU HOẠCH',summary:'Lưu sản phẩm, số lượng và thông tin đơn hàng để theo dõi dễ dàng.',instructions:['Mở Đơn hàng.','Tạo đơn hàng mới với sản phẩm và số lượng.','Theo dõi và quản lý các đơn trong danh sách.'],page:'orders',image:'orders',symbol:'box',side:'left'}
+  ];
+
+export const guideIndex=(index,count=FEATURES.length)=>((Number(index)%count)+count)%count;
+export const normalizeQuery=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[đĐ]/g,'d').toLowerCase();
+export const searchGuides=query=>{const q=normalizeQuery(query).trim();return FEATURES.map((feature,index)=>({feature,index})).filter(({feature})=>normalizeQuery(feature.label+' '+feature.summary+' '+feature.instructions.join(' ')).includes(q));};
