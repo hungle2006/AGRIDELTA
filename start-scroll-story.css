@@ -1,0 +1,235 @@
+/* AGRIDELTA Start · reversible Blender root scroll story
+   The app dashboard remains a normal document; only Start uses the sticky canvas. */
+html.rg-fullscreen{height:auto!important;overflow-y:auto!important;overflow-x:clip!important}
+html.rg-fullscreen body.rg-experience-mode,body.rg-experience-mode{
+  height:auto!important;min-height:100%!important;overflow-x:clip!important;
+  overflow-y:auto!important;overscroll-behavior-y:auto!important;
+}
+body.rg-experience-mode .earth-site,body.rg-experience-mode .earth-site main{
+  height:auto!important;min-height:100svh!important;overflow:visible!important;
+}
+body.rg-experience-mode .earth-stage{
+  position:relative!important;height:245svh!important;min-height:0!important;
+  max-width:none!important;aspect-ratio:auto!important;overflow:visible!important;
+  isolation:isolate;
+}
+body.rg-experience-mode .earth-footer{
+  display:flex!important;max-width:none;min-height:90px;padding:24px clamp(20px,6vw,96px);
+  background:#172a1d;color:#d3dcbe;border-top:1px solid #b4d78d33;
+}
+/* The real animated Blender GLB stays pinned while scrolling through its root story. */
+body.rg-experience-mode .scene-illustration{
+  position:sticky!important;top:0!important;left:0;right:0;bottom:auto!important;
+  width:100%!important;height:100svh!important;height:100dvh!important;
+  overflow:hidden!important;z-index:0;pointer-events:none;
+}
+body.rg-experience-mode .scene-illustration>.scene-landscape{
+  height:64%!important;object-fit:cover;object-position:center 76%;
+}
+body.rg-experience-mode .live-earth{
+  position:absolute!important;inset:0!important;width:100%;height:100%;
+  transform:translate3d(0,var(--scene-drift,0px),0);
+  will-change:transform;
+}
+body.rg-experience-mode .earth-header{z-index:30}
+body.rg-experience-mode .earth-intro{
+  position:absolute;top:clamp(100px,14dvh,157px);z-index:13;
+}
+body.rg-experience-mode .plant-journey{
+  position:absolute;top:clamp(120px,16dvh,180px);z-index:20;
+}
+body.rg-experience-mode .scene-load-status{z-index:16}
+body.rg-experience-mode .root-features{
+  position:absolute!important;inset:auto!important;top:0!important;left:0!important;
+  width:100%!important;height:100svh!important;height:100dvh!important;
+  z-index:14;pointer-events:none!important;touch-action:pan-y!important;
+  transform:translate3d(0,calc(var(--story-scroll-px,0px) + var(--scene-drift,0px)),0);
+  will-change:transform;
+}
+body.rg-experience-mode .root-gesture-plane{pointer-events:none!important}
+body.rg-experience-mode .root-feature-track{
+  display:contents!important;position:static!important;
+  overflow:visible!important;touch-action:pan-y!important;
+}
+body.rg-experience-mode .root-feature{
+  position:absolute!important;top:calc(var(--root-y) - 30px + var(--node-drift,0px))!important;
+  left:var(--root-x)!important;width:64px!important;min-width:0!important;
+  height:auto!important;transform:translateX(-50%)!important;pointer-events:auto!important;
+  touch-action:manipulation!important;scroll-snap-align:none!important;
+  animation:none!important;transition:opacity .18s ease!important;
+}
+body.rg-experience-mode .root-feature .root-orb{
+  width:60px!important;height:60px!important;min-width:0!important;min-height:0!important;
+  max-width:none!important;max-height:none!important;margin:0!important;
+  transform:scale(var(--node-scale,1))!important;
+  transform-origin:center center!important;transition:filter .18s ease!important;
+  filter:drop-shadow(0 0 10px #daf07a6a)!important;
+}
+body.rg-experience-mode .root-feature .root-orb>.earth-icon{
+  width:28px!important;height:28px!important;max-width:none!important;
+  min-width:0!important;min-height:0!important;
+}
+body.rg-experience-mode .root-feature:is(:hover,:focus-visible,.is-selected) .root-orb{
+  filter:drop-shadow(0 0 20px #e1fc9ce8)!important;
+}
+body.rg-experience-mode .root-feature .root-card{display:none!important}
+/* The dock stays available throughout the scroll story. */
+body.rg-experience-mode .start-feature-dock{
+  position:fixed!important;left:50%!important;right:auto!important;
+  bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;
+  transform:translateX(-50%)!important;z-index:80!important;
+  width:min(990px,92vw)!important;max-width:calc(100vw - 22px)!important;
+}
+body.rg-experience-mode .guide-sheet{
+  position:fixed!important;z-index:90!important;
+  right:clamp(18px,3.8vw,65px)!important;
+  bottom:clamp(124px,17dvh,172px)!important;
+  max-height:calc(100dvh - 165px)!important;
+}
+body.rg-experience-mode .earth-site.has-open-guide .plant-journey{
+  opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+}
+body.rg-experience-mode .root-discovery,
+body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{
+  top:auto!important;bottom:134px!important;left:clamp(28px,5vw,96px)!important;
+  right:auto!important;transform:none!important;align-items:flex-start!important;
+  text-align:left;z-index:20!important;gap:5px!important;
+}
+body.rg-experience-mode .root-discovery>span{font-weight:650}
+body.rg-experience-mode .root-features[data-revealed="5"] .root-discovery{display:none!important}
+/* A clear first-viewport hint, not a fake vertical swipe target. */
+body.rg-experience-mode .earth-scroll{
+  position:absolute;top:calc(100svh - 180px)!important;left:50%!important;
+  z-index:22!important;display:flex!important;align-items:center;
+  transform:translateX(-50%)!important;padding:5px 10px;
+  opacity:1;transition:opacity .2s ease;
+}
+body.rg-experience-mode .earth-scroll>span{
+  width:31px;height:40px;border-radius:18px;
+  background:#264b30c9;border:1px solid #d8f1a194;
+}
+body.rg-experience-mode .earth-scroll>span>.earth-icon{width:17px;height:17px}
+body.rg-experience-mode .earth-scroll small{
+  max-width:200px;font-size:11px;line-height:1.5;color:#ecf8d3;font-weight:650;
+  text-align:center;text-shadow:0 2px 7px #132018;
+}
+body.rg-experience-mode .earth-site.story-scrolled .earth-scroll{
+  opacity:0;pointer-events:none;
+}
+.journey-toggle{display:none}
+.journey-details{display:block}
+@media(min-width:720px) and (max-width:1180px){
+ body.rg-experience-mode .earth-intro{left:5%;max-width:38%}
+ body.rg-experience-mode .plant-journey{right:4%;width:min(300px,29vw)}
+ body.rg-experience-mode .earth-scroll{left:50%!important}
+}
+@media(max-height:700px) and (min-width:720px){
+ body.rg-experience-mode .earth-intro{top:85px}
+ body.rg-experience-mode .earth-intro h1{font-size:clamp(27px,3vw,39px)}
+ body.rg-experience-mode .plant-journey{top:88px}
+ body.rg-experience-mode .earth-scroll{top:calc(100svh - 150px)!important}
+ body.rg-experience-mode .root-discovery,
+ body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{bottom:118px!important}
+}
+@media(max-width:719px){
+ body.rg-experience-mode .earth-stage{height:230svh!important}
+ body.rg-experience-mode .earth-header{z-index:32}
+ body.rg-experience-mode .earth-intro{
+  position:absolute!important;top:clamp(69px,9dvh,90px)!important;
+  left:17px;right:17px;z-index:12;max-width:none;
+ }
+ body.rg-experience-mode .earth-intro h1{font-size:clamp(23px,6.7vw,32px)}
+ body.rg-experience-mode .earth-intro>p{max-width:335px}
+ body.rg-experience-mode .scene-illustration>.scene-landscape{
+  height:75%!important;object-position:48% 68%;
+ }
+ body.rg-experience-mode .live-earth{
+  inset:auto 0!important;top:clamp(115px,17dvh,184px)!important;
+  width:100%!important;height:clamp(400px,72dvh,630px)!important;
+ }
+ body.rg-experience-mode .blender-lifecycle-video,
+ body.rg-experience-mode .blender-root-video{
+  inset:0 auto!important;left:50%!important;
+  width:1164px!important;height:100%!important;max-width:none!important;
+  transform:translateX(-50%)!important;
+ }
+ body.rg-experience-mode .blender-root-video{transform:translateX(-50%) scaleX(.39)!important}
+ body.rg-experience-mode .plant-journey{
+  top:clamp(246px,34dvh,300px)!important;left:auto!important;right:12px!important;
+  width:min(226px,calc(100% - 24px))!important;max-width:none!important;
+  padding:7px 10px!important;border-radius:16px!important;
+  background:#183a29e8!important;z-index:38!important;
+  box-shadow:0 8px 26px #07171048;
+  transition:width .2s ease,background .2s ease;
+ }
+ body.rg-experience-mode .plant-journey h2{display:none!important}
+ .journey-toggle{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  width:100%;background:none;color:#eff7db;padding:4px 2px;
+  font-size:11px!important;font-weight:700;min-height:33px;
+ }
+ .journey-toggle>.earth-icon{width:18px;height:18px;color:#cbe99b}
+ .journey-toggle>span:nth-child(2){flex:1;text-align:left}
+ .journey-toggle>span:last-child{font-size:14px;color:#d7f1b1;transition:transform .2s}
+ .journey-details{display:none!important}
+ body.rg-experience-mode .earth-site.journey-open .plant-journey{
+  left:12px!important;right:12px!important;width:auto!important;
+ }
+ body.rg-experience-mode .earth-site.journey-open .journey-details{display:block!important}
+ body.rg-experience-mode .earth-site.journey-open .journey-toggle>span:last-child{transform:rotate(180deg)}
+ body.rg-experience-mode .earth-site.journey-open .plant-stages{margin-top:11px}
+ body.rg-experience-mode .earth-site.journey-open .lifecycle-controls{margin-top:8px}
+ body.rg-experience-mode .root-feature{
+  top:calc(var(--root-y) - 21px + var(--node-drift,0px))!important;
+  width:45px!important;min-width:0!important;display:flex;flex-direction:column;
+  align-items:center;
+ }
+ body.rg-experience-mode .root-feature .root-orb{
+  width:clamp(28px,8.8vw,44px)!important;
+  height:clamp(28px,8.8vw,44px)!important;
+ }
+ body.rg-experience-mode .root-feature .root-orb>.earth-icon{
+  width:clamp(16px,5vw,22px)!important;height:clamp(16px,5vw,22px)!important;
+ }
+ body.rg-experience-mode .root-discovery{display:none!important}
+ body.rg-experience-mode .earth-scroll{
+  top:calc(100svh - 172px)!important;left:50%!important;padding:4px 6px!important;
+ }
+ body.rg-experience-mode .earth-scroll>span{width:28px;height:34px}
+ body.rg-experience-mode .earth-scroll small{font-size:9px;max-width:170px}
+ body.rg-experience-mode .start-feature-dock{
+  left:9px!important;right:9px!important;
+  width:auto!important;max-width:none!important;
+  transform:none!important;bottom:calc(7px + env(safe-area-inset-bottom,0px))!important;
+  padding:6px!important;z-index:80!important;
+ }
+ body.rg-experience-mode .guide-sheet{
+  left:10px!important;right:10px!important;
+  top:auto!important;bottom:calc(88px + env(safe-area-inset-bottom,0px))!important;
+  width:auto!important;max-height:min(64dvh,calc(100dvh - 175px))!important;
+  margin:0!important;z-index:90!important;
+ }
+ body.rg-experience-mode .guide-sheet>.guide-note{display:none!important}
+ body.rg-experience-mode .earth-site.has-open-guide .plant-journey{display:none!important}
+ body.rg-experience-mode .earth-footer{min-height:78px;padding:17px 16px;gap:8px}
+ body.rg-experience-mode .earth-footer>span:nth-child(2){display:none}
+}
+@media(max-width:380px){
+ body.rg-experience-mode .plant-journey{top:clamp(220px,34dvh,274px)!important}
+ body.rg-experience-mode .root-feature .root-orb{width:30px!important;height:30px!important}
+ body.rg-experience-mode .root-feature .root-orb>.earth-icon{width:17px!important;height:17px!important}
+}
+@media(max-width:719px) and (max-height:670px){
+ body.rg-experience-mode .earth-intro h1{font-size:clamp(20px,6vw,27px)}
+ body.rg-experience-mode .earth-intro>p{font-size:9px}
+ body.rg-experience-mode .plant-journey{top:clamp(214px,36dvh,246px)!important}
+ body.rg-experience-mode .live-earth{top:115px!important;height:clamp(360px,73dvh,470px)!important}
+ body.rg-experience-mode .earth-scroll{top:calc(100svh - 145px)!important}
+ body.rg-experience-mode .guide-sheet{bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}
+ body.rg-experience-mode .start-dock-button{min-height:57px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ body.rg-experience-mode .earth-scroll,
+ .journey-toggle>span:last-child{transition:none!important}
+ body.rg-experience-mode .root-feature .root-orb{transition:none!important}
+}

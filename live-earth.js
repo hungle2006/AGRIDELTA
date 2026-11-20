@@ -4,6 +4,7 @@ import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 import {LIFECYCLE_SECONDS,STAGE_TIMES,stageAt} from './lifecycle-state.js';
 import {createVideoEarth} from './video-earth.js';
+import {clamp01,rootRevealAt} from './scroll-story-state.js';
 
 /** Actual Blender geometry/animation rendered live; no plant or soil image planes. */
 export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinished=()=>{},onComplete=()=>{},onError=()=>{}}={}){
@@ -12,10 +13,10 @@ export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinish
  if(!context)return createVideoEarth(host,{onStage,onReady,onRootFinished,onComplete,onError});
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const actions=[];
- let renderer,scene,camera,mixer,model,clock=0,last=0,running=!reduced,visible=true,lastStage=-1,ready=false,manualTarget=null,frameCount=0,lastRender=0,completeNotified=false;
+ let renderer,scene,camera,mixer,model,clock=0,last=0,running=!reduced,visible=true,lastStage=-1,ready=false,manualTarget=null,frameCount=0,lastRender=0,completeNotified=false,scrollRoots=null;
  const branches=Array.from({length:5},()=>({meshes:[],uniform:{value:0},progress:0,target:0,done:false}));
  const trunk={meshes:[],uniform:{value:0}};
- const control={revealRoot(i){if(i>=0&&i<5)branches[i].target=1;},seekStage(i){manualTarget=STAGE_TIMES[i]??0;running=false;},replay(){clock=0;manualTarget=null;running=true;lastStage=-1;completeNotified=false;},toggle(){if(clock>=LIFECYCLE_SECONDS){clock=0;completeNotified=false;}running=!running;return running;},setVisible(v){visible=v;last=0;},get ready(){return ready;}};
+ const control={revealRoot(i){if(i>=0&&i<5)branches[i].target=1;},setScrollRoots(progress){scrollRoots=clamp01(progress);},seekStage(i){manualTarget=STAGE_TIMES[i]??0;running=false;},replay(){clock=0;manualTarget=null;running=true;lastStage=-1;completeNotified=false;},toggle(){if(clock>=LIFECYCLE_SECONDS){clock=0;completeNotified=false;}running=!running;return running;},setVisible(v){visible=v;last=0;},get ready(){return ready;}};
  function fail(e){host.dataset.sceneState='error';onError(e);}
  try{
   renderer=new THREE.WebGLRenderer({canvas,context,alpha:true,antialias:true,powerPreference:'high-performance'});
@@ -52,8 +53,20 @@ export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinish
   renderer.setAnimationLoop(now=>{if(!last)last=now;let dt=Math.min((now-last)/1000,.05);last=now;if(!visible||document.hidden||host.closest('[hidden]'))return;if(now-lastRender<1000/30)return;const renderDelta=Math.min((now-lastRender)/1000,.12);lastRender=now;dt=renderDelta;
    if(ready){if(manualTarget!==null){const diff=manualTarget-clock;clock+=diff*(1-Math.exp(-dt*6));if(Math.abs(diff)<.015){clock=manualTarget;manualTarget=null;}}
     else if(running)clock=Math.min(LIFECYCLE_SECONDS,clock+dt);actions.forEach(a=>a.paused=false);mixer.setTime(clock);const st=stageAt(clock);if(st!==lastStage){lastStage=st;host.dataset.plantStage=String(st);onStage(st);}if(clock>=LIFECYCLE_SECONDS){running=false;if(!completeNotified){completeNotified=true;onComplete();}}
-    trunk.uniform.value=Math.min(.31,clock*.065);
-    branches.forEach((b,i)=>{if(b.target){b.meshes.forEach(o=>o.visible=true);b.progress=Math.min(1,b.progress+dt/(reduced?.05:1.35));b.uniform.value=THREE.MathUtils.smoothstep(b.progress,0,1);if(b.progress===1&&!b.done){b.done=true;host.dataset.rootCount=String(branches.filter(x=>x.done).length);onRootFinished(i);}}});
+    if(scrollRoots!==null){
+     // Geometry visibility derives from the current scroll position, never from gesture history.
+     // This makes both the taproot and its five true Blender meshes grow and retract.
+     trunk.uniform.value=THREE.MathUtils.smoothstep(scrollRoots,0,.36);
+     branches.forEach((b,i)=>{
+      const amount=rootRevealAt(scrollRoots,i);
+      b.progress=amount;b.uniform.value=amount;b.done=amount>=.999;
+      b.meshes.forEach(o=>{o.visible=amount>.0001;});
+     });
+     host.dataset.rootCount=String(branches.filter(b=>b.progress>.035).length);
+    }else{
+     trunk.uniform.value=Math.min(.31,clock*.065);
+     branches.forEach((b,i)=>{if(b.target){b.meshes.forEach(o=>o.visible=true);b.progress=Math.min(1,b.progress+dt/(reduced?.05:1.35));b.uniform.value=THREE.MathUtils.smoothstep(b.progress,0,1);if(b.progress===1&&!b.done){b.done=true;host.dataset.rootCount=String(branches.filter(x=>x.done).length);onRootFinished(i);}}});
+    }
     frameCount++;if(frameCount%45===0){host.dataset.lifecycleTime=clock.toFixed(1);host.dataset.drawCalls=String(renderer.info.render.calls);host.dataset.triangles=String(renderer.info.render.triangles);}
    }
    renderer.render(scene,camera);

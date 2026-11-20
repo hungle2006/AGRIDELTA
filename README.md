@@ -13,6 +13,14 @@ Start retains the supplied reference's typography, navigation, dawn valley and r
 - Mobile places the journey panel above the growing crown, compresses the root spread, uses a feature rail and scrolls the resulting guide into view.
 - The distant valley is a separate photographic background, revised for clearer fields/mountains and fresh greens.
 
+## Scroll-controlled Start experience
+
+The Start landing page is a reversible scroll story: a sticky real Blender plant and soil scene stays visible while its taproot and five lateral root meshes reveal as the page scrolls down, and retract as the user scrolls up. A root's shader uniform is computed from its current normalized scroll position, not from the number of swipes or previous completed animations. The circular markers increase in size smoothly as each corresponding root grows.
+
+The experience uses `scroll-story-state.js` for the shared deterministic scroll timing, `live-earth.js` for GLB root uniforms, and `video-earth.js` for scroll-seeked Blender video fallback when WebGL2 is unavailable. The plant's autonomous flower/fruit lifecycle remains independent from root scrolling. `start-scroll-story.css` supplies the sticky 3D scene and responsive mobile/desktop layout.
+
+Desktop: story title at left, plant in the middle, lifecycle at right, five-function dock fixed at the bottom. Mobile: a compact expandable journey panel and a five-function dock leave space for the plant and roots; the guide opens as a separate bottom sheet. Scroll is native; no wheel interception or page-wide scroll lock remains. Buttons for exploring the next root and all five guide shortcuts remain keyboard-accessible. Application screens continue scrolling normally.
+
 ## Real geometry and compatible motion
 
 `blender/start_lifecycle.py` preserves the original botanical animation from `blender/living_growth.py`, extends it with flowering and fruit, and appends the real soil cutaway and five independently identified roots from `blender/reference_earth.py`. Leaf midribs retain their botanical parents. The GLB is meshopt-compressed to about 1.5 MB while preserving its six root groups, animation channels and metadata.
