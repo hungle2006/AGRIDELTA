@@ -133,3 +133,16 @@ body.rg-experience-mode {background:#f6f5ed}
  .earth-site .earth-primary,.workflow-card,.workflow-card img,.start-dock-button,.dock-image,.workflow-arrow,.dock-arrow,.root-feature,.root-next{animation:none!important;transition:none!important}
  .root-feature{transform:translate(-50%,-50%)!important}
 }
+
+/* Bean-plant composition: keep the canopy fully visible above the lifecycle card.
+   WebGL framing is handled by the plant camera in live-earth.js. These visual
+   assets are used only when WebGL is unavailable or has not loaded yet. */
+.plant-model :is(.plant-poster,.plant-fallback-frame,.plant-fallback-film) {
+  transform: translateY(12px) scale(.965);
+  transform-origin: center center;
+}
+@media(max-width:760px) {
+  .plant-model :is(.plant-poster,.plant-fallback-frame,.plant-fallback-film) {
+    transform: translateY(9px) scale(.95);
+  }
+}
