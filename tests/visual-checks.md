@@ -7,7 +7,7 @@
 - Mobile menu opens/closes and navigation anchors land on the intended section.
 - Guide accordion switches its illustration and instructions; the seasons action enters the actual seasons screen.
 - Season entry form fits the mobile viewport and focuses the first input.
-- Growth stage buttons seek and pause the animation; replay restarts it; playback ends on the mature plant.
+- The plant starts from seed automatically. Water and fertilizer fall during growth. Scroll down while the scene is visible to trigger the harvest: each pod falls, rests on the soil, then disappears before the next begins. Reload to replay the cycle.
 - Media height remains 355 px on desktop before and after decode.
 - Cloud browser WebGL is disabled, so GLB motion could not be visually inspected in WebGL there. GLB channels were checked structurally and the Blender render was visually checked instead.
 - Accounts, sensor data, image diagnosis and server synchronization remain outside this frontend demo's scope.

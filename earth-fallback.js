@@ -1,14 +1,14 @@
-import {LIFECYCLE_SECONDS, stageAt} from './lifecycle-state.js';
+import {LIFECYCLE_SECONDS, HARVEST_SECONDS, stageAt} from './lifecycle-state.js';
 
 const asset = (layer, index) => `/assets/start-botanical-${layer}-${index}.webp`;
 
 export function mountPlantFallback(host) {
-  const layers = Array.from({length: 5}, (_, index) => {
+  const layers = Array.from({length: 6}, (_, index) => {
     const image = new Image();
     image.alt = '';
     image.decoding = 'async';
     image.className = 'plant-fallback-frame';
-    image.src = asset('lifecycle', index);
+    image.src = index === 5 ? '/assets/start-botanical-harvested.webp' : asset('lifecycle', index);
     host.append(image);
     return image;
   });
@@ -41,22 +41,23 @@ export function mountPlantFallback(host) {
     if (Math.abs(film.currentTime-targetTime) <= .30) film.classList.add('is-visible');
   });
 
-  return (time, shouldPlay) => {
-    const stage = stageAt(time);
+  return (time, shouldPlay, rate) => {
+    const stage = time >= HARVEST_SECONDS ? 5 : stageAt(time);
     if (stage !== activeStage) {
       layers.forEach((image, index) => image.classList.toggle('is-current', index === stage));
       activeStage = stage;
     }
     targetTime = time;
-    const jumped = Math.abs(lastTime-time) > .15;
+    const jumped = time < lastTime-.001 || time-lastTime > .42;
     lastTime = time;
     if (shouldPlay) {
+      if (film.playbackRate !== rate) film.playbackRate = rate;
       if (jumped) film.classList.remove('is-visible');
       if (!playing || jumped) startFilm();
       else syncTime();
     } else if (playing || jumped) {
       film.pause();
-      if (jumped || time >= LIFECYCLE_SECONDS) film.classList.remove('is-visible');
+      if (jumped || time === LIFECYCLE_SECONDS || time >= HARVEST_SECONDS) film.classList.remove('is-visible');
     }
     playing = shouldPlay;
   };

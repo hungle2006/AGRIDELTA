@@ -69,10 +69,13 @@ for i, frame in enumerate((1, 82, 396, 462, 657)):
     scene.frame_set(frame)
     render(f'lifecycle-{i}')
 
+scene.frame_set(scene.frame_end)
+render('harvested')
+
 if os.environ.get('AGRIDELTA_START_STILLS_ONLY') != '1':
-    scene.render.resolution_x = scene.render.resolution_y = 352
-    scene.cycles.samples = 7
-    for index, frame in enumerate(range(1, 674, 6)):
+    scene.render.resolution_x = scene.render.resolution_y = 320
+    scene.cycles.samples = 5
+    for index, frame in enumerate(range(1, scene.frame_end + 1, 4)):
         scene.frame_set(frame)
         render(f'motion-{index:03d}')
 

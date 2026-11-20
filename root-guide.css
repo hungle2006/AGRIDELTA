@@ -150,44 +150,20 @@ body.earth-modal-open { overflow: hidden; }
 }
 .earth-eyebrow .earth-icon { font-size: 17px; }
 
-.start-hero {
-  position: relative;
-  isolation: isolate;
-  background: #faf5e6;
-}
+.start-hero { background: #faf7ed; }
 .hero-layout {
   position: relative;
   z-index: 1;
   display: grid;
   grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-  align-items: center;
-  gap: clamp(20px, 3vw, 52px);
-  padding-top: clamp(29px, 5vh, 68px);
-  padding-bottom: clamp(35px, 6vh, 70px);
+  column-gap: clamp(20px, 3vw, 52px);
+  padding-top: clamp(24px, 4vh, 55px);
+  padding-bottom: 28px;
 }
-.plant-landscape {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-.plant-backdrop {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-  object-position: 65% 53%;
-  transform: translate(var(--scene-x, 0), var(--scene-y, 0)) scale(1.035);
-  transition: transform .65s cubic-bezier(.2,.65,.3,1);
-}
-.plant-landscape::after {
+.hero-layout::after {
   content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg,#faf7ed 0%,#faf7edec 23%,#faf7edaf 39%,#faf7ed00 73%),
-    linear-gradient(0deg,#faf7ed 0%,#faf7ed18 21%,transparent 65%);
+  grid-column: 1 / -1;
+  height: clamp(96px, 20svh, 175px);
 }
 .earth-intro { align-self: center; padding-bottom: 29px; }
 .earth-intro h1 {
@@ -204,10 +180,15 @@ body.earth-modal-open { overflow: hidden; }
   line-height: 1.65;
 }
 .earth-intro-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 28px; }
-.plant-journey { position: relative; min-width: 0; }
+.plant-journey {
+  position: sticky;
+  top: calc(var(--header-height) + 10px);
+  align-self: start;
+  min-width: 0;
+}
 .plant-art {
   position: relative;
-  height: clamp(350px, 56vh, 565px);
+  height: clamp(265px, 56svh, 565px);
   display: grid;
   place-items: center;
   container-type: size;
@@ -219,9 +200,8 @@ body.earth-modal-open { overflow: hidden; }
   aspect-ratio: 1;
   transform: translate(calc(var(--scene-x, 0px) * -1), calc(var(--scene-y, 0px) * -1));
   transition: transform .65s cubic-bezier(.2,.65,.3,1);
-  mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent), linear-gradient(180deg, transparent, #000 4%, #000 76%, transparent 95%);
-  mask-composite: intersect;
-  filter: saturate(1.06) drop-shadow(0 5px 13px #51471a30);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  filter: saturate(1.06) drop-shadow(0 5px 13px #51471a24);
 }
 .plant-model > *, .root-model > * { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: contain; }
 .plant-model[data-scene-state='ready'] .plant-poster,
@@ -241,17 +221,14 @@ body.earth-modal-open { overflow: hidden; }
   border-radius: 19px;
   background: #fffdf5f5;
   box-shadow: 0 15px 55px #352a1329;
-  backdrop-filter: blur(16px);
   padding: 14px clamp(12px, 2vw, 24px) 13px;
 }
 .plant-controls-heading { display: flex; align-items: center; justify-content: space-between; gap: 9px; margin-bottom: 9px; }
 .plant-controls h2 { font-size: 14px; line-height: 1.35; font-weight: 700; }
 .plant-controls #lifecycle-label { color: var(--muted); font-size: 12px; margin-top: 4px; }
-.plant-actions { display: flex; gap: 6px; }
-.plant-actions [data-pause] { color: #fffef7; background: #245e3e; border-color: #245e3e; }
-.plant-actions [data-pause]:hover { background: #17492d; }
-.plant-stages { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 4px; }
-.plant-stages button {
+.plant-controls [data-pause] { color: #284f37; }
+.plant-stages { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 4px; list-style: none; padding: 0; margin: 0; }
+.plant-stages li {
   min-width: 0;
   display: grid;
   justify-items: center;
@@ -269,8 +246,7 @@ body.earth-modal-open { overflow: hidden; }
   padding: 3px 1px;
 }
 .plant-stages .earth-icon { font-size: 19px; }
-.plant-stages button:hover { background: #edf2e4; }
-.plant-stages button[aria-pressed='true'] { background: #e5efd7; color: #264e37; border-color: #9eb789; }
+.plant-stages [aria-current='step'] { background: #e5efd7; color: #264e37; border-color: #9eb789; }
 
 .start-guides { padding-block: clamp(56px, 7.1vw, 112px); }
 .guide-intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 27px; margin-bottom: 34px; }
@@ -483,13 +459,6 @@ body.earth-modal-open { overflow: hidden; }
 
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .start-hero { view-timeline: --plant-scene block; overflow: clip; }
-    .plant-landscape, .plant-art {
-      animation: field-departure linear both;
-      animation-timeline: --plant-scene;
-      animation-range: exit 0% exit 78%;
-    }
-    .plant-art { animation-name: plant-departure; }
     .workflow-steps { view-timeline: --workflow block; }
     .workflow-steps:not(:has(:focus-visible)) li {
       animation: workflow-arrival ease-out both;
@@ -517,12 +486,6 @@ body.earth-modal-open { overflow: hidden; }
       animation-range: entry 30% cover 48%;
     }
   }
-}
-@keyframes field-departure {
-  to { translate: 0 18%; }
-}
-@keyframes plant-departure {
-  to { translate: -8% 14%; scale: .88; rotate: -5deg; }
 }
 @keyframes workflow-arrival {
   from { translate: 0 calc(18px + var(--step) * 12px); opacity: .78; }
@@ -572,11 +535,8 @@ body.earth-modal-open { overflow: hidden; }
   }
   .earth-menu-open .earth-nav { display: grid; }
   .earth-nav :is(a,button) { min-height: 41px; border-radius: 8px; }
-  .hero-layout { grid-template-columns: minmax(0,1fr); padding-block: 36px 32px; gap: 13px; }
-  .plant-backdrop { object-position: 67% 100%; }
-  .plant-landscape::after {
-    background: linear-gradient(180deg,#faf7edf7 0%,#faf7ede8 33%,#faf7ed18 68%,#faf7ed 100%);
-  }
+  .hero-layout { grid-template-columns: minmax(0,1fr); padding-block: 30px 10px; gap: 13px; }
+  .hero-layout::after { height: 92px; }
   .earth-intro { padding-bottom: 0; }
   .earth-intro h1 { font-size: clamp(43px, 9.7vw, 68px); margin-block: 13px 17px; }
   .earth-intro h1 em { display: inline; }
@@ -611,6 +571,7 @@ body.earth-modal-open { overflow: hidden; }
 }
 @media (prefers-reduced-motion: reduce) {
   .earth-site *, .earth-site *::before, .earth-site *::after { transition-duration: 0s !important; }
-  .plant-backdrop { transform: none; }
+  .hero-layout::after { display: none; }
+  .plant-journey { position: relative; top: auto; }
   .plant-model { transform: none; }
 }

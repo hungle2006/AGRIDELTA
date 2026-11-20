@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
-import {LIFECYCLE_SECONDS, STAGE_TIMES, stageAt} from './lifecycle-state.js';
+import {
+  LIFECYCLE_SECONDS, HARVEST_SECONDS, GROWTH_RATE, SCROLL_GROWTH_RATE, stageAt, careAt, plantPhase, advancePlantTime,
+} from './lifecycle-state.js';
 import {rootRevealAt} from './scroll-story-state.js';
 import {mountPlantFallback, mountRootFallback} from './earth-fallback.js';
 
 const PLANT_ASSET = '/assets/start-lifecycle-live.glb';
-export const INITIAL_PLANT_TIME = STAGE_TIMES[2];
 let modelRequest;
 
 function loadModel() {
@@ -61,52 +62,78 @@ function orthographicCamera(span, height, target) {
 }
 
 export function createLiveEarth(host, onUpdate) {
-  let time = INITIAL_PLANT_TIME;
-  let playing = false;
-  let lastFrame = 0;
+  const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
+  let time = motionPreference.matches ? LIFECYCLE_SECONDS : 0;
+  let harvestRequested = false;
+  let paused = false;
+  let lastFrame = null;
   let frame = 0;
-  let renderedTime = null;
-  let inView = true;
+  let inView = false;
   let visible = true;
   let renderer, observer, mixer, action, fallback;
+  const careMeshes = [];
+  const scene = createScene();
+  const camera = orthographicCamera(3.65, 3.10, 1.23);
+
+  function shouldAdvance(phase = plantPhase(time, harvestRequested)) {
+    return (mixer || fallback) && visible && inView && !paused && !document.hidden
+      && (phase === 'growing' || phase === 'harvesting');
+  }
+
+  function syncFallback(phase) {
+    const rate = phase === 'growing' ? (harvestRequested ? SCROLL_GROWTH_RATE : GROWTH_RATE) : 1;
+    fallback?.(time, Boolean(shouldAdvance(phase)), rate);
+  }
+
+  function update() {
+    const phase = plantPhase(time, harvestRequested);
+    const stage = stageAt(time);
+    if (host.dataset.plantStage !== String(stage)) host.dataset.plantStage = String(stage);
+    if (host.dataset.harvestState !== phase) host.dataset.harvestState = phase;
+    const care = careAt(time);
+    if (host.dataset.careAction !== care) host.dataset.careAction = care;
+    onUpdate(stage, phase, paused, care);
+    syncFallback(phase);
+    if (shouldAdvance(phase)) {
+      if (!frame) frame = requestAnimationFrame(tick);
+    } else {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      lastFrame = null;
+    }
+  }
 
   function draw() {
     if (mixer) {
       action.reset().play();
       mixer.setTime(time);
+      const activeCare = careAt(time);
+      careMeshes.forEach(({mesh, kind}) => { mesh.visible = kind === activeCare; });
       renderer.render(scene, camera);
       if (host.dataset.sceneState !== 'ready') host.dataset.sceneState = 'ready';
     }
-    fallback?.(time, playing && visible && inView && !document.hidden);
-    if (renderedTime !== time) {
-      renderedTime = time;
-      host.dataset.plantStage = String(stageAt(time));
-    }
+    update();
   }
 
   function tick(now) {
     frame = 0;
-    if (!playing || !inView || !visible || document.hidden) {
-      lastFrame = 0;
+    if (!shouldAdvance()) {
+      update();
       return;
     }
-    if (lastFrame && now-lastFrame < 30) {
-      refresh();
+    if (lastFrame === null || now-lastFrame >= 30) {
+      if (lastFrame !== null) {
+        time = advancePlantTime(time, (now-lastFrame)/1000, harvestRequested);
+      }
+      lastFrame = now;
+      draw();
       return;
     }
-    if (lastFrame) time = Math.min(LIFECYCLE_SECONDS, time + Math.min((now-lastFrame)/1000, .08));
-    lastFrame = now;
-    if (time >= LIFECYCLE_SECONDS) playing = false;
-    draw();
-    refresh();
-  }
-
-  function refresh() {
-    onUpdate(stageAt(time), playing, time >= LIFECYCLE_SECONDS);
-    if (playing && inView && visible && !document.hidden && !frame) frame = requestAnimationFrame(tick);
+    update();
   }
 
   function showFallback() {
+    if (fallback) return;
     observer?.disconnect();
     renderer?.dispose();
     renderer?.domElement.remove();
@@ -116,19 +143,21 @@ export function createLiveEarth(host, onUpdate) {
     draw();
   }
 
-  const scene = createScene();
-  const camera = orthographicCamera(3.65, 3.10, 1.23);
   try {
     renderer = createRenderer(host);
     observer = observeSize(renderer, host, draw);
-    renderer.domElement.addEventListener('webglcontextlost', (event) => {
+    renderer.domElement.addEventListener('webglcontextlost', event => {
       event.preventDefault();
       showFallback();
     }, {once: true});
     loadModel().then(({scene: original, animations}) => {
       if (fallback) return;
       const model = original.clone(true);
-      model.traverse(obj => { if (Number.isInteger(obj.userData.rootIndex)) obj.visible = false; });
+      model.traverse(obj => {
+        if (Number.isInteger(obj.userData.rootIndex)) obj.visible = false;
+        const kind = obj.userData.careKind;
+        if (kind) careMeshes.push({mesh: obj, kind: kind === 'Water droplet' ? 'watering' : 'fertilizing'});
+      });
       scene.add(model);
       mixer = new THREE.AnimationMixer(model);
       action = mixer.clipAction(animations[0]).setLoop(THREE.LoopOnce, 1);
@@ -141,43 +170,41 @@ export function createLiveEarth(host, onUpdate) {
 
   new IntersectionObserver(([entry]) => {
     inView = entry.isIntersecting;
-    lastFrame = 0;
-    fallback?.(time, playing && visible && inView && !document.hidden);
-    refresh();
+    lastFrame = null;
+    update();
   }).observe(host);
-  document.addEventListener('visibilitychange', () => {
-    lastFrame = 0;
-    fallback?.(time, playing && visible && inView && !document.hidden);
-    refresh();
+  document.addEventListener('visibilitychange', update);
+  motionPreference.addEventListener('change', event => {
+    if (!event.matches) return;
+    time = harvestRequested ? HARVEST_SECONDS : LIFECYCLE_SECONDS;
+    paused = false;
+    draw();
   });
-  draw();
+  update();
 
   return {
-    seekStage(index) {
-      playing = false;
-      time = STAGE_TIMES[index];
+    harvest() {
+      if (harvestRequested) return;
+      harvestRequested = true;
+      if (motionPreference.matches) time = HARVEST_SECONDS;
       draw();
-      refresh();
     },
     replay() {
-      time = 0;
-      playing = true;
-      lastFrame = 0;
+      time = motionPreference.matches ? LIFECYCLE_SECONDS : 0;
+      harvestRequested = false;
+      paused = false;
+      lastFrame = null;
       draw();
-      refresh();
     },
-    toggle() {
-      if (!playing && time >= LIFECYCLE_SECONDS) time = 0;
-      playing = !playing;
-      lastFrame = 0;
-      draw();
-      refresh();
+    togglePause() {
+      paused = !paused;
+      lastFrame = null;
+      update();
     },
     setVisible(value) {
       visible = value;
-      lastFrame = 0;
-      fallback?.(time, playing && visible && inView && !document.hidden);
-      refresh();
+      lastFrame = null;
+      update();
     },
   };
 }

@@ -9,16 +9,17 @@ from pathlib import Path
 from random import Random
 
 import bpy
-from mathutils import Vector
+from mathutils import Euler, Vector
 from mathutils.noise import noise_vector
 
 PROJECT = Path(__file__).resolve().parents[1]
 ASSETS = PROJECT / 'public/assets'
 LAST = 673
+END = LAST + 108
 rng = Random(92)
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
-scene.frame_end = LAST
+scene.frame_end = END
 scene.render.fps = 24
 
 
@@ -283,6 +284,30 @@ for j, (node, sign) in enumerate([(3, 1), (4, -1), (5, 1)]):
         colors.append((.12*bead, .29*bead, .031*bead))
     pod = mesh(f'Fruit bean pod {j+1}', vertices, faces, pod_mat, canopy, bloom, colors)
     growth(pod, fruit_start, fruit_start+106)
+    pod['podIndex'] = j
+
+    # Keep each pod attached until its turn. Let gravity ease into the fall,
+    # then leave the pod still on the soil before shrinking it away.
+    first = LAST + 1 + j*34
+    impact = first + 16
+    rest = impact + 11
+    gone = rest + 5
+    landing_rotation = Euler((.10, -sign*1.53, sign*.17))
+    lowest = min((landing_rotation.to_matrix() @ vertex).z for vertex in vertices)
+    landing = Vector((bloom.x+sign*.17, bloom.y-.13, -.035-lowest))
+    for frame, point, rotation in [
+        (first, bloom, (0,0,0)),
+        (first+8, bloom.lerp(landing,.25), (0,-sign*.39,sign*.09)),
+        (impact, landing, landing_rotation),
+        (gone, landing, landing_rotation),
+    ]:
+        pod.location = point
+        pod.rotation_euler = rotation
+        pod.keyframe_insert(data_path='location', frame=frame, group='Harvest')
+        pod.keyframe_insert(data_path='rotation_euler', frame=frame, group='Harvest')
+    for frame, size in [(rest,1), (gone,.00001), (END,.00001)]:
+        pod.scale = (size,)*3
+        pod.keyframe_insert(data_path='scale', frame=frame, group='Harvest')
 
 for i, sign in enumerate((-1, 1)):
     seed = blob(f'Seed coat half {i+1}', (sign*.105, -.025, .034), (.14, .095, .085), seed_mat, canopy, i+.5, rotate=sign*.47)
@@ -292,6 +317,48 @@ for i, sign in enumerate((-1, 1)):
         seed.scale = (scale,)*3
         for prop in ('location','rotation_euler','scale'):
             seed.keyframe_insert(data_path=prop, frame=frame, group='Bean lifecycle')
+
+# Water and compost use the same Blender timeline as the sprout. A dedicated
+# seed keeps the plant and soil generation below unchanged.
+care_rng = Random(108)
+water_mat = material('Glossy blue water', (.065,.33,.59), .16)
+compost_mat = material('Ochre compost granules', (.31,.16,.067), .76)
+
+
+def shower(label, template, first, count, spread, travel, ground):
+    for index in range(count):
+        particle = template.copy()
+        canopy.objects.link(particle)
+        particle.name = f'{label} {index+1}'
+        particle['careKind'] = label
+        begin = first + index*2 + care_rng.randrange(0,5)
+        duration = travel + care_rng.randrange(0,5)
+        x = care_rng.uniform(-spread,spread)
+        y = care_rng.uniform(-.30,-.045)
+        offset = care_rng.uniform(-.16,.16)
+        size = care_rng.uniform(.65,1.35)
+        particle.rotation_euler.z = care_rng.uniform(-pi,pi)
+        for frame, position, scale in [
+            (1, (x,y,3.0), .00001),
+            (begin-1, (x,y,3.0), .00001),
+            (begin, (x,y,3.0), size),
+            (begin+duration//2, (x+offset*.4,y,2.18), size),
+            (begin+duration, (x+offset,y,ground), size),
+            (begin+duration+5, (x+offset,y,ground), .00001),
+        ]:
+            particle.location = position
+            particle.scale = (scale,)*3
+            particle.keyframe_insert(data_path='location', frame=frame, group='Farm care')
+            particle.keyframe_insert(data_path='scale', frame=frame, group='Farm care')
+
+
+water = blob('Water droplet template', (0,0,0), (.035,.031,.083), water_mat, canopy, 2)
+compost = blob('Compost template', (0,0,0), (.048,.043,.041), compost_mat, canopy, 4)
+shower('Water droplet', water, 8, 22, .68, 24, .02)
+shower('Fertilizer pellet', compost, 89, 16, .83, 25, .04)
+bpy.data.objects.remove(water, do_unlink=True)
+bpy.data.objects.remove(compost, do_unlink=True)
+
 
 # Each root starts at a sampled point of the same taproot or lateral that feeds it.
 # The exported travel coordinate includes the parent's length at each junction.
@@ -393,7 +460,7 @@ raw = asset.read_bytes()
 json_size = struct.unpack_from('<I', raw, 12)[0]
 document = json.loads(raw[20:20+json_size])
 binary = raw[20+json_size:]
-lifecycle = {'name': 'Seed to bean pod', 'samplers': [], 'channels': []}
+lifecycle = {'name': 'Seed to harvest', 'samplers': [], 'channels': []}
 for clip in document['animations']:
     offset = len(lifecycle['samplers'])
     lifecycle['samplers'].extend(clip['samplers'])
