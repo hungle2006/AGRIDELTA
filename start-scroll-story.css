@@ -60,6 +60,7 @@
   display: grid;
   place-items: center;
   overflow: hidden;
+  overflow: clip;
   height: clamp(340px, 42vw, 545px);
   border-radius: 16px;
   border: 1px solid #81907c65;

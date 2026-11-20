@@ -217,7 +217,7 @@ function renderRoots(now) {
   rootSection.dataset.storyProgress = progress.toFixed(3);
 
   rootButtons.forEach((button,i) => {
-    const isExposed = rootRevealAt(progress,i) > .93;
+    const isExposed = rootRevealAt(progress,i) > .84;
     if (!isExposed && button === document.activeElement) growButton.focus({preventScroll: true});
     button.hidden = !isExposed;
   });
