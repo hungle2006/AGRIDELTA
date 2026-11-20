@@ -59,6 +59,8 @@ site.innerHTML = `
         <a href="#rg-roots">Bộ rễ</a>
         <a href="#rg-guides">Tính năng</a>
         <button type="button" data-knowledge>Kiến thức</button>
+        <button type="button" class="earth-mobile-nav-item" data-search>${icon('search')} Tìm kiếm</button>
+        <button type="button" class="earth-mobile-nav-item" data-enter-auth>${icon('user')} Tài khoản</button>
       </nav>
       <div class="earth-header-actions">
         <button type="button" class="earth-icon-button" aria-label="Tìm tính năng và hướng dẫn" data-search>${icon('search')}</button>
@@ -485,7 +487,10 @@ site.addEventListener('click', event => {
   else if (button.hasAttribute('data-enter-auth')) enter('home', true);
   else if (button === plantControl) plant.togglePause();
   else if (button === growButton) growNext();
-  else if (button.hasAttribute('data-search')) openSearch();
+  else if (button.hasAttribute('data-search')) {
+    setMenu(false);
+    openSearch();
+  }
   else if (button.hasAttribute('data-guide-previous')) openGuide(activeGuide - 1, '[data-guide-previous]');
   else if (button.hasAttribute('data-guide-next')) openGuide(activeGuide + 1, '[data-guide-next]');
   else if (button.hasAttribute('data-knowledge')) {
