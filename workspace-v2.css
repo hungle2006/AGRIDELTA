@@ -414,3 +414,15 @@ body.rg-app-mode #app{display:block!important;min-height:100dvh}
  .ag-app *, .ag-app *:before,.ag-app *:after,
  .ag-dialog-backdrop *{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
 }
+
+/* User-supplied, non-duplicated real field photography (stored locally in IndexedDB). */
+.ag-field-cover img {
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center;
+  display:block;z-index:0;filter:saturate(.92);
+}
+.ag-field-cover:has(img)::before {
+  content:"";position:absolute;inset:0;z-index:1;
+  background:linear-gradient(180deg,#122c202b,transparent 62%,#132f1f28);
+}
+.ag-field-cover:has(img) .ag-field-cover-icon {display:none}

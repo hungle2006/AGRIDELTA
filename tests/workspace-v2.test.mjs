@@ -31,3 +31,10 @@ test('Supabase data policies are owner-restricted and avoid client secrets',()=>
  assert.match(sql,/auth\.uid\(\)\) = user_id/);
  assert.doesNotMatch(app,/service_role/);
 });
+
+test('Field photos come from the user and persist in IndexedDB without repeated fake imagery',()=>{
+  assert.match(app,/data-image-id/);
+  assert.match(app,/kind==='observations'\|\|kind==='fields'/);
+  assert.match(app,/node\.prepend\(img\)/);
+  assert.match(css,/\.ag-field-cover img/);
+});

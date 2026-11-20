@@ -20,7 +20,7 @@ Không có dữ liệu mẫu tự sinh hoặc tài khoản giả. Nếu chưa c�
 4. Deploy lại. Trang Cài đặt sẽ hiện Đăng ký/Đăng nhập thực bằng Supabase Auth; mỗi truy vấn records dùng access token của tài khoản và được RLS giới hạn theo \`user_id\`.
 5. Xác nhận email, truy cập bằng hai tài khoản khác nhau, thử truy xuất dữ liệu người khác (phải bị từ chối). Kiểm tra ứng dụng trên nhiều thiết bị.
 
-**Giới hạn:** ảnh quan sát vẫn lưu cục bộ, chưa tự tải lên Supabase Storage; chưa có cảm biến độ ẩm hoặc AI chẩn đoán. Bản sao JSON không chứa bytes ảnh. Trạng thái offline không được gọi là đồng bộ máy chủ.
+**Giới hạn:** ảnh cánh đồng và ảnh quan sát vẫn lưu cục bộ, chưa tự tải lên Supabase Storage; chưa có cảm biến độ ẩm hoặc AI chẩn đoán. Bản sao JSON không chứa bytes ảnh. Trạng thái offline không được gọi là đồng bộ máy chủ.
 
 ## Chất lượng
 - Run: \`npm ci && node --test tests/*.test.mjs && npm run build\`

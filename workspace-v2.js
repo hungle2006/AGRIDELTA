@@ -102,7 +102,7 @@ const app = document.querySelector('#app');
   function fieldsPage(){
     const rows=filterRows(records.fields,f=>f.name+' '+f.crop+' '+f.note);
     return pageHead('01 / QUẢN LÝ ĐẤT','Cánh đồng <em>của bạn.</em>','Mỗi khu đất có thông tin riêng: diện tích, cây trồng, độ ẩm và ghi chú.','fields','Thêm cánh đồng')+searchBar('Tìm tên cánh đồng hoặc cây trồng')
-      +(rows.length?'<div class="ag-field-grid">'+rows.map((f,i)=>'<article class="ag-field-card"><div class="ag-field-cover ag-field-cover-'+i%4+'"><div class="ag-field-cover-top"><span>KHU VỰC / '+String(i+1).padStart(2,'0')+'</span><span class="ag-pill">'+esc(f.status||'Đang theo dõi')+'</span></div><span class="ag-field-cover-icon">'+I('leaf',44)+'</span></div><div class="ag-field-body"><div class="ag-card-row"><div><h3>'+esc(f.name)+'</h3><p>'+esc(f.crop||'Chưa khai báo cây')+'</p></div>'+actions('fields',f.id)+'</div><div class="ag-field-data"><span>'+I('field',16)+' '+fmt(f.area||0)+' ha</span><span>'+I('drop',16)+' '+(f.moisture===''||f.moisture==null?'Chưa đo':fmt(f.moisture)+'%')+'</span></div>'+(f.note?'<p class="ag-field-note">'+esc(f.note)+'</p>':'')+'</div></article>').join('')+'</div>':missing('Chưa có khu canh tác','Lưu mảnh đất đầu tiên, sau đó liên kết mùa vụ và công việc với nó.','fields'));
+      +(rows.length?'<div class="ag-field-grid">'+rows.map((f,i)=>'<article class="ag-field-card"><div class="ag-field-cover ag-field-cover-'+i%4+'" data-image-id="'+attr(f.id)+'"><div class="ag-field-cover-top"><span>KHU VỰC / '+String(i+1).padStart(2,'0')+'</span><span class="ag-pill">'+esc(f.status==='active'?'Đang canh tác':f.status==='planned'?'Chuẩn bị':f.status==='resting'?'Đất nghỉ':f.status||'Đang theo dõi')+'</span></div><span class="ag-field-cover-icon">'+I('leaf',44)+'</span></div><div class="ag-field-body"><div class="ag-card-row"><div><h3>'+esc(f.name)+'</h3><p>'+esc(f.crop||'Chưa khai báo cây')+'</p></div>'+actions('fields',f.id)+'</div><div class="ag-field-data"><span>'+I('field',16)+' '+fmt(f.area||0)+' ha</span><span>'+I('drop',16)+' '+(f.moisture===''||f.moisture==null?'Chưa đo':fmt(f.moisture)+'%')+'</span></div>'+(f.note?'<p class="ag-field-note">'+esc(f.note)+'</p>':'')+'</div></article>').join('')+'</div>':missing('Chưa có khu canh tác','Lưu mảnh đất đầu tiên, sau đó liên kết mùa vụ và công việc với nó.','fields'));
   }
   function seasonsPage(){
     const rows=filterRows(records.seasons,s=>s.name+' '+s.crop+' '+fieldName(s.fieldId));
@@ -139,7 +139,7 @@ const app = document.querySelector('#app');
   function formFields(type,d={}){
     const fieldSel='<label class="ag-form-field"><span>Khu vực canh tác</span>'+selectField(d.fieldId||'')+'</label>';
     const notes=(name='note',label='Ghi chú')=>'<label class="ag-form-field ag-span"><span>'+label+'</span><textarea name="'+name+'" rows="3" maxlength="1200">'+esc(d[name]||'')+'</textarea></label>';
-    if(type==='fields')return input('name','Tên cánh đồng','text',d.name||'',true,'maxlength="100"')+input('crop','Cây trồng','text',d.crop||'',false,'maxlength="100"')+input('area','Diện tích (ha)','number',d.area??'',true,'min="0.001" max="100000" step="any"')+input('moisture','Độ ẩm nhập thủ công (%)','number',d.moisture??'',false,'min="0" max="100" step="1"')+select('status','Trạng thái',[['active','Đang canh tác'],['planned','Chuẩn bị'],['resting','Đất nghỉ']],d.status||'active')+notes();
+    if(type==='fields')return input('name','Tên cánh đồng','text',d.name||'',true,'maxlength="100"')+input('crop','Cây trồng','text',d.crop||'',false,'maxlength="100"')+input('area','Diện tích (ha)','number',d.area??'',true,'min="0.001" max="100000" step="any"')+input('moisture','Độ ẩm nhập thủ công (%)','number',d.moisture??'',false,'min="0" max="100" step="1"')+select('status','Trạng thái',[['active','Đang canh tác'],['planned','Chuẩn bị'],['resting','Đất nghỉ']],d.status||'active')+notes()+'<label class="ag-form-field ag-span"><span>Ảnh thực tế của cánh đồng (tuỳ chọn, tối đa 8MB)</span><input type="file" name="photo" accept="image/*" /></label>';
     if(type==='seasons')return input('name','Tên mùa vụ','text',d.name||'',true,'maxlength="100"')+fieldSel+input('crop','Cây trồng','text',d.crop||'',false,'maxlength="100"')+input('start','Ngày gieo trồng','date',d.start||todayISO(),true)+input('end','Ngày dự kiến thu hoạch','date',d.end||'',true)+select('status','Trạng thái',[['planned','Kế hoạch'],['active','Đang canh tác'],['finished','Đã thu hoạch']],d.status||'planned')+notes();
     if(type==='tasks')return input('title','Tên công việc','text',d.title||'',true,'maxlength="150"')+fieldSel+input('due','Thời gian thực hiện','datetime-local',d.due||'',true)+select('priority','Mức ưu tiên',[['normal','Bình thường'],['high','Ưu tiên cao'],['low','Ưu tiên thấp']],d.priority||'normal')+notes();
     if(type==='orders')return input('customer','Tên khách hàng','text',d.customer||'',true,'maxlength="100"')+input('product','Sản phẩm','text',d.product||'',true,'maxlength="100"')+input('quantity','Số lượng','number',d.quantity||'',true,'min=".001" step="any"')+select('unit','Đơn vị',[['kg','kg'],['tấn','tấn'],['thùng','thùng'],['cái','cái']],d.unit||'kg')+input('price','Đơn giá (₫)','number',d.price??'',true,'min="0" step="1"')+select('status','Trạng thái',[['new','Đơn mới'],['processing','Đang xử lý'],['delivered','Đã giao']],d.status||'new')+notes();
@@ -177,7 +177,7 @@ const app = document.querySelector('#app');
       const url=URL.createObjectURL(blob);
       const img=document.createElement('img');
       img.alt='Ảnh quan sát cây trồng';img.src=url;img.loading='lazy';img.onload=()=>URL.revokeObjectURL(url);
-      node.replaceChildren(img);
+      if(node.classList.contains('ag-field-cover'))node.prepend(img);else node.replaceChildren(img);
     }
   }
   function imageDB(){
@@ -219,7 +219,7 @@ const app = document.querySelector('#app');
     if(kind==='orders'){data.quantity=Number(data.quantity);data.price=Number(data.price);if(!(data.quantity>0)||data.price<0){toast('Kiểm tra số lượng và đơn giá.');return;}}
     if(kind==='tasks')data.done=Boolean(previous?.done);
     const row={...previous,...data,id,createdAt:previous?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
-    if(kind==='observations'&&photo instanceof File&&photo.size){if(photo.size>8*1024*1024){toast('Ảnh không được vượt quá 8MB.');return;}if(!(await imagePut(id,photo))){toast('Không thể lưu ảnh trên thiết bị này.');return;}}
+    if((kind==='observations'||kind==='fields')&&photo instanceof File&&photo.size){if(photo.size>8*1024*1024){toast('Ảnh không được vượt quá 8MB.');return;}if(!(await imagePut(id,photo))){toast('Không thể lưu ảnh trên thiết bị này.');return;}}
     const rows=[...records[kind]],at=rows.findIndex(x=>x.id===id);if(at<0)rows.unshift(row);else rows[at]=row;records[kind]=rows;
     if(!cloudSession){local=records;persist();}
     modal=null;editing=null;render();toast('Đã lưu '+(kind==='observations'?'quan sát':'thông tin')+'.');
@@ -229,7 +229,7 @@ const app = document.querySelector('#app');
     const row=records[kind]?.find(r=>r.id===id);if(!row)return;
     if(!confirm('Xóa bản ghi "'+(row.name||row.title||row.product||row.note?.slice(0,32)||'này')+'"?'))return;
     if(kind==='fields'&&(records.seasons.some(x=>x.fieldId===id)||records.tasks.some(x=>x.fieldId===id))&&!confirm('Khu vực đang được dùng trong mùa vụ hoặc công việc. Vẫn xóa khu vực?'))return;
-    records[kind]=records[kind].filter(x=>x.id!==id);if(kind==='observations')await imageDelete(id);
+    records[kind]=records[kind].filter(x=>x.id!==id);if(kind==='observations'||kind==='fields')await imageDelete(id);
     if(!cloudSession){local=records;persist();}
     render();toast('Đã xóa bản ghi.');
     if(cloudSession)remoteRemove(kind,id).catch(()=>toast('Không thể đồng bộ thao tác xóa. Hãy kiểm tra kết nối.'));
@@ -341,6 +341,12 @@ const app = document.querySelector('#app');
     try{await cloudRequest('/auth/v1/logout',{method:'POST'});}catch{}
     cloudSession=null;localStorage.removeItem(CLOUD_SESSION);records=local;render();toast('Đã đăng xuất.');
   }
+  app.addEventListener('error',event=>{
+    if(event.target instanceof HTMLImageElement && event.target.classList.contains('ag-dash-photo')){
+      event.target.onerror=null;
+      event.target.src='/assets/field-dashboard.webp';
+    }
+  },true);
   app.addEventListener('click',async event=>{
     const target=event.target.closest('[data-go],[data-new],[data-edit],[data-remove],[data-toggle],[data-action],[data-menu],[data-dismiss]');
     if(!target)return;
