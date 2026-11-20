@@ -97,3 +97,5 @@ window.AGRIDELTAOpenAuth=function(){
 };
 
 window.addEventListener('agridelta-care-changed',()=>{if(document.body.classList.contains('rg-app-mode')&&state.page==='home')render();});
+// Keep keyboard navigation inside an open farm form.
+document.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const dialog=document.querySelector('#app .modal[aria-modal="true"]');if(!dialog)return;const items=[...dialog.querySelectorAll('button,input,select,textarea,[href]')].filter(x=>!x.disabled&&x.getClientRects().length);if(!items.length)return;const first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}});
