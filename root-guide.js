@@ -38,6 +38,11 @@ const stageNotes = [
   'Những bông hoa đầu tiên hé nở.',
   'Quả đậu lớn dần từ cuống hoa.',
 ];
+const workflow = [
+  {title: 'Thêm cánh đồng', detail: 'Lưu vị trí, diện tích và cây đang trồng.'},
+  {title: 'Lên lịch mùa vụ', detail: 'Chọn ngày gieo, thời gian chăm sóc và thu hoạch.'},
+  {title: 'Ghi việc chăm sóc', detail: 'Theo dõi ngày tưới, bón phân và các việc đã làm.'},
+];
 const rootPoints = [[8.8,51.3],[25.9,67.9],[52.4,78.2],[72.6,70.9],[91.4,47.8]];
 const brand = `<img src="/assets/agridelta-brand-mark.webp" alt="" width="38" height="38"><strong>AGRIDELTA</strong>`;
 const site = document.createElement('div');
@@ -45,7 +50,8 @@ site.id = 'rg-site';
 site.className = 'earth-site';
 site.innerHTML = `
   <a class="earth-skip" href="#rg-main">Bỏ qua điều hướng</a>
-  <header class="earth-header" id="rg-top">
+  <span id="rg-top" class="start-page-top" aria-hidden="true"></span>
+  <header class="earth-header">
     <div class="earth-container earth-header-inner">
       <a class="earth-brand" href="#rg-top" aria-label="AGRIDELTA — Trang chủ">${brand}</a>
       <nav class="earth-nav" id="earth-navigation" aria-label="Điều hướng chính">
@@ -65,7 +71,7 @@ site.innerHTML = `
   <main id="rg-main" tabindex="-1">
     <section class="start-hero" aria-labelledby="start-title">
       <div class="plant-landscape" aria-hidden="true">
-        <img class="plant-backdrop" src="/assets/start-delta-blue-hour.webp" alt="" width="1600" height="900" fetchpriority="high">
+        <img class="plant-backdrop" src="/assets/start-field-sunrise.webp" alt="" width="1600" height="900" fetchpriority="high">
       </div>
       <div class="earth-container hero-layout">
         <div class="earth-intro">
@@ -97,6 +103,24 @@ site.innerHTML = `
           </figcaption>
         </figure>
       </div>
+    </section>
+
+    <section class="start-workflow earth-container" aria-labelledby="workflow-title">
+      <h2 id="workflow-title">Bắt đầu một mùa vụ.</h2>
+      <ol class="workflow-steps">
+        ${workflow.map(({title,detail},i) => `
+          <li style="--step: ${i}">
+            <button class="workflow-card" type="button" data-open-guide="${i}" aria-haspopup="dialog" aria-controls="earth-dialog">
+              <img src="/assets/start-feature-${FEATURES[i].image}.webp" alt="" width="508" height="508" loading="lazy" decoding="async">
+              <span class="workflow-content">
+                <span class="workflow-index">Bước ${i+1}</span>
+                <strong>${title}</strong>
+                <span>${detail}</span>
+              </span>
+              <span class="workflow-arrow">${icon('right')}</span>
+            </button>
+          </li>`).join('')}
+      </ol>
     </section>
 
     <section class="root-features" id="rg-roots" aria-labelledby="root-title">
@@ -139,7 +163,7 @@ site.innerHTML = `
         <p>Chọn một tính năng để xem cách sử dụng và mở ngay trong bản dùng thử.</p>
       </div>
       <div class="start-feature-dock">${FEATURES.map((feature,i) => `
-        <button type="button" class="start-dock-button" data-open-guide="${i}" aria-haspopup="dialog" aria-controls="earth-dialog">
+        <button type="button" class="start-dock-button" style="--lane: ${i-2}; --distance: ${Math.abs(i-2)}" data-open-guide="${i}" aria-haspopup="dialog" aria-controls="earth-dialog">
           <img class="dock-image" src="/assets/start-feature-${feature.image}.webp" alt="" width="508" height="508" loading="lazy" decoding="async">
           <span class="dock-content">
             <strong><span class="dock-icon">${icon(symbols[i])}</span>${feature.label}</strong>
@@ -147,6 +171,15 @@ site.innerHTML = `
           </span>
           <span class="dock-arrow">${icon('right')}</span>
         </button>`).join('')}
+      </div>
+    </section>
+    <section class="earth-container start-close" aria-labelledby="start-close-title">
+      <div class="start-close-frame">
+        <img src="/assets/start-field-sunrise.webp" alt="" width="1600" height="900" loading="lazy" decoding="async">
+        <div class="start-close-copy">
+          <h2 id="start-close-title">Sẵn sàng cho mùa vụ tới?</h2>
+          <button type="button" class="earth-primary" data-enter-page="home">Mở bản dùng thử ${icon('right')}</button>
+        </div>
       </div>
     </section>
   </main>
@@ -186,6 +219,7 @@ const plant = createLiveEarth(find('#live-earth'), (stage, playing, ended) => {
 const rootSection = find('.root-features');
 const track = find('.root-scroll-track');
 const spread = find('.root-spread');
+const header = find('.earth-header');
 const rootButtons = [...site.querySelectorAll('[data-root-point]')];
 const meter = [...site.querySelectorAll('.root-progress-meter i')];
 const growButton = find('[data-grow-root]');
@@ -258,11 +292,14 @@ function scheduleRoots() {
 window.addEventListener('scroll', scheduleRoots, {passive: true});
 function sizeRootSpread() {
   if (!spread.offsetHeight) return;
-  spread.style.setProperty('--root-pin-top', `${Math.min(0, innerHeight - spread.offsetHeight - 10)}px`);
+  const rootTop = Math.min(header.offsetHeight, innerHeight - spread.offsetHeight - 10);
+  spread.style.setProperty('--root-pin-top', `${rootTop}px`);
   scheduleRoots();
 }
 
-new ResizeObserver(sizeRootSpread).observe(spread);
+const rootLayoutObserver = new ResizeObserver(sizeRootSpread);
+rootLayoutObserver.observe(spread);
+rootLayoutObserver.observe(header);
 window.addEventListener('resize', sizeRootSpread, {passive: true});
 sizeRootSpread();
 

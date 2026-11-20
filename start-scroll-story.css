@@ -1,4 +1,4 @@
-.root-features { background: #080e26; color: var(--ink); border-block: 1px solid #94c2fa22; }
+.root-features { background: #eef2e2; color: var(--ink); border-block: 1px solid #d7dfc8; }
 .root-scroll-track {
   --story-travel: clamp(340px, 70vh, 690px);
   position: relative;
@@ -30,14 +30,14 @@
   display: grid;
   gap: 7px;
   margin-top: 28px;
-  color: #b9e4ef;
+  color: #345f43;
   font-size: 12px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 .root-progress-meter { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.root-progress-meter i { display: block; height: 4px; border-radius: 4px; background: #344666; }
-.root-progress-meter i.is-grown { background: #8bf0ef; }
+.root-progress-meter i { display: block; height: 4px; border-radius: 4px; background: #c6d3bb; }
+.root-progress-meter i.is-grown { background: #3f754e; }
 .root-discovery-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 11px 19px; margin-top: 18px; }
 .root-discovery :is(.root-next, .root-skip) {
   display: inline-flex;
@@ -48,9 +48,9 @@
   font-size: 12px;
   font-weight: 700;
 }
-.root-next { background: #a8f5f0; color: #061525; border: 1px solid #a8f5f0; border-radius: 999px; padding: 9px 14px; }
-.root-next:hover { background: #d0fffc; }
-.root-discovery .root-skip { color: #c4d5ed; }
+.root-next { background: #245e3e; color: #fffef7; border: 1px solid #245e3e; border-radius: 999px; padding: 9px 14px; }
+.root-next:hover { background: #17492d; }
+.root-discovery .root-skip { color: #31503b; }
 .root-skip:hover { text-decoration: underline; text-underline-offset: 4px; }
 
 .root-visual {
@@ -63,9 +63,9 @@
   overflow: clip;
   height: clamp(340px, 42vw, 545px);
   border-radius: 20px;
-  border: 1px solid #89b7ef48;
-  background-color: #14223b;
-  background-image: radial-gradient(ellipse at 50% 35%, #173b5280, #060d26e3 78%), url('/assets/soil-albedo-v2.webp');
+  border: 1px solid #b8ae8e;
+  background-color: #473528;
+  background-image: radial-gradient(ellipse at 50% 35%, #8e632b45, #332417ea 78%), url('/assets/soil-albedo-v2.webp');
   background-size: cover;
   background-position: center;
   container-type: size;
@@ -73,7 +73,7 @@
 .root-visual-horizon {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #102345 3%, #1c3c59 14%, transparent 34%), linear-gradient(0deg,#070d25b0,transparent 50%);
+  background: linear-gradient(180deg, #6c783f 3%, #647243 14%, transparent 34%), linear-gradient(0deg,#291c13a0,transparent 50%);
   pointer-events: none;
 }
 .root-visual-label {
@@ -81,8 +81,8 @@
   z-index: 2;
   top: 14px;
   left: 14px;
-  color: #d9edef;
-  background: #0a1837dc;
+  color: #fff9e8;
+  background: #3f462fdc;
   border: 1px solid var(--rule);
   border-radius: 999px;
   padding: 6px 10px;
@@ -113,15 +113,15 @@
   padding: 0;
   display: grid;
   place-items: center;
-  color: #d4fbff;
-  border: 1px solid #9feaf7;
-  background: #0d2745;
-  box-shadow: 0 0 0 3px #31627999, 0 2px 12px #060b20aa;
+  color: #fffde9;
+  border: 1px solid #cbdea4;
+  background: #385541;
+  box-shadow: 0 0 0 3px #8eaa7699, 0 2px 12px #282217aa;
   border-radius: 50%;
   font-size: 20px !important;
 }
-.root-feature:hover { background: #a8f5f0; color: #061525; }
-.root-features :focus-visible { outline-color: #c2fdff; }
+.root-feature:hover { background: #245e3e; color: #fffef7; }
+.root-visual :focus-visible { outline-color: #dfefa8; }
 
 @media (max-width: 760px) {
   .root-spread { grid-template-columns: minmax(0,1fr); grid-template-areas: "copy" "scene"; align-content: start; gap: 16px; padding-block: 20px; }
