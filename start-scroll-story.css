@@ -1,4 +1,4 @@
-.root-features { background: #192d25; color: #faf5e2; }
+.root-features { background: #080e26; color: var(--ink); border-block: 1px solid #94c2fa22; }
 .root-scroll-track {
   --story-travel: clamp(340px, 70vh, 690px);
   position: relative;
@@ -8,19 +8,18 @@
   position: sticky;
   top: var(--root-pin-top, 0px);
   display: grid;
-  grid-template-columns: minmax(0, .76fr) minmax(0, 1.24fr);
+  grid-template-columns: minmax(0, 1.22fr) minmax(0, .78fr);
+  grid-template-areas: "scene copy";
   gap: clamp(19px, 6vw, 90px);
   align-items: center;
   padding-block: clamp(32px, 4.7vw, 70px);
 }
-.root-discovery .earth-eyebrow { color: #c5dc99; }
+.root-discovery { grid-area: copy; }
 .root-story-title {
-  font: 500 clamp(36px, 4.9vw, 70px)/1.08 var(--serif);
-  letter-spacing: -.065em;
   margin-top: 15px !important;
 }
 .root-discovery .root-story-desc {
-  color: #d0dccd;
+  color: var(--muted);
   max-width: 37ch;
   margin-top: 19px;
   font-size: 14px;
@@ -31,14 +30,14 @@
   display: grid;
   gap: 7px;
   margin-top: 28px;
-  color: #e4eccf;
+  color: #b9e4ef;
   font-size: 12px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 .root-progress-meter { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.root-progress-meter i { display: block; height: 4px; border-radius: 4px; background: #577063; }
-.root-progress-meter i.is-grown { background: #d0e891; }
+.root-progress-meter i { display: block; height: 4px; border-radius: 4px; background: #344666; }
+.root-progress-meter i.is-grown { background: #8bf0ef; }
 .root-discovery-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 11px 19px; margin-top: 18px; }
 .root-discovery :is(.root-next, .root-skip) {
   display: inline-flex;
@@ -49,12 +48,13 @@
   font-size: 12px;
   font-weight: 700;
 }
-.root-next { background: #dfedaa; color: #1c3a2b; border: 1px solid #dfedaa; border-radius: 8px; padding: 9px 14px; }
-.root-next:hover { background: #eaf6c2; }
-.root-discovery .root-skip { color: #e0eccf; }
+.root-next { background: #a8f5f0; color: #061525; border: 1px solid #a8f5f0; border-radius: 999px; padding: 9px 14px; }
+.root-next:hover { background: #d0fffc; }
+.root-discovery .root-skip { color: #c4d5ed; }
 .root-skip:hover { text-decoration: underline; text-underline-offset: 4px; }
 
 .root-visual {
+  grid-area: scene;
   position: relative;
   isolation: isolate;
   display: grid;
@@ -62,10 +62,10 @@
   overflow: hidden;
   overflow: clip;
   height: clamp(340px, 42vw, 545px);
-  border-radius: 16px;
-  border: 1px solid #81907c65;
-  background-color: #2c231b;
-  background-image: radial-gradient(ellipse at 50% 42%, #3a2c1f40, #1d1c17d9 80%), url('/assets/soil-albedo-v2.webp');
+  border-radius: 20px;
+  border: 1px solid #89b7ef48;
+  background-color: #14223b;
+  background-image: radial-gradient(ellipse at 50% 35%, #173b5280, #060d26e3 78%), url('/assets/soil-albedo-v2.webp');
   background-size: cover;
   background-position: center;
   container-type: size;
@@ -73,7 +73,21 @@
 .root-visual-horizon {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #273d30 3%, #41503b 16%, transparent 34%), linear-gradient(0deg,#1e2319b0,transparent 50%);
+  background: linear-gradient(180deg, #102345 3%, #1c3c59 14%, transparent 34%), linear-gradient(0deg,#070d25b0,transparent 50%);
+  pointer-events: none;
+}
+.root-visual-label {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  left: 14px;
+  color: #d9edef;
+  background: #0a1837dc;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
   pointer-events: none;
 }
 .root-model-frame {
@@ -99,18 +113,18 @@
   padding: 0;
   display: grid;
   place-items: center;
-  color: #f0f4d8;
-  border: 1px solid #e3e7ae;
-  background: #233d30;
-  box-shadow: 0 0 0 3px #263b3299, 0 2px 12px #18150faa;
+  color: #d4fbff;
+  border: 1px solid #9feaf7;
+  background: #0d2745;
+  box-shadow: 0 0 0 3px #31627999, 0 2px 12px #060b20aa;
   border-radius: 50%;
   font-size: 20px !important;
 }
-.root-feature:hover { background: #dfedaa; color: #20392c; }
-.root-features :focus-visible { outline-color: #e3eba8; }
+.root-feature:hover { background: #a8f5f0; color: #061525; }
+.root-features :focus-visible { outline-color: #c2fdff; }
 
-@media (max-width: 720px) {
-  .root-spread { grid-template-columns: minmax(0,1fr); align-content: start; gap: 16px; padding-block: 20px; }
+@media (max-width: 760px) {
+  .root-spread { grid-template-columns: minmax(0,1fr); grid-template-areas: "copy" "scene"; align-content: start; gap: 16px; padding-block: 20px; }
   .root-story-title { font-size: clamp(32px, 7.6vw, 52px); margin-top: 5px !important; }
   .root-story-title br { display: none; }
   .root-discovery .root-story-desc { font-size: 12px; line-height: 1.55; margin-top: 7px; }

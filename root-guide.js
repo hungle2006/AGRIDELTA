@@ -63,40 +63,40 @@ site.innerHTML = `
     </div>
   </header>
   <main id="rg-main" tabindex="-1">
-    <section class="earth-container start-hero" aria-labelledby="start-title">
-      <div class="earth-intro">
-        <p class="earth-eyebrow">${icon('plant')} Nông nghiệp thông minh</p>
-        <h1 id="start-title">Từ hạt giống<br>đến mùa vụ <em>bền vững.</em></h1>
-        <p class="earth-intro-copy">Quản lý cánh đồng, theo dõi cây trồng và lên kế hoạch mùa vụ từ một nơi.</p>
-        <div class="earth-intro-actions">
-          <button type="button" class="earth-primary" data-enter-page="home">Bắt đầu miễn phí ${icon('right')}</button>
-          <a class="earth-secondary" href="#rg-roots">${icon('down')} Khám phá bộ rễ</a>
-        </div>
+    <section class="start-hero" aria-labelledby="start-title">
+      <div class="plant-landscape" aria-hidden="true">
+        <img class="plant-backdrop" src="/assets/start-delta-blue-hour.webp" alt="" width="1600" height="900" fetchpriority="high">
       </div>
-      <figure class="plant-journey" aria-labelledby="journey-title">
-        <div class="plant-landscape">
-          <img class="plant-backdrop" src="/assets/start-landscape-clear.webp" alt="" fetchpriority="high">
+      <div class="earth-container hero-layout">
+        <div class="earth-intro">
+          <p class="earth-eyebrow">${icon('plant')} Nông nghiệp thông minh</p>
+          <h1 id="start-title">Từ hạt giống<br>đến mùa vụ <em>bền vững.</em></h1>
+          <p class="earth-intro-copy">Quản lý cánh đồng, theo dõi cây trồng và lên kế hoạch mùa vụ từ một nơi.</p>
+          <div class="earth-intro-actions">
+            <button type="button" class="earth-primary" data-enter-page="home">Bắt đầu miễn phí ${icon('right')}</button>
+            <a class="earth-secondary" href="#rg-roots">${icon('down')} Khám phá bộ rễ</a>
+          </div>
+        </div>
+        <figure class="plant-journey" aria-labelledby="journey-title">
           <div class="plant-art">
             <div class="plant-model" id="live-earth" data-scene-state="loading" aria-hidden="true">
-              <img class="plant-poster" src="/assets/start-botanical-lifecycle-2.webp" alt="" fetchpriority="high">
+              <img class="plant-poster" src="/assets/start-botanical-lifecycle-2.webp" alt="" width="580" height="580" fetchpriority="high">
             </div>
           </div>
-          <div class="plant-visual-label"><span></span> Vòng đời cây đậu</div>
-          <div class="plant-stage-tag" aria-hidden="true"><span class="stage-current-number">03</span><span>/ 05</span></div>
-        </div>
-        <figcaption class="plant-controls">
-          <div class="plant-controls-heading">
-            <div><h2 id="journey-title">Hành trình của cây</h2><p id="lifecycle-label">${stageNotes[2]}</p></div>
-            <div class="plant-actions">
-              <button type="button" class="earth-icon-button" data-replay aria-label="Phát từ hạt giống" title="Phát từ hạt giống">${icon('replay')}</button>
-              <button type="button" class="earth-icon-button" data-pause aria-label="Phát vòng đời" title="Phát vòng đời">${icon('play')}</button>
+          <figcaption class="plant-controls">
+            <div class="plant-controls-heading">
+              <div><h2 id="journey-title">Vòng đời cây đậu</h2><p id="lifecycle-label">${stageNotes[2]}</p></div>
+              <div class="plant-actions">
+                <button type="button" class="earth-icon-button" data-replay aria-label="Phát từ hạt giống" title="Phát từ hạt giống">${icon('replay')}</button>
+                <button type="button" class="earth-icon-button" data-pause aria-label="Phát vòng đời" title="Phát vòng đời">${icon('play')}</button>
+              </div>
             </div>
-          </div>
-          <div class="plant-stages" role="group" aria-label="Chọn giai đoạn của cây">${stages.map((stage,i) => `
-            <button type="button" data-plant-stage="${i}" aria-pressed="${i === 2}">${icon(stageIcons[i])}<span>${stage}</span></button>`).join('')}
-          </div>
-        </figcaption>
-      </figure>
+            <div class="plant-stages" role="group" aria-label="Chọn giai đoạn của cây">${stages.map((stage,i) => `
+              <button type="button" data-plant-stage="${i}" aria-pressed="${i === 2}">${icon(stageIcons[i])}<span>${stage}</span></button>`).join('')}
+            </div>
+          </figcaption>
+        </figure>
+      </div>
     </section>
 
     <section class="root-features" id="rg-roots" aria-labelledby="root-title">
@@ -117,7 +117,7 @@ site.innerHTML = `
           </div>
           <div class="root-visual">
             <div class="root-visual-horizon" aria-hidden="true"></div>
-            <div class="root-visual-label"><span></span> Mặt cắt bộ rễ</div>
+            <div class="root-visual-label">Mặt cắt bộ rễ</div>
             <div class="root-model-frame">
               <div class="root-model" data-scene-state="loading" aria-hidden="true">
                 <img class="root-poster" src="/assets/start-botanical-root-2.webp" alt="" loading="lazy">
@@ -140,9 +140,11 @@ site.innerHTML = `
       </div>
       <div class="start-feature-dock">${FEATURES.map((feature,i) => `
         <button type="button" class="start-dock-button" data-open-guide="${i}" aria-haspopup="dialog" aria-controls="earth-dialog">
-          <span class="dock-icon">${icon(symbols[i])}</span>
-          <strong>${feature.label}</strong>
-          <span class="dock-summary">${feature.summary}</span>
+          <img class="dock-image" src="/assets/start-feature-${feature.image}.webp" alt="" width="508" height="508" loading="lazy" decoding="async">
+          <span class="dock-content">
+            <strong><span class="dock-icon">${icon(symbols[i])}</span>${feature.label}</strong>
+            <span class="dock-summary">${feature.summary}</span>
+          </span>
           <span class="dock-arrow">${icon('right')}</span>
         </button>`).join('')}
       </div>
@@ -175,7 +177,6 @@ const plant = createLiveEarth(find('#live-earth'), (stage, playing, ended) => {
   plantUI = key;
   buttons.forEach((button,i) => button.setAttribute('aria-pressed', String(stage === i)));
   find('#lifecycle-label').textContent = stageNotes[stage];
-  find('.stage-current-number').textContent = `0${stage+1}`;
   const label = playing ? 'Tạm dừng vòng đời' : ended ? 'Phát lại vòng đời' : 'Phát vòng đời';
   plantControl.innerHTML = icon(playing ? 'pause' : ended ? 'replay' : 'play');
   plantControl.title = label;
@@ -190,6 +191,21 @@ const meter = [...site.querySelectorAll('.root-progress-meter i')];
 const growButton = find('[data-grow-root]');
 const earth = createRootEarth(find('.root-model'), rootButtons);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const hero = find('.start-hero');
+if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  hero.addEventListener('pointermove', event => {
+    if (reducedMotion.matches) return;
+    const rect = hero.getBoundingClientRect();
+    const x = (event.clientX-rect.left)/rect.width-.5;
+    const y = (event.clientY-rect.top)/rect.height-.5;
+    hero.style.setProperty('--scene-x', `${(x*18).toFixed(1)}px`);
+    hero.style.setProperty('--scene-y', `${(y*13).toFixed(1)}px`);
+  }, {passive: true});
+  hero.addEventListener('pointerleave', () => {
+    hero.style.removeProperty('--scene-x');
+    hero.style.removeProperty('--scene-y');
+  });
+}
 let progress = 0;
 let target = 0;
 let lastTick = 0;
