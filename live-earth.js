@@ -123,7 +123,9 @@ export function createLiveEarth(host, onUpdate) {
     }
     if (lastFrame === null || now-lastFrame >= 30) {
       if (lastFrame !== null) {
-        time = advancePlantTime(time, (now-lastFrame)/1000, harvestRequested);
+        // Keep care and harvest visible even when a slow renderer stalls between frames.
+        const elapsed = Math.min(.28, (now-lastFrame)/1000);
+        time = advancePlantTime(time, elapsed, harvestRequested);
       }
       lastFrame = now;
       draw();
