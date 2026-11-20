@@ -60,7 +60,7 @@ site.innerHTML = `
         <a href="#rg-guides">Tính năng</a>
         <button type="button" data-knowledge>Kiến thức</button>
         <button type="button" class="earth-mobile-nav-item" data-search>${icon('search')} Tìm kiếm</button>
-        <button type="button" class="earth-mobile-nav-item" data-enter-auth>${icon('user')} Tài khoản</button>
+        <button type="button" class="earth-mobile-nav-item" data-enter-auth>Tài khoản</button>
       </nav>
       <div class="earth-header-actions">
         <button type="button" class="earth-icon-button" aria-label="Tìm tính năng và hướng dẫn" data-search>${icon('search')}</button>
