@@ -316,7 +316,6 @@ body.earth-modal-open { overflow: hidden; }
 .earth-dialog .guide-note { color: var(--muted); font-size: 11px; margin-top: 15px; }
 .guide-instructions {
   list-style: none;
-  counter-reset: steps;
   display: grid;
   gap: 7px;
   padding: 0;
@@ -332,9 +331,7 @@ body.earth-modal-open { overflow: hidden; }
   border-radius: 7px;
   font-size: 13px;
 }
-.guide-instructions li::before {
-  counter-increment: steps;
-  content: counter(steps);
+.guide-step-number {
   flex: 0 0 24px;
   height: 24px;
   display: grid;

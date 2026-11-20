@@ -288,7 +288,7 @@ function openGuide(index, focusSelector) {
     <p class="earth-eyebrow">${icon(symbols[activeGuide])} Hướng dẫn sử dụng</p>
     <h2 id="earth-dialog-title">${titles[activeGuide]}</h2>
     <p class="earth-dialog-summary">${feature.summary}</p>
-    <ol class="guide-instructions">${feature.instructions.map(text => `<li>${text}</li>`).join('')}</ol>
+    <ol class="guide-instructions">${feature.instructions.map((text, index) => `<li><span class="guide-step-number" aria-hidden="true">${index+1}</span><span>${text}</span></li>`).join('')}</ol>
     <div class="guide-sheet-bottom">
       <div class="guide-paging">
         <button type="button" class="earth-icon-button" data-guide-previous aria-label="Hướng dẫn trước">${icon('left')}</button>
