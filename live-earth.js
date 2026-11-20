@@ -73,7 +73,10 @@ export function createLiveEarth(host, onUpdate) {
   let renderer, observer, mixer, action, fallback;
   const careMeshes = [];
   const scene = createScene();
-  const camera = orthographicCamera(3.65, 3.10, 1.23);
+  // Keep the tallest bean foliage inside the square WebGL frame.
+  // Higher camera and look-at preserve the viewing angle while bringing the plant
+  // down in-frame; a slightly wider span leaves safe headroom on small screens.
+  const camera = orthographicCamera(3.85, 3.30, 1.43);
 
   function shouldAdvance(phase = plantPhase(time, harvestRequested)) {
     return (mixer || fallback) && visible && inView && !paused && !document.hidden
