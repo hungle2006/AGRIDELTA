@@ -503,3 +503,11 @@ site.addEventListener('keydown', event => {
 
 window.AGRIDELTARootGuide = {open, close: () => enter(), go: enter};
 window.AGRIDELTAStory = {replay: () => { open(); harvestTriggered = false; plant.replay(); }};
+ 
+// Shareable, reload-safe entrance to the operational workspace.
+// Example: /start?app=1&view=fields. No mock login is used.
+const appRoute = new URLSearchParams(window.location.search);
+if (appRoute.get('app') === '1') {
+  const destination = appRoute.get('view') || 'home';
+  enter(destination);
+}
