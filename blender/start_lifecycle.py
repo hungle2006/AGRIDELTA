@@ -95,15 +95,17 @@ def point(path,t):
  t=max(0,min(.999999,t))*(len(path)-1);i=int(t);u=t-i
  a=Vector(path[max(0,i-1)]);b=Vector(path[i]);c=Vector(path[min(len(path)-1,i+1)]);d=Vector(path[min(len(path)-1,i+2)])
  return .5*((2*b)+(-a+c)*u+(2*a-5*b+4*c-d)*u*u+(-a+3*b-3*c+d)*u*u*u)
-def rootmesh(name,path,width,index,mat=rootmat):
- vs=[];fs=[];N=(len(path)-1)*9;R=7
+def pathdistance(path,t):
+ samples=[point(path,t*j/40) for j in range(41)];return sum((samples[j]-samples[j-1]).length for j in range(1,41))
+def rootmesh(name,path,width,index,mat=rootmat,offset=0):
+ vs=[];fs=[];travels=[];N=(len(path)-1)*9;R=7
  for q in range(N+1):
-  t=q/N;p=point(path,t);tangent=(point(path,min(.999999,t+.001))-point(path,max(0,t-.001))).normalized();axis=tangent.cross(Vector((0,1,0))).normalized();other=tangent.cross(axis).normalized();radius=width*(1-t)**1.15+.001
+  t=q/N;p=point(path,t);travel=offset+pathdistance(path,t);tangent=(point(path,min(.999999,t+.001))-point(path,max(0,t-.001))).normalized();axis=tangent.cross(Vector((0,1,0))).normalized();other=tangent.cross(axis).normalized();radius=width*(1-t)**1.15+.001
   for k in range(R):
-   v=p+radius*(axis*cos(k*2*pi/R)+other*sin(k*2*pi/R));vs.append(tuple(v))
+   v=p+radius*(axis*cos(k*2*pi/R)+other*sin(k*2*pi/R));vs.append(tuple(v));travels.append(travel)
  for q in range(N):
   for k in range(R):a=q*R+k;b=q*R+(k+1)%R;fs.append((a,b,b+R,a+R))
- me=bpy.data.meshes.new(name);me.from_pydata(vs,[],fs);me.update();o=bpy.data.objects.new(name,me);root_collection.objects.link(o);o.data.materials.append(mat);o['rootIndex']=index;o['growthOrigin']=[0,.2516,-.03];o['connectedCollar']=True
+ me=bpy.data.meshes.new(name);me.from_pydata(vs,[],fs);me.update();attr=me.attributes.new('_ROOT_TRAVEL','FLOAT','POINT');attr.data.foreach_set('value',travels);o=bpy.data.objects.new(name,me);root_collection.objects.link(o);o.data.materials.append(mat);o['rootIndex']=index;o['growthOrigin']=[0,.2516,-.03];o['connectedCollar']=True
  for f in me.polygons:f.use_smooth=True
  return o
 collar=(0,.03,.2516);neck=(-.006,-.17,-.10)
@@ -120,13 +122,15 @@ for i,path in enumerate(paths):
   t=.28+j*.055+.012*sin(j*2.3+i);a=point(path,t);direction=-1 if j%2==0 else 1;length=(.48+.17*sin(j*1.7+i))*(1-t*.4)
   tangent=(point(path,t+.015)-point(path,t-.015)).normalized();normal=Vector((-tangent.z,0,tangent.x))*direction
   end=a+normal*length+Vector((0,-.005,-.11));mid=a.lerp(end,.55)+Vector((.035*sin(i+j),0,.025));side=[tuple(a),tuple(mid),tuple(end)]
-  rootmesh('Lateral %d %d'%(i,j),side,.0105*(1-t*.6),i)
+  rootmesh('Lateral %d %d'%(i,j),side,.0105*(1-t*.6),i,offset=pathdistance(path,t))
   for k in range(3):
-   p=point(side,.38+k*.20);tip=p+Vector((normal.x*.10*(-1 if k%2 else 1),-.002,-.12-.035*k));rootmesh('Absorbing %d %d %d'%(i,j,k),[tuple(p),tuple(p.lerp(tip,.6)+Vector((.012,0,0))),tuple(tip)],.0035,i,fine)
+   p=point(side,.38+k*.20);tip=p+Vector((normal.x*.10*(-1 if k%2 else 1),-.002,-.12-.035*k));rootmesh('Absorbing %d %d %d'%(i,j,k),[tuple(p),tuple(p.lerp(tip,.6)+Vector((.012,0,0))),tuple(tip)],.0035,i,fine,offset=pathdistance(path,t)+pathdistance(side,.38+k*.20))
 for i in range(-1,5):
  group=[o for o in root_collection.objects if o.get('rootIndex')==i];bpy.ops.object.select_all(action='DESELECT')
  for o in group:o.select_set(True)
  bpy.context.view_layer.objects.active=group[0];bpy.ops.object.join();o=bpy.context.object;o.name='Root trunk' if i<0 else 'Guide root %d'%i;o['rootIndex']=i;o['growthOrigin']=[0,.2516,-.03];o['connectedCollar']=True
+ attr=o.data.attributes['_ROOT_TRAVEL'];maximum=max(a.value for a in attr.data)
+ for a in attr.data:a.value/=maximum
 s.frame_set(672)
 # Texture the actual soil meshes using explicit exportable UVs.
 soil=material('Live textured earth',(.22,.10,.025),.96);p=soil.node_tree.nodes.get('Principled BSDF');tex=soil.node_tree.nodes.new('ShaderNodeTexImage');im=bpy.data.images.load(OUT+'/soil-albedo-v2.webp');im.scale(1024,1024);im.pack();tex.image=im;soil.node_tree.links.new(tex.outputs['Color'],p.inputs['Base Color'])
@@ -150,7 +154,7 @@ bpy.context.view_layer.objects.active=meshes[0];bpy.ops.object.join();bpy.contex
 # The exported lifecycle is a synchronized clip; guide roots are independently revealed in WebGL.
 s.frame_set(1)
 bpy.ops.wm.save_as_mainfile(filepath=ROOT+'/blender/start_lifecycle.blend')
-bpy.ops.export_scene.gltf(filepath=OUT+'/start-lifecycle.glb',export_format='GLB',export_animations=True,export_animation_mode='SCENE',export_force_sampling=True,export_frame_range=True,export_frame_step=3,export_cameras=False,export_lights=False,export_yup=True,export_extras=True,export_materials='EXPORT',export_image_format='AUTO')
+bpy.ops.export_scene.gltf(filepath=OUT+'/start-lifecycle.glb',export_format='GLB',export_animations=True,export_animation_mode='SCENE',export_force_sampling=True,export_frame_range=True,export_frame_step=3,export_cameras=False,export_lights=False,export_yup=True,export_extras=True,export_attributes=True,export_materials='EXPORT',export_image_format='AUTO')
 path=OUT+'/start-lifecycle.glb';raw=open(path,'rb').read();size=struct.unpack_from('<I',raw,12)[0];g=json.loads(raw[20:20+size]);binary=raw[20+size:];merged={'name':'Seed to blossom and fruit','samplers':[],'channels':[]}
 for a in g.get('animations',[]):
  offset=len(merged['samplers']);merged['samplers'].extend(a['samplers'])

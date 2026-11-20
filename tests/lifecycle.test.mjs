@@ -18,7 +18,7 @@ test('lifecycle includes flower and fruit after germination in botanical order',
 test('automatic care and root anatomy survive the optimized Blender export',()=>{
  const b=readFileSync(new URL('../public/assets/start-lifecycle-live.glb',import.meta.url));const g=JSON.parse(b.subarray(20,20+b.readUInt32LE(12)).toString());
  const roots=g.nodes.filter(n=>Number.isInteger(n.extras?.rootIndex));assert.equal(roots.length,6);
- roots.forEach(n=>{assert.equal(n.extras.connectedCollar,true);assert.deepEqual(n.extras.growthOrigin,[0,.2516,-.03]);});
+ roots.forEach(n=>{assert.equal(n.extras.connectedCollar,true);assert.deepEqual(n.extras.growthOrigin,[0,.2516,-.03]);g.meshes[n.mesh].primitives.forEach(p=>assert.ok(p.attributes._ROOT_TRAVEL!==undefined));});
  const water=g.nodes.filter(n=>n.extras?.automaticCare==='water'),feed=g.nodes.filter(n=>n.extras?.automaticCare==='feed');assert.equal(water.length,15);assert.equal(feed.length,10);
  for(const n of [...water,...feed])assert.ok(g.animations[0].channels.some(c=>c.target.node===g.nodes.indexOf(n)&&c.target.path==='translation'));
  const red=g.materials.find(m=>m.name==='Ripe tomato red').pbrMetallicRoughness.baseColorFactor;assert.ok(red[0]>.6&&red[1]<.03&&red[2]<.02);
