@@ -11,6 +11,16 @@ test('lifecycle includes flower and fruit after germination in botanical order',
  const b=readFileSync(new URL('../public/assets/start-lifecycle-live.glb',import.meta.url));const j=JSON.parse(b.subarray(20,20+b.readUInt32LE(12)).toString());
  assert.ok(j.asset.generator.includes('glTF-Transform')); assert.ok(j.animations[0].channels.length>40);
  assert.equal(j.nodes.filter(n=>Number.isInteger(n.extras?.rootIndex)&&n.extras.rootIndex>=0).length,5);
- assert.ok(j.nodes.some(n=>n.name==='Blender soil cutaway'));assert.ok(j.nodes.some(n=>n.name.includes('Fruit bean pod')));assert.ok(j.nodes.some(n=>n.name.includes('Blossom')));
+ assert.ok(j.nodes.some(n=>n.name==='Blender soil cutaway'));assert.ok(j.nodes.some(n=>n.name.includes('Tomato red fruit')));assert.ok(j.nodes.some(n=>n.name.includes('Blossom')));
  const last=Math.max(...j.animations[0].samplers.map(s=>j.accessors[s.input].max[0]));assert.ok(last>27);
+});
+
+test('automatic care and root anatomy survive the optimized Blender export',()=>{
+ const b=readFileSync(new URL('../public/assets/start-lifecycle-live.glb',import.meta.url));const g=JSON.parse(b.subarray(20,20+b.readUInt32LE(12)).toString());
+ const roots=g.nodes.filter(n=>Number.isInteger(n.extras?.rootIndex));assert.equal(roots.length,6);
+ roots.forEach(n=>{assert.equal(n.extras.connectedCollar,true);assert.deepEqual(n.extras.growthOrigin,[0,.2516,-.03]);});
+ const water=g.nodes.filter(n=>n.extras?.automaticCare==='water'),feed=g.nodes.filter(n=>n.extras?.automaticCare==='feed');assert.equal(water.length,15);assert.equal(feed.length,10);
+ for(const n of [...water,...feed])assert.ok(g.animations[0].channels.some(c=>c.target.node===g.nodes.indexOf(n)&&c.target.path==='translation'));
+ const red=g.materials.find(m=>m.name==='Ripe tomato red').pbrMetallicRoughness.baseColorFactor;assert.ok(red[0]>.6&&red[1]<.03&&red[2]<.02);
+ const ui=readFileSync(new URL('../root-guide.js',import.meta.url),'utf8');assert.ok(!ui.includes('data-care='));assert.ok(!ui.includes('readCare'));
 });

@@ -6,16 +6,17 @@ import {LIFECYCLE_SECONDS,STAGE_TIMES,stageAt} from './lifecycle-state.js';
 import {createVideoEarth} from './video-earth.js';
 
 /** Actual Blender geometry/animation rendered live; no plant or soil image planes. */
-export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinished=()=>{},onComplete=()=>{},onError=()=>{}}={}){
+export function createLiveEarth(host,{onStage=()=>{},onTime=()=>{},onReady=()=>{},onRootFinished=()=>{},onComplete=()=>{},onError=()=>{}}={}){
  const canvas=document.createElement('canvas');
  const context=canvas.getContext('webgl2',{alpha:true,antialias:true});
- if(!context)return createVideoEarth(host,{onStage,onReady,onRootFinished,onComplete,onError});
+ if(!context)return createVideoEarth(host,{onStage,onTime,onReady,onRootFinished,onComplete,onError});
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const actions=[];
- let renderer,scene,camera,mixer,model,clock=0,last=0,running=false,visible=true,lastStage=-1,ready=false,manualTarget=null,frameCount=0,lastRender=0,completeNotified=false,growthLimit=0;
+ let lastCareTime=-1;
+ let renderer,scene,camera,mixer,model,clock=0,last=0,running=true,visible=true,lastStage=-1,ready=false,manualTarget=null,frameCount=0,lastRender=0,completeNotified=false,growthLimit=27.7;
  const branches=Array.from({length:5},()=>({meshes:[],uniform:{value:0},progress:0,target:0,done:false}));
  const trunk={meshes:[],uniform:{value:0}};
- const control={setGrowthLimit(t){growthLimit=Math.max(0,Math.min(27.7,t));running=clock<growthLimit;},revealRoot(i){if(i>=0&&i<5)branches[i].target=1;},seekStage(i){manualTarget=Math.min(growthLimit,STAGE_TIMES[i]??0);running=false;},replay(){clock=0;manualTarget=null;running=true;lastStage=-1;completeNotified=false;},toggle(){if(clock>=growthLimit)return false;running=!running;return running;},setVisible(v){visible=v;last=0;},get ready(){return ready;}};
+ const control={revealRoot(i){if(i>=0&&i<5)branches[i].target=1;},seekStage(i){manualTarget=Math.min(growthLimit,STAGE_TIMES[i]??0);running=false;},replay(){clock=0;manualTarget=null;running=true;lastStage=-1;completeNotified=false;},toggle(){if(clock>=growthLimit)return false;running=!running;return running;},setVisible(v){visible=v;last=0;},get ready(){return ready;}};
  function fail(e){host.dataset.sceneState='error';onError(e);}
  try{
   renderer=new THREE.WebGLRenderer({canvas,context,alpha:true,antialias:true,powerPreference:'high-performance'});
@@ -34,7 +35,7 @@ export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinish
    model.traverse(o=>{if(!o.isMesh)return;
     let ancestor=o;while(ancestor&&!Number.isInteger(ancestor.userData.rootIndex))ancestor=ancestor.parent;
     if(ancestor){const idx=ancestor.userData.rootIndex,branch=idx<0?trunk:branches[idx];if(!branch)return;branch.meshes.push(o);o.visible=idx<0;
-     o.geometry=o.geometry.clone();const pos=o.geometry.attributes.position,travel=new Float32Array(pos.count),v=new THREE.Vector3(),origin=idx===0||idx===4?-.25:-.48;let max=0;
+     o.geometry=o.geometry.clone();const pos=o.geometry.attributes.position,travel=new Float32Array(pos.count),v=new THREE.Vector3(),origin=.2516;let max=0;
      for(let i=0;i<pos.count;i++){v.fromBufferAttribute(pos,i).applyMatrix4(o.matrixWorld);travel[i]=idx<0?Math.max(0,.15-v.y):Math.hypot(v.x,v.y-origin);max=Math.max(max,travel[i]);}
      for(let i=0;i<travel.length;i++)travel[i]/=max||1;o.geometry.setAttribute('aRootTravel',new THREE.BufferAttribute(travel,1));
      const materials=Array.isArray(o.material)?o.material:[o.material];const mapped=materials.map(m=>{m=m.clone();m.emissive?.set(0xcd731c);m.emissiveIntensity=.65;m.roughness=.65;
@@ -47,13 +48,14 @@ export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinish
   function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);const mobile=innerWidth<720;
    if(mobile){const span=6.2;camera.left=-span*w/h/2;camera.right=span*w/h/2;camera.top=span/2;camera.bottom=-span/2;}
    else{camera.left=-5.55;camera.right=5.55;camera.top=11.1*h/w/2;camera.bottom=-camera.top;}camera.updateProjectionMatrix();
-   if(model){model.traverse(o=>{if(Number.isInteger(o.userData.rootIndex))o.scale.x=mobile?.39:1;});model.updateMatrixWorld(true);}
+   if(model){model.traverse(o=>{if(Number.isInteger(o.userData.rootIndex))o.scale.x=mobile?w*.000865:1;});model.updateMatrixWorld(true);}
   }
   renderer.setAnimationLoop(now=>{if(!last)last=now;let dt=Math.min((now-last)/1000,.05);last=now;if(!visible||document.hidden||host.closest('[hidden]'))return;if(now-lastRender<1000/30)return;const renderDelta=Math.min((now-lastRender)/1000,.12);lastRender=now;dt=renderDelta;
    if(ready){if(manualTarget!==null){const diff=manualTarget-clock;clock+=diff*(1-Math.exp(-dt*6));if(Math.abs(diff)<.015){clock=manualTarget;manualTarget=null;}}
     else if(running)clock=Math.min(growthLimit,clock+dt);actions.forEach(a=>a.paused=false);mixer.setTime(clock);const st=stageAt(clock);if(st!==lastStage){lastStage=st;host.dataset.plantStage=String(st);onStage(st);}if(clock>=growthLimit)running=false;if(clock>=27.7){running=false;if(!completeNotified){completeNotified=true;onComplete();}}
-    trunk.uniform.value=Math.min(.31,clock*.065);
+    trunk.uniform.value=Math.min(1,clock*.32);
     branches.forEach((b,i)=>{if(b.target){b.meshes.forEach(o=>o.visible=true);b.progress=Math.min(1,b.progress+dt/(reduced?.05:1.35));b.uniform.value=THREE.MathUtils.smoothstep(b.progress,0,1);if(b.progress===1&&!b.done){b.done=true;host.dataset.rootCount=String(branches.filter(x=>x.done).length);onRootFinished(i);}}});
+    if(Math.floor(clock*4)!==lastCareTime){lastCareTime=Math.floor(clock*4);onTime(clock);}
     frameCount++;if(frameCount%45===0){host.dataset.lifecycleTime=clock.toFixed(1);host.dataset.drawCalls=String(renderer.info.render.calls);host.dataset.triangles=String(renderer.info.render.triangles);}
    }
    renderer.render(scene,camera);
