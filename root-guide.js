@@ -41,7 +41,7 @@ const html=`<div id="rg-site" class="rg-site earth-site"><a class="earth-skip" h
 <div class="earth-intro"><span class="earth-kicker">AGRIDELTA PLATFORM</span><h1>Từ Hạt Giống<br>Đến Mùa Vụ <em>Bền Vững</em></h1><p>Nền tảng nông nghiệp thông minh giúp bạn quản lý<br class="desktop-break"> canh tác, theo dõi cây trồng và tối ưu mùa vụ bằng công nghệ.</p><div class="earth-intro-actions"><button class="earth-cta" data-enter-page="home">${icon('leaf')}Bắt đầu miễn phí ${icon('right')}</button><button class="earth-secondary" data-open-guide="0">${icon('play')}Xem cách hoạt động</button></div></div>
 <aside class="plant-journey" aria-label="Hành trình của cây"><h2>${icon('plant')}Hành trình của cây</h2><button type="button" class="journey-toggle" aria-controls="journey-details" aria-expanded="false">${icon('plant')}<span>Hành trình của cây</span><span aria-hidden="true">⌄</span></button><div class="journey-details" id="journey-details"><div class="plant-stages" role="group" aria-label="Chọn giai đoạn của cây">${stages.map((s,i)=>`<button data-plant-stage="${i}" aria-pressed="${i===0}" class="${i===0?'is-active':''}">${icon(stageIcons[i])}<span>${s}</span></button>`).join('')}</div><div class="lifecycle-controls"><span id="lifecycle-label">Hạt giống đang thức giấc</span><button data-replay aria-label="Xem lại quá trình cây phát triển">Xem lại</button><button data-pause aria-label="Tạm dừng cây phát triển">Tạm dừng</button></div></div></aside>
 <button class="earth-scroll" data-scroll-roots aria-label="Cuộn xuống để bộ rễ mọc dần"><span>${icon('down')}</span><small>Cuộn xuống để rễ phát triển<br>Cuộn lên để trở về</small></button>
-<section class="root-features" id="rg-roots" aria-label="Theo dõi bộ rễ phát triển theo chiều cuộn" tabindex="0"><div class="root-gesture-plane" aria-hidden="true"></div><div class="root-discovery"><span id="root-progress">0 / 5 nhánh rễ đã khám phá</span><button class="root-grow-next" data-grow-root>${icon('plant')}Mọc nhánh đầu tiên ${icon('right')}</button><small>Cuộn xuống để rễ lớn dần · Cuộn lên để thu lại</small></div><div class="root-feature-track">${FEATURES.map((f,i)=>`<button class="root-feature" hidden style="--root-x:${anchors[i].x}%;--root-y:${anchors[i].y}%" data-open-guide="${i}" aria-expanded="false" aria-controls="earth-guide" aria-label="Mở hướng dẫn ${titles[i]}"><span class="root-orb"><img src="/assets/guide-orb-v2.webp" alt="" loading="eager">${icon(symbols[i])}</span><span class="root-card"><strong>${titles[i]}</strong><span>${summaries[i]}</span><span class="root-card-arrow">${icon('right')}</span></span></button>`).join('')}</div></section>
+<section class="root-features" id="rg-roots" aria-label="Theo dõi bộ rễ phát triển theo chiều cuộn" tabindex="0"><div class="root-gesture-plane" aria-hidden="true"></div><div class="root-discovery" aria-label="Khám phá bộ rễ"><span class="root-story-eyebrow">${icon('plant')} KHÁM PHÁ BÊN DƯỚI MẶT ĐẤT</span><strong class="root-story-title">Từ bộ rễ, một mùa vụ bắt đầu.</strong><p class="root-story-desc">Cuộn xuống để các nhánh rễ vươn dài, cuộn lên để quay lại từng bước.</p><div class="root-progress-line" aria-hidden="true"><span></span></div><div class="root-discovery-actions"><span id="root-progress">01 / 05 nhánh rễ</span><button class="root-grow-next" data-grow-root>${icon('down')} Nhánh tiếp theo ${icon('right')}</button></div></div><div class="root-feature-track">${FEATURES.map((f,i)=>`<button class="root-feature" hidden style="--root-x:${anchors[i].x}%;--root-y:${anchors[i].y}%" data-open-guide="${i}" aria-expanded="false" aria-controls="earth-guide" aria-label="Mở hướng dẫn ${titles[i]}"><span class="root-orb"><img src="/assets/guide-orb-v2.webp" alt="" loading="eager">${icon(symbols[i])}</span><span class="root-card"><strong>${titles[i]}</strong><span>${summaries[i]}</span><span class="root-card-arrow">${icon('right')}</span></span></button>`).join('')}</div></section>
 <nav class="start-feature-dock" aria-label="Lối tắt đến các chức năng AGRIDELTA"><div class="start-dock-heading"><span>${icon('leaf')} KHÁM PHÁ HỆ SINH THÁI</span><small>Chọn một chức năng để xem hướng dẫn ngay tại đây</small></div><div class="start-dock-items"><button type="button" class="start-dock-button" data-quick-guide="0" aria-controls="earth-guide" aria-expanded="false" aria-label="Mở hướng dẫn Cánh đồng">${icon(symbols[0])}<span>Cánh đồng</span></button><button type="button" class="start-dock-button" data-quick-guide="1" aria-controls="earth-guide" aria-expanded="false" aria-label="Mở hướng dẫn Mùa vụ">${icon(symbols[1])}<span>Mùa vụ</span></button><button type="button" class="start-dock-button" data-quick-guide="2" aria-controls="earth-guide" aria-expanded="false" aria-label="Mở hướng dẫn Công việc">${icon(symbols[2])}<span>Công việc</span></button><button type="button" class="start-dock-button" data-quick-guide="3" aria-controls="earth-guide" aria-expanded="false" aria-label="Mở hướng dẫn Quan sát">${icon(symbols[3])}<span>Quan sát</span></button><button type="button" class="start-dock-button" data-quick-guide="4" aria-controls="earth-guide" aria-expanded="false" aria-label="Mở hướng dẫn Đơn hàng">${icon(symbols[4])}<span>Đơn hàng</span></button></div></nav>
 </section>
 <section class="guide-sheet" id="earth-guide" aria-labelledby="guide-title" tabindex="-1" hidden><div class="guide-heading"><span class="guide-step-label" id="guide-step-label">NHÁNH RỄ 01 / 05</span><button class="guide-close" aria-label="Đóng hướng dẫn">${icon('close')}</button></div><div class="guide-title-row"><span class="guide-topic-icon" id="guide-topic-icon"></span><h2 id="guide-title"></h2></div><p id="guide-summary"></p><ol id="guide-instructions"></ol><div class="guide-sheet-bottom"><div class="guide-paging"><button id="guide-prev" aria-label="Hướng dẫn trước">${icon('left')}</button><span id="guide-counter">01 / 05</span><button id="guide-next" aria-label="Hướng dẫn tiếp theo">${icon('right')}</button></div><button class="guide-open-app" id="guide-open-app">Mở chức năng ${icon('right')}</button></div><p class="guide-note">Bạn đang khám phá bản dùng thử. Dữ liệu được lưu trên thiết bị.</p></section>
@@ -50,7 +50,7 @@ const html=`<div id="rg-site" class="rg-site earth-site"><a class="earth-skip" h
 if(new URLSearchParams(location.search).get('capture')==='reference')document.documentElement.classList.add('reference-capture');
 const container=document.createElement('div');container.innerHTML=html;const site=container.firstElementChild;document.body.insertBefore(site,document.querySelector('#app'));document.body.classList.add('rg-experience-mode');
 const rootRegion=site.querySelector('.root-features'),track=site.querySelector('.root-feature-track'),buttons=[...site.querySelectorAll('.root-feature')],dockButtons=[...site.querySelectorAll('[data-quick-guide]')],panel=site.querySelector('#earth-guide'),modal=site.querySelector('#earth-modal');
-let active=0,opened=false,previousFocus=null,gesture=null,lastWheel=0,plantStage=0,suppressRootClickUntil=0,rootCount=0,sceneFailed=false,storyFrame=0;
+let active=0,opened=false,previousFocus=null,plantStage=0,rootCount=0,sceneFailed=false,storyFrame=0,storyLast=0,storyTarget=0,storyVisual=0,storyDistance=0;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const loadStatus=site.querySelector('.scene-load-status');
 const earth=createLiveEarth(site.querySelector('#live-earth'),{
@@ -63,9 +63,9 @@ const earth=createLiveEarth(site.querySelector('#live-earth'),{
 function updatePlantStage(i){plantStage=i;site.querySelectorAll('button[data-plant-stage]').forEach((b,j)=>{b.classList.toggle('is-active',j===i);b.setAttribute('aria-pressed',String(j===i));});site.querySelector('#lifecycle-label').textContent=['Hạt giống đang thức giấc','Mầm non vươn lên khỏi đất','Thân lá mở rộng từng ngày','Những bông hoa đầu tiên','Hoa kết thành quả xanh'][i];}
 function updateRootProgress(){
  const count=rootCount;
- site.querySelector('#root-progress').textContent=`${count} / 5 nhánh rễ đang hiện`;
+ site.querySelector('#root-progress').textContent=`0${count} / 05 nhánh rễ`;
  const next=site.querySelector('[data-grow-root]');
- next.innerHTML=icon('plant')+(count>=5?'Xem các hướng dẫn':'Cuộn khám phá nhánh tiếp theo')+icon('right');
+ next.innerHTML=icon('down')+(count>=5?'Xem hướng dẫn':'Nhánh tiếp theo')+icon('right');
  next.disabled=false;rootRegion.dataset.revealed=String(count);
 }
 function growNext(){
@@ -101,31 +101,43 @@ function closeGuide({focus=true}={}){
  dockButtons.forEach(b=>{b.classList.remove('is-active');b.setAttribute('aria-expanded','false');});
  if(focus)(innerWidth<720||buttons[active]?.hidden?dockButtons[active]:buttons[active])?.focus({preventScroll:true});
 }
-function syncScrollStory(){
- if(site.hidden||!document.body.classList.contains('rg-experience-mode'))return;
- const stage=site.querySelector('.earth-stage');
- const travel=Math.max(1,stage.offsetHeight-window.innerHeight);
- const distance=Math.max(0,Math.min(travel,-stage.getBoundingClientRect().top));
- const progress=storyProgress(distance,travel);
+function syncScrollStory(now=performance.now()){
+ if(site.hidden||!document.body.classList.contains('rg-experience-mode')){storyFrame=0;storyLast=0;return;}
+ const dt=storyLast?Math.min(64,now-storyLast):16;
+ storyLast=now;
+ // Time-based damping is reversible and consistent on 60Hz/120Hz displays.
+ const factor=reduced?1:1-Math.exp(-dt/95);
+ storyVisual+=(storyTarget-storyVisual)*factor;
+ if(Math.abs(storyTarget-storyVisual)<.0005)storyVisual=storyTarget;
+ const progress=storyVisual;
  site.style.setProperty('--story-progress',progress.toFixed(4));
- site.style.setProperty('--story-scroll-px',`${Math.round(distance)}px`);
- site.style.setProperty('--scene-drift',`${Math.round(progress*34)}px`);
- site.classList.toggle('story-scrolled',progress>.055);
+ site.style.setProperty('--story-scroll-px',`${Math.round(storyDistance)}px`);
+ site.style.setProperty('--scene-drift',`${Math.round(progress*22)}px`);
+ site.classList.toggle('story-scrolled',progress>.07);
+ site.classList.toggle('roots-active',progress>.16);
  site.dataset.storyProgress=progress.toFixed(3);
  earth.setScrollRoots(progress);
  buttons.forEach((button,i)=>{
-  const value=rootRevealAt(progress,i);
-  const visible=value>.018;
-  button.hidden=!visible;button.classList.toggle('is-revealed',visible);
-  button.style.setProperty('--node-scale',(1+value*.64).toFixed(3));
-  button.style.setProperty('--node-drift',`${Math.round(value*12)}px`);
+  const amount=rootRevealAt(progress,i);
+  const visible=amount>.022;
+  if(button.hidden===visible)button.hidden=!visible;
+  button.classList.toggle('is-revealed',visible);
+  button.style.setProperty('--node-scale',(1+amount*(innerWidth<720?.54:.60)).toFixed(3));
+  button.style.setProperty('--node-drift',`${Math.round(amount*7)}px`);
  });
  const count=rootCountAt(progress);
  if(count!==rootCount){rootCount=count;updateRootProgress();}
+ const dockStatus=site.querySelector('.start-dock-heading small');if(dockStatus)dockStatus.textContent=`${count}/5 nhánh rễ · Chọn chức năng để xem hướng dẫn`;
+ storyFrame=0;
+ if(Math.abs(storyTarget-storyVisual)>.0005)storyFrame=requestAnimationFrame(syncScrollStory);
 }
 function scheduleScrollStory(){
- if(storyFrame)return;
- storyFrame=requestAnimationFrame(()=>{storyFrame=0;syncScrollStory();});
+ if(site.hidden||!document.body.classList.contains('rg-experience-mode'))return;
+ const stage=site.querySelector('.earth-stage');
+ const travel=Math.max(1,stage.offsetHeight-window.innerHeight);
+ storyDistance=Math.max(0,Math.min(travel,-stage.getBoundingClientRect().top));
+ storyTarget=storyProgress(storyDistance,travel);
+ if(!storyFrame)storyFrame=requestAnimationFrame(syncScrollStory);
 }
 window.addEventListener('scroll',scheduleScrollStory,{passive:true});
 window.addEventListener('resize',scheduleScrollStory,{passive:true});
@@ -133,7 +145,7 @@ site.querySelector('.guide-close').onclick=()=>closeGuide();site.querySelector('
 // Native vertical scrolling drives the reversible tree. Buttons remain keyboard accessible.
 buttons.forEach((b,i)=>{b.addEventListener('pointerenter',()=>{if(!b.hidden&&matchMedia('(hover:hover)').matches)sceneFocus(i);});b.addEventListener('pointerleave',()=>{if(opened)sceneFocus(active);});});
 function setPlantStage(n){earth.seekStage(Number(n));closeJourney();site.querySelector('[data-pause]').textContent='Tiếp tục';site.querySelector('[data-pause]').setAttribute('aria-label','Tiếp tục cây phát triển');}
-fetch('/assets/earth-layout.json').then(r=>r.ok?r.json():null).then(points=>{if(!Array.isArray(points)||points.length!==5)return;points.forEach((p,i)=>{buttons[i].style.setProperty('--root-x',p.x+'%');buttons[i].style.setProperty('--root-y',p.y+'%');});}).catch(()=>{});
+fetch('/assets/earth-layout.json').then(r=>r.ok?r.json():null).then(points=>{if(!Array.isArray(points)||points.length!==5)return;points.forEach((p,i)=>{buttons[i].style.setProperty('--root-x',p.x+'%');buttons[i].style.setProperty('--root-y',p.y+'%');buttons[i].style.setProperty('--root-mobile-x',[21,35.5,50,64.5,79][i]+'%');buttons[i].style.setProperty('--root-mobile-y',[67,71,75,71,67][i]+'%');});}).catch(()=>{});
 site.querySelector('[data-grow-root]').onclick=growNext;
 site.querySelector('[data-scroll-roots]').onclick=growNext;
 site.querySelector('[data-replay]').onclick=()=>{earth.replay();site.querySelector('[data-pause]').textContent='Tạm dừng';};
@@ -159,8 +171,8 @@ function modalContent(content){previousFocus=document.activeElement;site.querySe
 function search(){modalContent(`<span class="earth-modal-eyebrow">KHÁM PHÁ AGRIDELTA</span><h2 id="earth-modal-title">Bạn cần tìm điều gì?</h2><label class="earth-search-input">${icon('search')}<input id="earth-search-field" type="search" placeholder="Tìm tính năng hoặc hướng dẫn…" aria-label="Tìm tính năng hoặc hướng dẫn"></label><div id="earth-search-results"></div>`);const input=site.querySelector('#earth-search-field'),results=site.querySelector('#earth-search-results');const normalize=normalizeQuery;function update(){const q=normalize(input.value);const found=FEATURES.map((f,i)=>({f,i})).filter(({f,i})=>normalize(titles[i]+' '+f.summary).includes(q));results.innerHTML=found.length?found.map(({f,i})=>`<button data-search-result="${i}">${icon(symbols[i])}<span><b>${titles[i]}</b><small>${f.summary}</small></span>${icon('right')}</button>`).join(''):'<p class="earth-no-results">Chưa tìm thấy kết quả. Thử “mùa vụ”, “cánh đồng” hoặc “quan sát”.</p>';results.querySelectorAll('button').forEach(b=>b.onclick=()=>{closeModal();openGuide(b.dataset.searchResult,{scroll:true,instant:true});});}input.addEventListener('input',update);update();}
 function knowledge(){modalContent(`<span class="earth-modal-eyebrow">KIẾN THỨC CANH TÁC</span><h2 id="earth-modal-title">Chăm đúng từ gốc rễ.</h2><div class="knowledge-list"><article>${icon('farm')}<div><h3>Hiểu khu đất trước khi gieo</h3><p>Ghi lại diện tích, loại đất và cây đang trồng để có kế hoạch phù hợp.</p></div></article><article>${icon('calendar')}<div><h3>Theo dõi từng mốc mùa vụ</h3><p>Lưu ngày gieo trồng và lịch chăm sóc. Đối chiếu hướng dẫn chuyên môn theo từng loại cây.</p></div></article><article>${icon('plant')}<div><h3>Quan sát đều đặn mỗi ngày</h3><p>Ghi nhận màu lá, độ ẩm và hình ảnh. Bản dùng thử hỗ trợ lưu ghi nhận, chưa chẩn đoán bệnh cây.</p></div></article></div>`);}
 site.querySelector('.earth-modal-close').onclick=closeModal;site.querySelector('.earth-modal-backdrop').onclick=closeModal;
-site.addEventListener('click',e=>{if(e.target.closest('[data-reload-scene]')){location.reload();return;}if(performance.now()<suppressRootClickUntil&&e.target.closest('.root-features')){e.preventDefault();return;}const b=e.target.closest('[data-open-guide],[data-enter-page],[data-enter-auth],[data-plant-stage],[data-search],[data-knowledge],[data-focus-guides],a[href^="#"]');if(!b)return;if(b.hasAttribute('data-open-guide')){closeMenu();openGuide(b.dataset.openGuide,{scroll:true,instant:true});}if(b.hasAttribute('data-enter-page'))enter(b.dataset.enterPage);if(b.hasAttribute('data-enter-auth'))enterAuth();if(b.hasAttribute('data-plant-stage'))setPlantStage(b.dataset.plantStage);if(b.hasAttribute('data-search'))search();if(b.hasAttribute('data-knowledge'))knowledge();if(b.hasAttribute('data-focus-guides')){closeMenu();dockButtons[0]?.focus({preventScroll:true});}if(b.matches('a'))closeMenu();});
+site.addEventListener('click',e=>{if(e.target.closest('[data-reload-scene]')){location.reload();return;}const b=e.target.closest('[data-open-guide],[data-enter-page],[data-enter-auth],[data-plant-stage],[data-search],[data-knowledge],[data-focus-guides],a[href^="#"]');if(!b)return;if(b.hasAttribute('data-open-guide')){closeMenu();openGuide(b.dataset.openGuide,{scroll:true,instant:true});}if(b.hasAttribute('data-enter-page'))enter(b.dataset.enterPage);if(b.hasAttribute('data-enter-auth'))enterAuth();if(b.hasAttribute('data-plant-stage'))setPlantStage(b.dataset.plantStage);if(b.hasAttribute('data-search'))search();if(b.hasAttribute('data-knowledge'))knowledge();if(b.hasAttribute('data-focus-guides')){closeMenu();dockButtons[0]?.focus({preventScroll:true});}if(b.matches('a'))closeMenu();});
 site.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();if(opened)closeGuide();closeJourney();closeMenu();}if(['ArrowLeft','ArrowRight'].includes(e.key)&&e.target.closest('.root-features,.guide-sheet')){e.preventDefault();if(e.key==='ArrowRight'||rootCount===0)growNext();else openGuide(Math.max(0,active-1));}if(e.key==='Tab'&&!modal.hidden){const items=[...modal.querySelector('.earth-modal-dialog').querySelectorAll('button,input,[href]')].filter(el=>!el.disabled&&el.getClientRects().length);const a=items[0],z=items.at(-1);if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus();}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus();}}});
-requestAnimationFrame(syncScrollStory);
+scheduleScrollStory();
 window.AGRIDELTARootGuide={open,close:()=>enter('home'),go:enter};window.AGRIDELTAStory={replay:()=>{open();earth.replay();}};
 })();

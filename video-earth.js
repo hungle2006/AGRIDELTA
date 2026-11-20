@@ -5,7 +5,7 @@ import {clamp01,rootRevealAt} from './scroll-story-state.js';
 export function createVideoEarth(host,{onStage,onReady,onRootFinished,onComplete,onError}){
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const plant=document.createElement('video');plant.className='blender-lifecycle-video';plant.src='/assets/start-lifecycle-film.webm';plant.muted=true;plant.playsInline=true;plant.preload='auto';plant.autoplay=!reduced;plant.setAttribute('aria-hidden','true');host.append(plant);
- const roots=Array.from({length:5},()=>null);let lastStage=-1,ready=false,visible=true,wasPlaying=!reduced,lastUpdate=0,scrollRoots=null;
+ const roots=Array.from({length:5},()=>null);const lastSeek=Array.from({length:5},()=>0);let lastStage=-1,ready=false,visible=true,wasPlaying=!reduced,lastUpdate=0,scrollRoots=null;
  function update(now=0){if(ready&&visible&&!document.hidden&&now-lastUpdate>100){lastUpdate=now;const stage=stageAt(plant.currentTime);if(stage!==lastStage){lastStage=stage;onStage(stage);host.dataset.plantStage=String(stage);}host.dataset.lifecycleTime=plant.currentTime.toFixed(1);}requestAnimationFrame(update);}
  function paintScrollRoot(i){
   const v=roots[i];if(!v||scrollRoots===null)return;
@@ -13,7 +13,8 @@ export function createVideoEarth(host,{onStage,onReady,onRootFinished,onComplete
   v.style.opacity=amount>.001?'1':'0';
   if(v.readyState>=1&&Number.isFinite(v.duration)&&v.duration>0){
    const target=Math.min(v.duration-.015,Math.max(0,v.duration*amount));
-   if(Math.abs(v.currentTime-target)>.055){try{v.currentTime=target;}catch{}}
+   const delta=Math.abs(v.currentTime-target),now=performance.now();
+   if(delta>.07&&(now-lastSeek[i]>115||delta>.45)){try{v.currentTime=target;lastSeek[i]=now;}catch{}}
   }
  }
  function syncScrollRoots(){

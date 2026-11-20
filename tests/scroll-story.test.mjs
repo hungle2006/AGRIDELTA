@@ -14,13 +14,14 @@ test('scroll progress clamps to the page and handles zero travel',()=>{
 test('five Blender roots grow monotonically and retract on reverse scroll',()=>{
  const samples=[0,.1,.3,.5,.7,1];
  for(let i=0;i<5;i++){
-  assert.equal(rootRevealAt(0,i),0);
+  if(i===0)assert.ok(rootRevealAt(0,i)>.1,'A small real Blender root should already be visible at the first fold');
+  else assert.equal(rootRevealAt(0,i),0);
   assert.equal(rootRevealAt(1,i),1);
   const values=samples.map(p=>rootRevealAt(p,i));
   for(let j=1;j<values.length;j++)assert.ok(values[j]>=values[j-1]);
   for(let j=samples.length-2;j>=0;j--)assert.ok(values[j]<=values[j+1]);
  }
- assert.equal(rootCountAt(0),0);
+ assert.equal(rootCountAt(0),1);
  assert.equal(rootCountAt(1),5);
  assert.equal(rootScrollTarget(0)>ROOT_STARTS[0],true);
  assert.equal(rootScrollTarget(4)<1,true);
@@ -37,6 +38,10 @@ test('Start scroll story retains real GLB and never blocks vertical wheel scroll
  assert.ok(!script.includes('e.preventDefault();if(newGesture)growNext'));
  assert.ok(css.includes('position:sticky!important'));
  assert.ok(css.includes('overflow-y:auto!important'));
- assert.ok(live.includes('trunk.uniform.value=THREE.MathUtils.smoothstep'));
+ assert.ok(live.includes('trunk.uniform.value=.34+.66*THREE.MathUtils.smoothstep'));
  assert.ok(fallback.includes('setScrollRoots(progress)'));
+ assert.ok(fallback.includes('lastSeek[i]'),'mobile fallback throttles expensive video seeks');
+ assert.ok(script.includes('Math.exp(-dt/95)'),'scroll animation uses time-based damping');
+ assert.ok(script.includes('--root-mobile-x'),'mobile root nodes use separate layout anchors');
+ assert.ok(css.includes('.root-story-title'),'Start introduces the root system before scrolling');
 });

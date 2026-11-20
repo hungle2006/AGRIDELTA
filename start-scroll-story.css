@@ -234,3 +234,246 @@ body.rg-experience-mode .earth-site.story-scrolled .earth-scroll{
  .journey-toggle>span:last-child{transition:none!important}
  body.rg-experience-mode .root-feature .root-orb{transition:none!important}
 }
+
+
+/* Start UX 2026-11-20: simplify the first fold and eliminate competing scroll prompts. */
+body.rg-experience-mode .earth-header{
+ top:10px;height:66px;left:clamp(14px,4.6vw,76px);right:clamp(14px,4.6vw,76px);
+ padding:7px 15px;border-radius:22px;
+ background:linear-gradient(115deg,rgba(247,252,242,.86),rgba(249,253,246,.63));
+ border:1px solid rgba(246,255,233,.62);
+ box-shadow:0 8px 28px rgba(9,38,24,.08);
+ backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+body.rg-experience-mode .earth-brand-name{letter-spacing:-.04em}
+body.rg-experience-mode .earth-intro{
+ top:clamp(103px,14dvh,140px);left:clamp(24px,6.8vw,110px);max-width:min(415px,35vw);
+}
+body.rg-experience-mode .earth-intro h1{
+ font-size:clamp(29px,3.05vw,45px);line-height:1.08;letter-spacing:-.055em;
+ margin:10px 0 15px;text-wrap:balance;
+}
+body.rg-experience-mode .earth-intro>p{
+ display:block;max-width:375px;padding:10px 13px;
+ font-size:clamp(11px,.94vw,13px);line-height:1.55;
+ color:#24432b;background:rgba(249,253,242,.85);
+ border:1px solid rgba(255,255,243,.73);border-radius:12px;
+ box-shadow:0 8px 24px rgba(18,54,29,.08);
+ -webkit-box-orient:unset;-webkit-line-clamp:unset;overflow:visible;
+}
+body.rg-experience-mode .earth-intro-actions{margin-top:14px;gap:9px}
+body.rg-experience-mode .earth-cta,body.rg-experience-mode .earth-secondary{
+ min-height:43px;padding:10px 15px;transition:transform .23s cubic-bezier(.2,.8,.2,1),background .23s,box-shadow .23s;
+}
+body.rg-experience-mode .plant-journey{
+ right:clamp(20px,5vw,80px);top:clamp(115px,16dvh,160px);
+ background:linear-gradient(140deg,rgba(24,68,52,.94),rgba(27,60,39,.89));
+ border:1px solid rgba(221,248,190,.32);
+ box-shadow:0 15px 36px rgba(16,42,30,.18),inset 0 1px 0 rgba(255,255,255,.13);
+}
+body.rg-experience-mode .earth-scroll{display:none!important}
+
+/* One integrated scroll-story explanation replaces the old left button + center hint. */
+body.rg-experience-mode .root-discovery,
+body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{
+ display:flex!important;flex-direction:column!important;
+ align-items:stretch!important;text-align:left!important;
+ bottom:135px!important;left:clamp(25px,6.8vw,110px)!important;
+ right:auto!important;top:auto!important;transform:none!important;
+ width:min(365px,34vw)!important;max-width:none!important;
+ min-width:0!important;padding:16px 18px!important;gap:8px!important;
+ border:1px solid rgba(198,235,159,.32);border-radius:17px;
+ background:linear-gradient(145deg,rgba(18,52,35,.90),rgba(21,43,27,.86));
+ box-shadow:0 18px 40px rgba(8,25,15,.24),inset 0 1px 0 rgba(255,255,235,.12);
+ backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+ color:#edf6da;pointer-events:auto;z-index:25!important;
+ opacity:1;transition:opacity .32s ease,transform .32s ease;
+}
+body.rg-experience-mode .root-story-eyebrow{
+ display:flex;align-items:center;gap:7px;letter-spacing:.12em;
+ color:#d2ef9b;font-size:9px;font-weight:750;
+}
+body.rg-experience-mode .root-story-eyebrow .earth-icon{width:14px;height:14px}
+body.rg-experience-mode .root-story-title{
+ color:#fbfff1;font-size:clamp(14px,1.14vw,18px);line-height:1.32;
+ font-weight:750;letter-spacing:-.025em;white-space:normal;
+}
+body.rg-experience-mode .root-discovery .root-story-desc{
+ color:#c9daba;font-size:11px;line-height:1.62;white-space:normal;margin:0;
+}
+body.rg-experience-mode .root-progress-line{
+ height:4px;background:#d8f8c124;border-radius:999px;
+ overflow:hidden;width:100%;margin:2px 0;
+}
+body.rg-experience-mode .root-progress-line>span{
+ display:block;width:100%;height:100%;background:linear-gradient(90deg,#88c86e,#d9f59d);
+ transform:scaleX(var(--story-progress,0));transform-origin:left center;
+ border-radius:inherit;
+}
+body.rg-experience-mode .root-discovery-actions{
+ display:flex;align-items:center;justify-content:space-between;gap:9px;width:100%;
+}
+body.rg-experience-mode .root-discovery-actions>span{
+ font-size:10px;letter-spacing:.04em;color:#ddf2c3;font-weight:700;white-space:nowrap;
+}
+body.rg-experience-mode .root-grow-next,
+body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-grow-next{
+ flex-shrink:0;min-height:34px!important;padding:7px 11px!important;
+ font-size:10px!important;line-height:1.2;gap:6px;
+ border:1px solid rgba(217,244,160,.55)!important;
+ background:#cdebaa;color:#173e26!important;
+ box-shadow:none;
+ transition:transform .2s ease,background .2s ease,box-shadow .2s ease;
+}
+body.rg-experience-mode .root-grow-next>.earth-icon{width:14px;height:14px}
+body.rg-experience-mode .root-grow-next:hover{
+ transform:translateY(-2px);background:#e5f6c2;
+ box-shadow:0 6px 18px #091b1238;
+}
+body.rg-experience-mode .earth-site.roots-active .root-discovery{
+ opacity:0!important;pointer-events:none!important;transform:translateY(14px)!important;
+}
+body.rg-experience-mode .root-feature{
+ will-change:opacity;outline-offset:5px;
+}
+body.rg-experience-mode .root-feature .root-orb{
+ transform:translate3d(0,0,0) scale(var(--node-scale,1))!important;
+ backface-visibility:hidden;
+}
+body.rg-experience-mode .root-feature .root-orb>img{
+ border-radius:50%;filter:drop-shadow(0 2px 9px rgba(10,34,14,.25));
+}
+body.rg-experience-mode .start-feature-dock{
+ bottom:calc(11px + env(safe-area-inset-bottom,0px))!important;
+ border-radius:18px!important;padding:11px 14px 12px!important;
+ background:linear-gradient(125deg,rgba(13,48,28,.95),rgba(22,56,37,.94));
+ box-shadow:0 16px 38px rgba(6,22,12,.32),inset 0 1px 0 rgba(255,255,255,.17);
+}
+body.rg-experience-mode .start-feature-dock .start-dock-button{
+ border-radius:11px;min-height:48px;transition:background .18s ease,transform .18s ease,border-color .18s ease;
+}
+body.rg-experience-mode .start-feature-dock .start-dock-button:active{
+ transform:scale(.97);
+}
+
+/* Narrow laptop: protect the GLB viewport and keep a breathable left-hand story card. */
+@media(min-width:720px) and (max-width:1180px){
+ body.rg-experience-mode .earth-header{left:18px;right:18px}
+ body.rg-experience-mode .earth-intro{left:5%;max-width:38vw}
+ body.rg-experience-mode .earth-intro h1{font-size:clamp(26px,3.2vw,39px)}
+ body.rg-experience-mode .root-discovery,
+ body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{
+  left:5%!important;width:min(345px,39vw)!important;padding:13px 15px!important;
+ }
+ body.rg-experience-mode .plant-journey{right:3%;width:min(310px,30vw)}
+}
+@media(max-height:730px) and (min-width:720px){
+ body.rg-experience-mode .earth-intro{top:90px}
+ body.rg-experience-mode .earth-intro h1{font-size:clamp(28px,2.8vw,40px)}
+ body.rg-experience-mode .earth-intro>p{padding:8px 11px;font-size:11px}
+ body.rg-experience-mode .earth-intro-actions{margin-top:10px}
+ body.rg-experience-mode .root-discovery,
+ body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{
+  bottom:118px!important;padding:12px 14px!important;gap:6px!important;
+ }
+ body.rg-experience-mode .root-story-title{font-size:14px}
+ body.rg-experience-mode .root-discovery .root-story-desc{font-size:10px}
+}
+
+/* Mobile: preserve the entire seedling between the introduction and the soil. */
+@media(max-width:719px){
+ body.rg-experience-mode .earth-header{
+  top:7px;left:8px;right:8px;height:56px;padding:6px 9px;
+  border-radius:17px;gap:5px;background:rgba(250,254,246,.82);
+ }
+ body.rg-experience-mode .earth-brand-name{font-size:15px}
+ body.rg-experience-mode .earth-intro{
+  top:73px!important;left:17px!important;right:17px!important;max-width:none!important;
+ }
+ body.rg-experience-mode .earth-intro h1{
+  font-size:clamp(23px,6.3vw,30px);line-height:1.06;margin:6px 0 9px;
+ }
+ body.rg-experience-mode .earth-intro>p{
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+  overflow:hidden;max-width:350px;padding:7px 10px;
+  font-size:10px;line-height:1.48;border-radius:10px;
+ }
+ body.rg-experience-mode .earth-intro-actions{margin-top:9px;gap:7px}
+ body.rg-experience-mode .earth-cta,body.rg-experience-mode .earth-secondary{
+  min-height:36px;padding:7px 10px;font-size:10px!important;
+ }
+ body.rg-experience-mode .live-earth{
+  top:clamp(198px,23dvh,242px)!important;
+  height:clamp(398px,64dvh,558px)!important;
+ }
+ body.rg-experience-mode .scene-illustration>.scene-landscape{
+  height:77%!important;object-position:48% 72%;
+ }
+ body.rg-experience-mode .plant-journey{
+  top:clamp(470px,57dvh,515px)!important;
+  right:12px!important;left:auto!important;
+  width:min(226px,calc(100% - 24px))!important;
+  background:rgba(19,52,35,.92)!important;
+ }
+ body.rg-experience-mode .root-feature{
+  left:var(--root-mobile-x,var(--root-x))!important;
+  top:calc(var(--root-mobile-y,var(--root-y)) - 21px + var(--node-drift,0px))!important;
+  width:46px!important;
+ }
+ body.rg-experience-mode .root-feature .root-orb{
+  width:32px!important;height:32px!important;max-width:none!important;
+ }
+ body.rg-experience-mode .root-feature .root-orb>.earth-icon{
+  width:18px!important;height:18px!important;
+ }
+ body.rg-experience-mode .root-discovery,
+ body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{
+  display:flex!important;left:14px!important;right:auto!important;top:auto!important;
+  bottom:calc(94px + env(safe-area-inset-bottom,0px))!important;
+  width:min(278px,calc(100vw - 28px))!important;
+  max-width:none!important;padding:11px 13px!important;
+  gap:6px!important;border-radius:14px;
+ }
+ body.rg-experience-mode .root-story-eyebrow{font-size:8px}
+ body.rg-experience-mode .root-story-title{font-size:13px;line-height:1.22}
+ body.rg-experience-mode .root-discovery .root-story-desc{font-size:10px;line-height:1.48}
+ body.rg-experience-mode .root-discovery-actions>span{font-size:9px}
+ body.rg-experience-mode .root-grow-next,
+ body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-grow-next{
+  min-height:30px!important;padding:5px 8px!important;font-size:9px!important;
+ }
+ body.rg-experience-mode .start-feature-dock{
+  padding:6px!important;bottom:calc(7px + env(safe-area-inset-bottom,0px))!important;
+ }
+ body.rg-experience-mode .start-feature-dock .start-dock-button{
+  min-height:60px;font-size:clamp(8px,2.3vw,10px)!important;
+ }
+ body.rg-experience-mode .earth-site.journey-open .root-discovery{
+  opacity:0!important;pointer-events:none!important;
+ }
+}
+@media(max-width:719px) and (max-height:680px){
+ body.rg-experience-mode .earth-intro{top:68px!important}
+ body.rg-experience-mode .earth-intro h1{font-size:clamp(20px,6vw,27px)}
+ body.rg-experience-mode .live-earth{
+  top:clamp(188px,27dvh,216px)!important;height:clamp(340px,64dvh,435px)!important;
+ }
+ body.rg-experience-mode .plant-journey{top:clamp(385px,60dvh,430px)!important}
+ body.rg-experience-mode .root-discovery,
+ body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{
+  bottom:calc(83px + env(safe-area-inset-bottom,0px))!important;
+  padding:9px 11px!important;gap:4px!important;
+ }
+ body.rg-experience-mode .root-story-eyebrow{font-size:7px}
+ body.rg-experience-mode .root-story-title{font-size:12px}
+ body.rg-experience-mode .root-discovery .root-story-desc{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+ body.rg-experience-mode .root-discovery,
+ body.rg-experience-mode .root-grow-next,
+ body.rg-experience-mode .start-feature-dock .start-dock-button{transition:none!important}
+}
+
+@media(max-width:719px){
+ body.rg-experience-mode .blender-root-video{transform:translateX(-50%) scaleX(.46)!important}
+}

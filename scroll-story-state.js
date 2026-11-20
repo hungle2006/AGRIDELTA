@@ -2,8 +2,8 @@
  * Reversible scroll-story geometry: one scroll position determines every root.
  * No sticky state: reversing the scroll retracts the branches and scales nodes down.
  */
-export const ROOT_STARTS=Object.freeze([0.06,0.225,0.39,0.555,0.72]);
-export const ROOT_GROW_SPAN=0.19;
+export const ROOT_STARTS=Object.freeze([-0.08,0.19,0.385,0.58,0.775]);
+export const ROOT_GROW_SPAN=0.215;
 export const clamp01=value=>Math.min(1,Math.max(0,Number.isFinite(Number(value))?Number(value):0));
 export const smoothstep=value=>{const t=clamp01(value);return t*t*(3-2*t);};
 export function storyProgress(scrollDistance,scrollTravel){

@@ -13,16 +13,16 @@ export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinish
  if(!context)return createVideoEarth(host,{onStage,onReady,onRootFinished,onComplete,onError});
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const actions=[];
- let renderer,scene,camera,mixer,model,clock=0,last=0,running=!reduced,visible=true,lastStage=-1,ready=false,manualTarget=null,frameCount=0,lastRender=0,completeNotified=false,scrollRoots=null;
+ let renderer,scene,camera,mixer,model,clock=0,last=0,running=!reduced,visible=true,lastStage=-1,ready=false,manualTarget=null,frameCount=0,lastRender=0,completeNotified=false,scrollRoots=null,cameraProgress=0;
  const branches=Array.from({length:5},()=>({meshes:[],uniform:{value:0},progress:0,target:0,done:false}));
  const trunk={meshes:[],uniform:{value:0}};
  const control={revealRoot(i){if(i>=0&&i<5)branches[i].target=1;},setScrollRoots(progress){scrollRoots=clamp01(progress);},seekStage(i){manualTarget=STAGE_TIMES[i]??0;running=false;},replay(){clock=0;manualTarget=null;running=true;lastStage=-1;completeNotified=false;},toggle(){if(clock>=LIFECYCLE_SECONDS){clock=0;completeNotified=false;}running=!running;return running;},setVisible(v){visible=v;last=0;},get ready(){return ready;}};
  function fail(e){host.dataset.sceneState='error';onError(e);}
  try{
   renderer=new THREE.WebGLRenderer({canvas,context,alpha:true,antialias:true,powerPreference:'high-performance'});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,innerWidth<720?1.65:2));renderer.setClearColor(0,0);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.14;
+  renderer.setPixelRatio(Math.min(devicePixelRatio,innerWidth<720?1.35:1.65));renderer.setClearColor(0,0);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.14;
   host.append(renderer.domElement);renderer.domElement.setAttribute('aria-hidden','true');
-  scene=new THREE.Scene();camera=new THREE.OrthographicCamera(-5.55,5.55,3.1,-3.1,.1,60);camera.position.set(0,2.2,13);camera.lookAt(0,-.16,0);
+  scene=new THREE.Scene();camera=new THREE.OrthographicCamera(-5.55,5.55,3.1,-3.1,.1,60);camera.position.set(0,2.35,13);camera.lookAt(0,.05,0);
   const pmrem=new THREE.PMREMGenerator(renderer),room=new RoomEnvironment();scene.environment=pmrem.fromScene(room,.04).texture;room.dispose();pmrem.dispose();scene.environmentIntensity=.38;
   scene.add(new THREE.HemisphereLight(0xeaffef,0x53300e,2.1));
   const sun=new THREE.DirectionalLight(0xffe9b4,3.4);sun.position.set(-4,6,-3);scene.add(sun);
@@ -46,17 +46,21 @@ export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinish
    ready=true;clock=0;mixer.setTime(0);host.dataset.sceneState='ready';host.dataset.geometry='blender-glb';resize();onReady();
   },undefined,fail);
   function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);const mobile=innerWidth<720;
-   if(mobile){const span=6.2;camera.left=-span*w/h/2;camera.right=span*w/h/2;camera.top=span/2;camera.bottom=-span/2;}
-   else{camera.left=-5.55;camera.right=5.55;camera.top=11.1*h/w/2;camera.bottom=-camera.top;}camera.updateProjectionMatrix();
-   if(model){model.traverse(o=>{if(Number.isInteger(o.userData.rootIndex))o.scale.x=mobile?.39:1;});model.updateMatrixWorld(true);}
+   if(mobile){const span=7.4;camera.left=-span*w/h/2;camera.right=span*w/h/2;camera.top=span/2;camera.bottom=-span/2;camera.zoom=.94;}
+   else{camera.left=-5.55;camera.right=5.55;camera.top=11.1*h/w/2;camera.bottom=-camera.top;camera.zoom=.84;}camera.updateProjectionMatrix();
+   if(model){model.traverse(o=>{if(Number.isInteger(o.userData.rootIndex))o.scale.x=mobile?.46:1;});model.updateMatrixWorld(true);}
   }
   renderer.setAnimationLoop(now=>{if(!last)last=now;let dt=Math.min((now-last)/1000,.05);last=now;if(!visible||document.hidden||host.closest('[hidden]'))return;if(now-lastRender<1000/30)return;const renderDelta=Math.min((now-lastRender)/1000,.12);lastRender=now;dt=renderDelta;
-   if(ready){if(manualTarget!==null){const diff=manualTarget-clock;clock+=diff*(1-Math.exp(-dt*6));if(Math.abs(diff)<.015){clock=manualTarget;manualTarget=null;}}
+   if(ready){
+     // Follow the growing Blender taproot with a gentle camera dolly, without abrupt zoom jumps.
+     cameraProgress+=(Math.max(0,scrollRoots??0)-cameraProgress)*(1-Math.exp(-dt*3.5));
+     camera.position.y=2.35-cameraProgress*.24;camera.lookAt(0,.05-cameraProgress*.33,0);
+     if(manualTarget!==null){const diff=manualTarget-clock;clock+=diff*(1-Math.exp(-dt*6));if(Math.abs(diff)<.015){clock=manualTarget;manualTarget=null;}}
     else if(running)clock=Math.min(LIFECYCLE_SECONDS,clock+dt);actions.forEach(a=>a.paused=false);mixer.setTime(clock);const st=stageAt(clock);if(st!==lastStage){lastStage=st;host.dataset.plantStage=String(st);onStage(st);}if(clock>=LIFECYCLE_SECONDS){running=false;if(!completeNotified){completeNotified=true;onComplete();}}
     if(scrollRoots!==null){
      // Geometry visibility derives from the current scroll position, never from gesture history.
      // This makes both the taproot and its five true Blender meshes grow and retract.
-     trunk.uniform.value=THREE.MathUtils.smoothstep(scrollRoots,0,.36);
+     trunk.uniform.value=.34+.66*THREE.MathUtils.smoothstep(scrollRoots,0,.44);
      branches.forEach((b,i)=>{
       const amount=rootRevealAt(scrollRoots,i);
       b.progress=amount;b.uniform.value=amount;b.done=amount>=.999;
