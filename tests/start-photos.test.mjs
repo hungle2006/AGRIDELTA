@@ -22,7 +22,7 @@ test('cards render srcset, safe local fallback and retain 3D plant & root story'
  assert.match(src,/startPhoto\(START_IMAGES\.workflow\[i\]/);
  assert.match(src,/startPhoto\(START_IMAGES\.features\[i\]/);
  assert.match(src,/startPhoto\(START_IMAGES\.closing/);
- assert.match(src,/data\.photoFallback/);
+ assert.match(src,/dataset\.photoFallback/);
  assert.match(src,/createLiveEarth/);
  assert.match(src,/createRootEarth/);
  assert.ok(css.includes(START_IMAGES.hero.id));
