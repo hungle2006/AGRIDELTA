@@ -72,23 +72,36 @@ site.innerHTML = `
     <section class="start-hero" aria-labelledby="start-title">
       <div class="earth-container hero-layout">
         <div class="earth-intro">
-          <p class="earth-eyebrow">${icon('plant')} Nông nghiệp thông minh</p>
-          <h1 id="start-title">Từ hạt giống<br>đến mùa vụ <em>bền vững.</em></h1>
+          <div class="hero-kicker-row">
+            <p class="earth-eyebrow">${icon('plant')} Nông nghiệp thông minh</p>
+            <span class="hero-issue" aria-hidden="true">GREEN FIELD / 2026</span>
+          </div>
+          <h1 id="start-title">Từ hạt giống<br>đến mùa vụ<br><em>bền vững.</em></h1>
           <p class="earth-intro-copy">Quản lý cánh đồng, theo dõi cây trồng và lên kế hoạch mùa vụ từ một nơi.</p>
           <div class="earth-intro-actions">
             <button type="button" class="earth-primary" data-enter-page="home">Bắt đầu miễn phí ${icon('right')}</button>
             <a class="earth-secondary" href="#rg-roots">${icon('down')} Khám phá bộ rễ</a>
           </div>
+          <a href="#rg-roots" class="hero-scroll-note">
+            <span class="hero-scroll-icon">${icon('down')}</span>
+            <span><strong>KHÁM PHÁ TỪ GỐC RỄ</strong><small>Cuộn xuống để thấy cách hệ sinh thái vận hành</small></span>
+          </a>
         </div>
         <figure class="plant-journey" aria-labelledby="journey-title">
           <div class="plant-art">
+            <div class="plant-art-topline" aria-hidden="true"><span class="plant-live-dot"></span> MÔ PHỎNG CÂY 3D <span>01 / 05</span></div>
             <div class="plant-model" id="live-earth" data-scene-state="loading" aria-hidden="true">
               <img class="plant-poster" src="/assets/start-botanical-lifecycle-0.webp" alt="" width="580" height="580" fetchpriority="high">
             </div>
+            <span class="plant-art-side" aria-hidden="true">GROW WITH NATURE · 2026</span>
           </div>
           <figcaption class="plant-controls">
             <div class="plant-controls-heading">
-              <div><h2 id="journey-title">Vòng đời cây đậu</h2><p id="lifecycle-label">${stageNotes[0]}</p></div>
+              <div class="plant-controls-copy">
+                <span class="plant-controls-kicker">HÀNH TRÌNH SINH TRƯỞNG</span>
+                <h2 id="journey-title">Vòng đời cây đậu</h2>
+                <p id="lifecycle-label">${stageNotes[0]}</p>
+              </div>
               <button type="button" class="earth-icon-button" data-pause aria-label="Tạm dừng chuyển động" title="Tạm dừng chuyển động">${icon('pause')}</button>
             </div>
             <ol class="plant-stages" aria-label="Các giai đoạn của cây đậu">${stages.map((stage,i) => `
@@ -100,7 +113,10 @@ site.innerHTML = `
     </section>
 
     <section class="start-workflow earth-container" aria-labelledby="workflow-title">
-      <h2 id="workflow-title">Bắt đầu một mùa vụ.</h2>
+      <div class="start-workflow-head">
+        <div><p class="earth-eyebrow">01 / KHỞI ĐẦU</p><h2 id="workflow-title">Bắt đầu một mùa vụ.</h2></div>
+        <p>Ba bước đơn giản để biến việc chăm sóc cây trồng thành một hành trình rõ ràng, từ gieo hạt đến thu hoạch.</p>
+      </div>
       <ol class="workflow-steps">
         ${workflow.map(({title, detail},i) => `
           <li style="--step: ${i}">
