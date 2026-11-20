@@ -2,7 +2,8 @@
  * Reversible scroll-story geometry: one scroll position determines every root.
  * No sticky state: reversing the scroll retracts the branches and scales nodes down.
  */
-export const ROOT_STARTS=Object.freeze([-0.08,0.19,0.385,0.58,0.775]);
+export const ROOT_ORDER=Object.freeze([2,1,3,0,4]); // central taproot first, then symmetrical branches
+export const ROOT_STARTS=Object.freeze([0.57,0.19,-0.09,0.38,0.77]);
 export const ROOT_GROW_SPAN=0.215;
 export const clamp01=value=>Math.min(1,Math.max(0,Number.isFinite(Number(value))?Number(value):0));
 export const smoothstep=value=>{const t=clamp01(value);return t*t*(3-2*t);};
@@ -19,5 +20,5 @@ export function rootCountAt(progress){
 }
 export function rootScrollTarget(index){
  const i=Math.max(0,Math.min(ROOT_STARTS.length-1,Math.trunc(Number(index)||0)));
- return clamp01(ROOT_STARTS[i]+ROOT_GROW_SPAN*.62);
+ return clamp01(ROOT_STARTS[ROOT_ORDER[i]]+ROOT_GROW_SPAN*.62);
 }

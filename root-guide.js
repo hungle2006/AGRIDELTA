@@ -145,7 +145,7 @@ site.querySelector('.guide-close').onclick=()=>closeGuide();site.querySelector('
 // Native vertical scrolling drives the reversible tree. Buttons remain keyboard accessible.
 buttons.forEach((b,i)=>{b.addEventListener('pointerenter',()=>{if(!b.hidden&&matchMedia('(hover:hover)').matches)sceneFocus(i);});b.addEventListener('pointerleave',()=>{if(opened)sceneFocus(active);});});
 function setPlantStage(n){earth.seekStage(Number(n));closeJourney();site.querySelector('[data-pause]').textContent='Tiếp tục';site.querySelector('[data-pause]').setAttribute('aria-label','Tiếp tục cây phát triển');}
-fetch('/assets/earth-layout.json').then(r=>r.ok?r.json():null).then(points=>{if(!Array.isArray(points)||points.length!==5)return;points.forEach((p,i)=>{buttons[i].style.setProperty('--root-x',p.x+'%');buttons[i].style.setProperty('--root-y',p.y+'%');buttons[i].style.setProperty('--root-mobile-x',[21,35.5,50,64.5,79][i]+'%');buttons[i].style.setProperty('--root-mobile-y',[67,71,75,71,67][i]+'%');});}).catch(()=>{});
+fetch('/assets/earth-layout.json').then(r=>r.ok?r.json():null).then(points=>{if(!Array.isArray(points)||points.length!==5)return;points.forEach((p,i)=>{buttons[i].style.setProperty('--root-x',p.x+'%');buttons[i].style.setProperty('--root-y',p.y+'%');buttons[i].style.setProperty('--root-mobile-x',[21,35.5,50,64.5,79][i]+'%');buttons[i].style.setProperty('--root-mobile-y',[63,66,67,66,63][i]+'%');});}).catch(()=>{});
 site.querySelector('[data-grow-root]').onclick=growNext;
 site.querySelector('[data-scroll-roots]').onclick=growNext;
 site.querySelector('[data-replay]').onclick=()=>{earth.replay();site.querySelector('[data-pause]').textContent='Tạm dừng';};

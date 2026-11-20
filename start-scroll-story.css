@@ -281,7 +281,7 @@ body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .
  bottom:135px!important;left:clamp(25px,6.8vw,110px)!important;
  right:auto!important;top:auto!important;transform:none!important;
  width:min(365px,34vw)!important;max-width:none!important;
- min-width:0!important;padding:16px 18px!important;gap:8px!important;
+ min-width:0!important;padding:12px 15px!important;gap:5px!important;
  border:1px solid rgba(198,235,159,.32);border-radius:17px;
  background:linear-gradient(145deg,rgba(18,52,35,.90),rgba(21,43,27,.86));
  box-shadow:0 18px 40px rgba(8,25,15,.24),inset 0 1px 0 rgba(255,255,235,.12);
