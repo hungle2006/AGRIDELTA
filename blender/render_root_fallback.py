@@ -1,6 +1,6 @@
 """Transparent movies of the actual Blender roots extending from trunk to tip."""
 import bpy,os,math
-setup=open(os.path.join(os.path.dirname(__file__),'render_start_fallback.py')).read().split("out='/tmp/agridelta-live-frames'")[0]
+setup=open(os.path.join(os.path.dirname(__file__),'render_start_fallback.py')).read().split("out=os.environ.get('START_OUTPUT'")[0]
 exec(compile(setup,__file__,'exec'))
 s.frame_set(672)
 for o in s.objects:
@@ -8,7 +8,7 @@ for o in s.objects:
 out='/tmp/agridelta-root-frames';os.makedirs(out,exist_ok=True)
 for idx in [int(i) for i in os.environ.get('ROOT_INDICES','0,1,2,3,4').split(',')]:
  for o in roots:o.hide_render=True
- chosen=[o for o in roots if o.get('rootIndex')==idx or (idx==0 and o.get('rootIndex')==-1)]
+ chosen=[o for o in roots if o.get('rootIndex')==idx]
  shaders=[]
  for o in chosen:
   o.hide_render=False

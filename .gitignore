@@ -18,3 +18,7 @@ public/assets/guide-orb-v2.png
 public/assets/start-lifecycle.glb
 public/assets/start-lifecycle-optimized.glb
 public/assets/start-lifecycle-motion.webm
+
+# Browser verification output
+/test-results/
+/playwright-report/
