@@ -12,7 +12,7 @@ test('Start editorial redesign keeps the fully functional WebGL lifecycle and na
   assert.match(root,/id="lifecycle-label"/);
   assert.match(root,/data-enter-page="home"/);
   assert.match(root,/href="#rg-roots"/);
-  assert.match(root,/class="hero-bottom-rail"/);
+  assert.match(root,/class="earth-container hero-bottom-rail"/);
   assert.match(root,/class="start-workflow-head"/);
   assert.match(root,/earth\.setScrollRoots\(progress\)/);
 });
