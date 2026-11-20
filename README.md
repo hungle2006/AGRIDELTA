@@ -6,12 +6,13 @@ Start retains the supplied reference's typography, navigation, dawn valley and r
 
 ## Experience
 
-- The original Blender animation is now gated by care: water AND fertilizer are required for each of four transitions. A single action cannot advance growth; previously unlocked stages can be revisited. The camera remains fixed.
-- Four care milestones and partial care are persisted locally under a versioned key. Locked future stages cannot be selected; both live GLB and animated fallback stop at the unlocked growth limit. The dashboard shares this same state.
-- The five guide roots and feature cards start hidden. One deliberate wheel gesture, horizontal drag/swipe, Right Arrow or grow button reveals one new branch from trunk to tip. Its card and three-step instructions appear after the growth finishes. Earlier roots stay visible.
-- Horizontal gestures cycle existing guides after all five have grown. Search and navigation can reveal a requested guide; unrevealed preceding branches grow sequentially.
-- Mobile places the journey panel above the growing crown, compresses the root spread, uses a feature rail and scrolls the resulting guide into view.
-- The distant valley is a separate photographic background, revised for clearer fields/mountains and fresh greens.
+- A fixed-camera Blender lifecycle now grows automatically: seed, seedling, foliage, yellow flowers and three ripe red tomatoes with green star-shaped calyxes.
+- Four automatic care sequences deliver water droplets, then organic fertilizer granules before growth transitions. There are no water/fertilizer action buttons or locked-stage gates. Pause, replay and chapter selection remain available.
+- The current observed growth stage is shared with the farm dashboard through local browser state.
+- A continuous tapered root collar connects the plant to its taproot. Lateral roots and fine hairs start on sampled parent curves. Responsive root compression scales mesh origins together with geometry, retaining every connection.
+- Scroll, deliberate horizontal gestures, keyboard controls or a root node reveal branches progressively. Choosing any of the five guides grows its missing preceding roots, then shows the requested instructions.
+- Camera-aligned root nodes remain part of the scene. Five readable guide cards and the selected three-step instructions sit below it; mobile uses a vertical list and a timeline below the tree.
+- The brand mark is newly modeled and lit in Blender (`blender/brand_mark.py`). The distant valley remains a photographic background.
 
 ## Real geometry and compatible motion
 
@@ -56,4 +57,4 @@ Existing fields, seasons, tasks, observation and orders workflows are retained. 
 
 `unified.css` aligns Start, demo entry, dashboard, fields, seasons, observation, orders, profile and forms with one green/ivory palette, Be Vietnam Pro, Phosphor symbols, brand mark, card radii and spacing. Mobile retains a fixed five-item bottom navigation, single-column forms and cards. The garden summary returns to the same live garden, instead of opening a separate plant viewer. Vertical scrolling no longer gets trapped by root exploration; horizontal drag, Shift-wheel and accessible controls reveal roots.
 
-Care is an illustrative interaction, not agronomic watering or fertilization advice. Farm records remain browser-local demo data; this change does not introduce server authentication or cloud sync.
+Care is an illustrative automatic animation, not agronomic watering or fertilization advice. Farm records remain browser-local demo data; this change does not introduce server authentication or cloud sync.

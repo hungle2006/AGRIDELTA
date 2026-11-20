@@ -6,16 +6,16 @@ import {LIFECYCLE_SECONDS,STAGE_TIMES,stageAt} from './lifecycle-state.js';
 import {createVideoEarth} from './video-earth.js';
 
 /** Actual Blender geometry/animation rendered live; no plant or soil image planes. */
-export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinished=()=>{},onComplete=()=>{},onError=()=>{}}={}){
+export function createLiveEarth(host,{onStage=()=>{},onTime=()=>{},onReady=()=>{},onRootFinished=()=>{},onComplete=()=>{},onError=()=>{}}={}){
  const canvas=document.createElement('canvas');
  const context=canvas.getContext('webgl2',{alpha:true,antialias:true});
- if(!context)return createVideoEarth(host,{onStage,onReady,onRootFinished,onComplete,onError});
+ if(!context)return createVideoEarth(host,{onStage,onTime,onReady,onRootFinished,onComplete,onError});
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const actions=[];
  let renderer,scene,camera,mixer,model,clock=0,last=0,running=false,visible=true,lastStage=-1,ready=false,manualTarget=null,frameCount=0,lastRender=0,completeNotified=false,growthLimit=0;
  const branches=Array.from({length:5},()=>({meshes:[],uniform:{value:0},progress:0,target:0,done:false}));
  const trunk={meshes:[],uniform:{value:0}};
- const control={setGrowthLimit(t){growthLimit=Math.max(0,Math.min(27.7,t));running=clock<growthLimit;},revealRoot(i){if(i>=0&&i<5)branches[i].target=1;},seekStage(i){manualTarget=Math.min(growthLimit,STAGE_TIMES[i]??0);running=false;},replay(){clock=0;manualTarget=null;running=true;lastStage=-1;completeNotified=false;},toggle(){if(clock>=growthLimit)return false;running=!running;return running;},setVisible(v){visible=v;last=0;},get ready(){return ready;}};
+ const control={setGrowthLimit(t){growthLimit=Math.max(0,Math.min(27.7,t));running=clock<growthLimit;},revealRoot(i){if(i>=0&&i<5)branches[i].target=1;},seekStage(i){manualTarget=Math.min(growthLimit,STAGE_TIMES[i]??0);running=false;},replay(){clock=0;manualTarget=null;running=true;lastStage=-1;completeNotified=false;},toggle(){if(clock>=growthLimit){clock=0;manualTarget=null;completeNotified=false;lastStage=-1;}running=!running;return running;},setVisible(v){visible=v;last=0;},get ready(){return ready;}};
  function fail(e){host.dataset.sceneState='error';onError(e);}
  try{
   renderer=new THREE.WebGLRenderer({canvas,context,alpha:true,antialias:true,powerPreference:'high-performance'});
@@ -47,12 +47,14 @@ export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinish
   function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);const mobile=innerWidth<720;
    if(mobile){const span=6.2;camera.left=-span*w/h/2;camera.right=span*w/h/2;camera.top=span/2;camera.bottom=-span/2;}
    else{camera.left=-5.55;camera.right=5.55;camera.top=11.1*h/w/2;camera.bottom=-camera.top;}camera.updateProjectionMatrix();
-   if(model){model.traverse(o=>{if(Number.isInteger(o.userData.rootIndex))o.scale.x=mobile?.39:1;});model.updateMatrixWorld(true);}
+   // Scale roots and their translated origins together about the shared collar.
+   if(model){model.traverse(o=>{if(Number.isInteger(o.userData.rootIndex)){if(!o.userData.baseRootTransform)o.userData.baseRootTransform={x:o.position.x,scale:o.scale.x};const base=o.userData.baseRootTransform;o.scale.x=base.scale*(mobile?Math.min(.39,(innerWidth-58)/787):1);o.position.x=base.x*(mobile?Math.min(.39,(innerWidth-58)/787):1);}});model.updateMatrixWorld(true);}
   }
   renderer.setAnimationLoop(now=>{if(!last)last=now;let dt=Math.min((now-last)/1000,.05);last=now;if(!visible||document.hidden||host.closest('[hidden]'))return;if(now-lastRender<1000/30)return;const renderDelta=Math.min((now-lastRender)/1000,.12);lastRender=now;dt=renderDelta;
    if(ready){if(manualTarget!==null){const diff=manualTarget-clock;clock+=diff*(1-Math.exp(-dt*6));if(Math.abs(diff)<.015){clock=manualTarget;manualTarget=null;}}
     else if(running)clock=Math.min(growthLimit,clock+dt);actions.forEach(a=>a.paused=false);mixer.setTime(clock);const st=stageAt(clock);if(st!==lastStage){lastStage=st;host.dataset.plantStage=String(st);onStage(st);}if(clock>=growthLimit)running=false;if(clock>=27.7){running=false;if(!completeNotified){completeNotified=true;onComplete();}}
-    trunk.uniform.value=Math.min(.31,clock*.065);
+    trunk.uniform.value=Math.min(1,clock/4);
+    onTime(clock);
     branches.forEach((b,i)=>{if(b.target){b.meshes.forEach(o=>o.visible=true);b.progress=Math.min(1,b.progress+dt/(reduced?.05:1.35));b.uniform.value=THREE.MathUtils.smoothstep(b.progress,0,1);if(b.progress===1&&!b.done){b.done=true;host.dataset.rootCount=String(branches.filter(x=>x.done).length);onRootFinished(i);}}});
     frameCount++;if(frameCount%45===0){host.dataset.lifecycleTime=clock.toFixed(1);host.dataset.drawCalls=String(renderer.info.render.calls);host.dataset.triangles=String(renderer.info.render.triangles);}
    }

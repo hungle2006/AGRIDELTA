@@ -11,6 +11,6 @@ test('lifecycle includes flower and fruit after germination in botanical order',
  const b=readFileSync(new URL('../public/assets/start-lifecycle-live.glb',import.meta.url));const j=JSON.parse(b.subarray(20,20+b.readUInt32LE(12)).toString());
  assert.ok(j.asset.generator.includes('glTF-Transform')); assert.ok(j.animations[0].channels.length>40);
  assert.equal(j.nodes.filter(n=>Number.isInteger(n.extras?.rootIndex)&&n.extras.rootIndex>=0).length,5);
- assert.ok(j.nodes.some(n=>n.name==='Blender soil cutaway'));assert.ok(j.nodes.some(n=>n.name.includes('Fruit bean pod')));assert.ok(j.nodes.some(n=>n.name.includes('Blossom')));
+ assert.ok(j.nodes.some(n=>n.name==='Blender soil cutaway'));assert.ok(j.nodes.some(n=>n.name.includes('Fruit red tomato')));assert.ok(j.nodes.some(n=>n.name.includes('Blossom')));assert.equal(j.nodes.filter(n=>n.extras?.careEffect==='water').length,24);assert.equal(j.nodes.filter(n=>n.extras?.careEffect==='feed').length,16);assert.ok(j.nodes.some(n=>n.extras?.rootIndex===-1));
  const last=Math.max(...j.animations[0].samplers.map(s=>j.accessors[s.input].max[0]));assert.ok(last>27);
 });
