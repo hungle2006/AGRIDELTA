@@ -62,8 +62,8 @@ site.innerHTML = `
       </nav>
       <div class="earth-header-actions">
         <button type="button" class="earth-icon-button" aria-label="Tìm tính năng và hướng dẫn" data-search>${icon('search')}</button>
-        <button type="button" class="earth-login" data-enter-auth>Đăng nhập</button>
-        <button type="button" class="earth-primary earth-header-cta" data-enter-page="home">Dùng thử ${icon('right')}</button>
+        <button type="button" class="earth-login" data-enter-auth>Tài khoản</button>
+        <button type="button" class="earth-primary earth-header-cta" data-enter-page="home">Vào ứng dụng ${icon('right')}</button>
         <button type="button" class="earth-icon-button earth-menu" aria-label="Mở menu" aria-expanded="false" aria-controls="earth-navigation">${icon('menu')}</button>
       </div>
     </div>
@@ -79,7 +79,7 @@ site.innerHTML = `
           <h1 id="start-title">Từ hạt giống<br>đến mùa vụ<br><em>bền vững.</em></h1>
           <p class="earth-intro-copy">Chăm sóc từng mảnh đất, theo dõi cây trồng và hoạch định mùa vụ — tất cả trong một không gian xanh.</p>
           <div class="earth-intro-actions">
-            <button type="button" class="earth-primary" data-enter-page="home">Bắt đầu hành trình ${icon('right')}</button>
+            <button type="button" class="earth-primary" data-enter-page="home">Bắt đầu quản lý ${icon('right')}</button>
             <a class="earth-secondary" href="#rg-roots">${icon('down')} Khám phá bộ rễ</a>
           </div>
           <div class="hero-editorial-note" aria-label="Bức ảnh nông nghiệp thực tế">
@@ -178,7 +178,7 @@ site.innerHTML = `
     <section class="earth-container start-guides" id="rg-guides" aria-labelledby="start-guides-title">
       <div class="guide-intro">
         <div><p class="earth-eyebrow">${icon('leaf')} Hệ sinh thái AgriDelta</p><h2 id="start-guides-title">Chăm trọn một mùa vụ.</h2></div>
-        <p>Chọn một tính năng để xem cách sử dụng và mở ngay trong bản dùng thử.</p>
+        <p>Chọn một tính năng để xem cách sử dụng và mở ngay trong ứng dụng.</p>
       </div>
       <div class="start-feature-dock">${FEATURES.map((feature,i) => `
         <button type="button" class="start-dock-button" style="--lane: ${i-2}; --distance: ${Math.abs(i-2)}" data-open-guide="${i}" aria-haspopup="dialog" aria-controls="earth-dialog">
@@ -196,7 +196,7 @@ site.innerHTML = `
         ${startPhoto(START_IMAGES.closing,"start-closing-photo","(max-width:760px) 100vw, 90vw")}
         <div class="start-close-copy">
           <h2 id="start-close-title">Sẵn sàng cho mùa vụ tới?</h2>
-          <button type="button" class="earth-primary" data-enter-page="home">Mở bản dùng thử ${icon('right')}</button>
+          <button type="button" class="earth-primary" data-enter-page="home">Vào ứng dụng ${icon('right')}</button>
         </div>
       </div>
     </section>
@@ -407,7 +407,7 @@ function openGuide(index, focusSelector) {
       </div>
       <button class="earth-primary" type="button" data-enter-page="${feature.page}">Mở ${feature.label.toLowerCase()} ${icon('right')}</button>
     </div>
-    <p class="guide-note">Dữ liệu của bản dùng thử được lưu trên thiết bị này.</p>
+    <p class="guide-note">Dữ liệu của ứng dụng được lưu trên thiết bị này.</p>
   `, focusSelector);
 }
 
