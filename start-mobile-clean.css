@@ -1,7 +1,7 @@
 /* AGRIDELTA · Mobile Start simplification
    Intentionally scoped to <=760px so desktop composition, Blender animation,
    lifecycle state logic, and scroll-linked roots remain unchanged. */
-.earth-site .earth-mobile-nav-item {display:none;}
+.earth-site .earth-nav .earth-mobile-nav-item {display:none;}
 @media (max-width:760px) {
   .earth-site {--header-height:61px;--gutter:clamp(17px,4.8vw,27px)}
   .earth-site .earth-header {background:#f9fbf4f5;}
