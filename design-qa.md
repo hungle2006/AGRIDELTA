@@ -1,28 +1,34 @@
-# AGRIDELTA reference reconstruction QA
+# AGRIDELTA Living Start QA
 
-Source visual truth: `design/reference-home.png`, 905 × 505 px. Final candidate: `3ba6b31`, browser-rendered Vercel preview. Native final capture: `tests/evidence/reference-final.jpg`, 905 × 505 px. Side-by-side source and implementation: `tests/evidence/reference-comparison.jpg`. Focused comparisons: `plant-comparison.jpg`, `typography-comparison.jpg`, `root-cards-comparison.jpg` in the same directory. All were inspected as paired images, including the complete composition.
+Source composition: design/reference-home.png, 905 × 505 pixels. The latest user explicitly changes the source state: preserve the initial Blender germination, add automatic flowering/fruit, start with all guide roots/cards hidden, and grow one new branch per gesture. The brighter clear valley and different botanical lifecycle are intentional changes, not a pixel-identical reproduction claim.
 
-## Iteration history
+## Evidence
 
-1. Blocked: flat foliage, detached foreground leaves, weak root illumination, low headline baseline, narrow navigation spacing and a capture scrollbar. First iframe capture was 890 × 497; it was normalized only for initial composition review, not used as final exact-size evidence.
-2. Corrected foliage curvature/backlighting, depth of field, warm root bloom, kicker line box, header spacing and native reference capture. Tested root click, keyboard next and actual pointer swipe from Cánh đồng to Mùa vụ. Mobile guide appeared below the scene without blocking the feature rail.
-3. Thickened and tapered the shoot, arched leaf midribs, moved the pendant dew drop, darkened physical glass orbs and used the folded-leaf brand mark. Fixed synthetic clicks after dragging, root keyboard focus and search field focus. Re-rendered the Blender scene and repeated paired full/focused visual comparison at native 905 × 505.
+Final candidate: 6ed0d35, actual Vercel preview. Browser capture at native 905 × 505 CSS pixels, no density rescaling: tests/evidence/live-start/final-flowering.jpg. Full paired comparison: comparison.jpg. Focused paired comparisons: type-comparison.jpg, plant-comparison.jpg, roots-comparison.jpg. Mobile evidence: mobile-320.jpg. All paths are under tests/evidence/live-start/.
 
-## Final review
+## Comparison and fix history
 
-- Typography: Be Vietnam Pro regular/medium/800 and genuine italic 800. Two-line source headline, emphasis, navigation, stage labels, summaries and CTA hierarchy retained. The raster reference does not identify its exact font; this is the closest existing project family, not a certified font match.
-- Layout: source aspect ratio, left headline, central seedling, right glass journey panel, soil horizon and five staggered root cards reconstructed using measured proportions. Feature anchors are projected from the actual Blender camera. Desktop source composition is maintained; mobile stacks copy/journey above the plant and uses a horizontal feature rail.
-- Color/material: green title and CTAs, lime symbols, dark brown translucent cards, glass bubbles and golden roots. Real textured Blender geometry supplies plant, dew, clods, soil face and branching roots. The distant valley is a separate generated photographic backdrop.
-- Copy and icons: source Vietnamese labels and summaries reproduced with Phosphor line icons; detailed instructions are actual HTML and open the existing demo workflows.
-- Responsive: browser checks at 320, 390, 768 and 1440 px iframe widths; no page-level horizontal overflow. At 320 px, the platform scrollbar leaves 305 px of content and clientWidth equals scrollWidth. Menu opens and closes. The feature rail intentionally scrolls horizontally.
-- Interaction: root click opens its three-step guide; previous/next, ArrowRight and a native horizontal pointer drag change guides. Search `mua vu` returns Mùa vụ and opens that guide. Plant stage selection updates its pressed state and Blender layer. Escape/close dismiss panels. Existing demo routes and local-storage behavior remain covered by the retained application checks.
-- Console: inspected preview error logs; only browser-extension metadata errors were present, no application-origin errors in the inspected logs.
-- Validation: syntax checks, three meaningful landing tests, Vite production build and whitespace checks passed.
+1. P0: the cloud browser cannot create a WebGL context. The preview initially showed no plant or earth. Fixed with transparent moving Blender renders from the authored scene for WebGL-disabled clients. This is an animated fallback, not static plant/soil photographs. Capable clients retain the direct GLB path.
+2. P2: stage highlighting selected the live scene host through its dataset attribute, shifting the pressed button one place. Fixed by restricting stage updates to button[data-plant-stage]. Confirmed that the visible plant stage, label and pressed button agree.
+3. P2: mobile crown overlapped the enlarged journey panel; excessive empty space separated the revealed card and guide. Moved the live scene beneath the panel, shortened the mobile section and removed the redundant rail scrollbar. Desktop progression controls were moved clear of central root cards.
+4. Final paired comparison and browser retest show no actionable P0/P1/P2 defects in the tested states. All five roots were unlocked sequentially and retained. Flower and fruit states displayed correctly.
 
-## Remaining differences
+## Required surfaces
 
-P3 artistic differences: botanical silhouette/vein detail, granular soil distribution, root curves and lighting differ from the source artwork. Tiny discovery caption contrast varies over the bright central root. The scene is an authored reconstruction; no numeric 90% similarity score or pixel-identical claim is made. No open P0/P1/P2 interaction, overflow or layout defects were observed in the tested states.
+- Typography: retained Be Vietnam Pro 800 and real italic 800, source headline wrapping and navigation hierarchy. Exact source font family is unspecified. Small desktop labels retain source-scale proportions; mobile controls are enlarged.
+- Layout: source headline, navigation, soil horizon, central plant, right journey panel and staggered root cards retained. New playback controls and initial discovery control have sufficient separation. Mobile crown clears the panel; guide scrolls into view after root growth.
+- Colors: fresh green background, green CTAs, warm roots, lime symbols and dark brown glass cards. Brighter landscape is intentional. Feature selection and stage selection are distinct.
+- Images/geometry: actual Blender plant animation, earth cutaway, root geometry and glass nodes. No static plant/soil image layers in Start. Direct GLB is about 1.5 MB; transparent fallback lifecycle is about 1 MB, 24fps, 27.792 seconds, with five independent root movies. The distant landscape is a separate generated photographic background.
+- Copy: source feature labels and summaries retained. Final stage is Kết quả to match visible pod development. Instructions remain linked to existing demo workflows.
 
-The managed local preview relay returned Site Unavailable after one reload. QA therefore used the actual Vercel preview build rather than claiming local preview success. `public/layout-check.html` was removed for production; the helper remains in `tests/` for future development.
+## Validation and limits
+
+Browser tested: initial hidden roots/cards; automated seed-to-fruit progression; stage seek; pause/replay controls; sequential five-root unlock; guide content after growth; retention of earlier roots; mouse drag and wheel growth; mobile horizontal drag and automatic guide scroll. Mobile 390 and 320 px frames have no page-level horizontal overflow (320 frame leaves 305 px content due to the browser scrollbar; clientWidth equals scrollWidth). Exact 905 × 505 capture has no scrollbar. Final browser error log contained no application errors.
+
+Five automated tests pass, including state sequencing, Vietnamese search and GLB anatomy/animation metadata. Syntax checks and production build pass. Local preview relay was unavailable after restart/reload, so verification used actual Vercel previews. The cloud browser uses the animated-video path because WebGL is disabled; direct GPU rendering was not visually tested in this environment. GLB contents and Blender rendering were validated separately. No physical iPhone hardware test was performed.
+
+P3 follow-up: plant/soil/root details differ from the original photographic artwork, and software-rendered fallback has less fine material detail than direct GPU rendering. Numeric 90% similarity is not asserted. These are documented artistic/platform differences, not broken interactions.
+
+Production checklist: remove public viewport helper; publish this tested source/assets; verify the production alias and live page.
 
 final result: passed
