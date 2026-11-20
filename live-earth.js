@@ -12,10 +12,10 @@ export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinish
  if(!context)return createVideoEarth(host,{onStage,onReady,onRootFinished,onComplete,onError});
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const actions=[];
- let renderer,scene,camera,mixer,model,clock=0,last=0,running=!reduced,visible=true,lastStage=-1,ready=false,manualTarget=null,frameCount=0,lastRender=0,completeNotified=false;
+ let renderer,scene,camera,mixer,model,clock=0,last=0,running=false,visible=true,lastStage=-1,ready=false,manualTarget=null,frameCount=0,lastRender=0,completeNotified=false,growthLimit=0;
  const branches=Array.from({length:5},()=>({meshes:[],uniform:{value:0},progress:0,target:0,done:false}));
  const trunk={meshes:[],uniform:{value:0}};
- const control={revealRoot(i){if(i>=0&&i<5)branches[i].target=1;},seekStage(i){manualTarget=STAGE_TIMES[i]??0;running=false;},replay(){clock=0;manualTarget=null;running=true;lastStage=-1;completeNotified=false;},toggle(){if(clock>=LIFECYCLE_SECONDS){clock=0;completeNotified=false;}running=!running;return running;},setVisible(v){visible=v;last=0;},get ready(){return ready;}};
+ const control={setGrowthLimit(t){growthLimit=Math.max(0,Math.min(27.7,t));running=clock<growthLimit;},revealRoot(i){if(i>=0&&i<5)branches[i].target=1;},seekStage(i){manualTarget=Math.min(growthLimit,STAGE_TIMES[i]??0);running=false;},replay(){clock=0;manualTarget=null;running=true;lastStage=-1;completeNotified=false;},toggle(){if(clock>=growthLimit)return false;running=!running;return running;},setVisible(v){visible=v;last=0;},get ready(){return ready;}};
  function fail(e){host.dataset.sceneState='error';onError(e);}
  try{
   renderer=new THREE.WebGLRenderer({canvas,context,alpha:true,antialias:true,powerPreference:'high-performance'});
@@ -51,7 +51,7 @@ export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinish
   }
   renderer.setAnimationLoop(now=>{if(!last)last=now;let dt=Math.min((now-last)/1000,.05);last=now;if(!visible||document.hidden||host.closest('[hidden]'))return;if(now-lastRender<1000/30)return;const renderDelta=Math.min((now-lastRender)/1000,.12);lastRender=now;dt=renderDelta;
    if(ready){if(manualTarget!==null){const diff=manualTarget-clock;clock+=diff*(1-Math.exp(-dt*6));if(Math.abs(diff)<.015){clock=manualTarget;manualTarget=null;}}
-    else if(running)clock=Math.min(LIFECYCLE_SECONDS,clock+dt);actions.forEach(a=>a.paused=false);mixer.setTime(clock);const st=stageAt(clock);if(st!==lastStage){lastStage=st;host.dataset.plantStage=String(st);onStage(st);}if(clock>=LIFECYCLE_SECONDS){running=false;if(!completeNotified){completeNotified=true;onComplete();}}
+    else if(running)clock=Math.min(growthLimit,clock+dt);actions.forEach(a=>a.paused=false);mixer.setTime(clock);const st=stageAt(clock);if(st!==lastStage){lastStage=st;host.dataset.plantStage=String(st);onStage(st);}if(clock>=growthLimit)running=false;if(clock>=27.7){running=false;if(!completeNotified){completeNotified=true;onComplete();}}
     trunk.uniform.value=Math.min(.31,clock*.065);
     branches.forEach((b,i)=>{if(b.target){b.meshes.forEach(o=>o.visible=true);b.progress=Math.min(1,b.progress+dt/(reduced?.05:1.35));b.uniform.value=THREE.MathUtils.smoothstep(b.progress,0,1);if(b.progress===1&&!b.done){b.done=true;host.dataset.rootCount=String(branches.filter(x=>x.done).length);onRootFinished(i);}}});
     frameCount++;if(frameCount%45===0){host.dataset.lifecycleTime=clock.toFixed(1);host.dataset.drawCalls=String(renderer.info.render.calls);host.dataset.triangles=String(renderer.info.render.triangles);}
