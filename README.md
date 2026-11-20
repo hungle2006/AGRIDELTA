@@ -6,8 +6,8 @@ Start retains the supplied reference's typography, navigation, dawn valley and r
 
 ## Experience
 
-- The original Blender germination animation grows automatically into a leafy plant, opens three blossoms and develops three bean pods over 28 seconds. The camera remains fixed.
-- Replay, pause/resume and five stage controls operate on the same timeline. Reduced-motion users can choose stages manually.
+- The original Blender animation is now gated by care: water AND fertilizer are required for each of four transitions. A single action cannot advance growth; previously unlocked stages can be revisited. The camera remains fixed.
+- Four care milestones and partial care are persisted locally under a versioned key. Locked future stages cannot be selected; both live GLB and animated fallback stop at the unlocked growth limit. The dashboard shares this same state.
 - The five guide roots and feature cards start hidden. One deliberate wheel gesture, horizontal drag/swipe, Right Arrow or grow button reveals one new branch from trunk to tip. Its card and three-step instructions appear after the growth finishes. Earlier roots stay visible.
 - Horizontal gestures cycle existing guides after all five have grown. Search and navigation can reveal a requested guide; unrevealed preceding branches grow sequentially.
 - Mobile places the journey panel above the growing crown, compresses the root spread, uses a feature rail and scrolls the resulting guide into view.
@@ -51,3 +51,9 @@ npm run build
 `tests/layout-check.html` is a development-only viewport helper. Temporarily copy it to public for a preview and remove the public copy before production. The design QA report records the actual browser-tested rendering path and any environment limitations.
 
 Existing fields, seasons, tasks, observation and orders workflows are retained. Their data remains browser-local demo data. Fonts: Be Vietnam Pro with genuine italic 800. Icons: Phosphor.
+
+## Unified farm workspace
+
+`unified.css` aligns Start, demo entry, dashboard, fields, seasons, observation, orders, profile and forms with one green/ivory palette, Be Vietnam Pro, Phosphor symbols, brand mark, card radii and spacing. Mobile retains a fixed five-item bottom navigation, single-column forms and cards. The garden summary returns to the same live garden, instead of opening a separate plant viewer. Vertical scrolling no longer gets trapped by root exploration; horizontal drag, Shift-wheel and accessible controls reveal roots.
+
+Care is an illustrative interaction, not agronomic watering or fertilization advice. Farm records remain browser-local demo data; this change does not introduce server authentication or cloud sync.

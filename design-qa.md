@@ -1,34 +1,38 @@
-# AGRIDELTA Living Start QA
+# AGRIDELTA unified care workspace QA
 
-Source composition: design/reference-home.png, 905 × 505 pixels. The latest user explicitly changes the source state: preserve the initial Blender germination, add automatic flowering/fruit, start with all guide roots/cards hidden, and grow one new branch per gesture. The brighter clear valley and different botanical lifecycle are intentional changes, not a pixel-identical reproduction claim.
+## Source and intent
 
-## Evidence
+Source: current product captured in this audit run before editing, tests/evidence/care-redesign/dashboard-before.jpg, plus existing green Start composition. User requests a cohesive redesign of the complete laptop/mobile app, clearer root guides, and growth requiring water and fertilizer. This is a redesign, not a pixel clone.
 
-Final candidate: 6ed0d35, actual Vercel preview. Browser capture at native 905 × 505 CSS pixels, no density rescaling: tests/evidence/live-start/final-flowering.jpg. Full paired comparison: comparison.jpg. Focused paired comparisons: type-comparison.jpg, plant-comparison.jpg, roots-comparison.jpg. Mobile evidence: mobile-320.jpg. All paths are under tests/evidence/live-start/.
+Implementation: preview c67a514, captured dashboard.jpg and mobile-root.jpg under tests/evidence/care-redesign/. Side-by-side review: comparison.jpg. Dashboard captures are browser viewport images with identical framing; the paired image normalizes both to 900 px width for inspection. Mobile guide was tested in 320px iframe (305px content after scrollbar); 390px iframe content is 375px. No page-level horizontal overflow in either tested width.
 
-## Comparison and fix history
+## Audit findings and fixes
 
-1. P0: the cloud browser cannot create a WebGL context. The preview initially showed no plant or earth. Fixed with transparent moving Blender renders from the authored scene for WebGL-disabled clients. This is an animated fallback, not static plant/soil photographs. Capable clients retain the direct GLB path.
-2. P2: stage highlighting selected the live scene host through its dataset attribute, shifting the pressed button one place. Fixed by restricting stage updates to button[data-plant-stage]. Confirmed that the visible plant stage, label and pressed button agree.
-3. P2: mobile crown overlapped the enlarged journey panel; excessive empty space separated the revealed card and guide. Moved the live scene beneath the panel, shortened the mobile section and removed the redundant rail scrollbar. Desktop progression controls were moved clear of central root cards.
-4. Final paired comparison and browser retest show no actionable P0/P1/P2 defects in the tested states. All five roots were unlocked sequentially and retained. Flower and fruit states displayed correctly.
+1. Start to dashboard: different logo, decorative language, fonts, corners and imagery made the transition feel disconnected. Reused the brand mark, green/ivory palette, genuine family/weights and Phosphor icons. Shared garden state replaces the unrelated still plant in dashboard hero. Breadcrumb and return-to-garden controls connect the flow.
+2. Care: old tree ran to fruit without action. Both care actions are now required for every transition, with per-stage state reset and persistent progress. Repeated watering cannot substitute fertilizer. Future stage buttons are locked. Both GLB and video paths use an unlocked timeline cap.
+3. Root guide: heavy dark overlay and sparse page controls made instructions harder to follow. Reworked card borders/selection, lighter readable guide sheet, stronger icon/counter contrast and mobile sizing. Ordinary vertical scroll is no longer trapped; horizontal drag, Shift-wheel, arrows and grow controls remain.
+4. Preview pass P2: dashboard garden CTA had pale text on a light background. Fixed to dark green text on a pale green button; final screenshot confirms readable contrast. Page-heading breaks received explicit spacing.
+5. Responsive pass P2: journey/care panels could overlap the plant crown. Mobile canvas is below the combined panel; tablet uses a separate care dock. Mobile care advances scroll the plant into view. Farm forms use 16px inputs; navigation has generous targets and bottom safe-area padding.
+6. Keyboard: added focus containment inside farm dialogs. Existing Escape close is retained.
 
-## Required surfaces
+## Browser-verified behavior
 
-- Typography: retained Be Vietnam Pro 800 and real italic 800, source headline wrapping and navigation hierarchy. Exact source font family is unspecified. Small desktop labels retain source-scale proportions; mobile controls are enlarged.
-- Layout: source headline, navigation, soil horizon, central plant, right journey panel and staggered root cards retained. New playback controls and initial discovery control have sufficient separation. Mobile crown clears the panel; guide scrolls into view after root growth.
-- Colors: fresh green background, green CTAs, warm roots, lime symbols and dark brown glass cards. Brighter landscape is intentional. Feature selection and stage selection are distinct.
-- Images/geometry: actual Blender plant animation, earth cutaway, root geometry and glass nodes. No static plant/soil image layers in Start. Direct GLB is about 1.5 MB; transparent fallback lifecycle is about 1 MB, 24fps, 27.792 seconds, with five independent root movies. The distant landscape is a separate generated photographic background.
-- Copy: source feature labels and summaries retained. Final stage is Kết quả to match visible pod development. Instructions remain linked to existing demo workflows.
+- Initial plant time stays 0 without care; future stages disabled.
+- Water alone keeps milestone at 0 and disables repeat water until fertilizer.
+- Fertilizer completes the pair, unlocks milestone 1. Plant subsequently stops at 7.7 seconds rather than proceeding to flowers.
+- Reload preserves milestone 1. Four total care pairs unlock all four transitions; dashboard reflects milestone 4.
+- Garden-to-dashboard and back work; root growth finishes before its guide opens. Mobile guide is readable at 320px, with no horizontal overflow.
+- Dashboard, fields, season, observation and orders navigation inspected. Created and saved a clearly named test field in preview-local data; it appeared in the list.
+- Final error-log inspection: no application-origin errors.
+
+## Required visual surfaces
+
+Typography: unified Be Vietnam Pro and matching hierarchy, genuine italic where retained. Spacing: shared content widths, 20px surfaces, coherent toolbars and mobile stacking. Colors: green/ivory tokens, darker guide icons, readable primary actions. Images: existing real Blender foreground preserved; existing generated landscape reused for farm context instead of hand-drawn filler. Copy: consistent Vietnamese labels and explicit local/demo status.
 
 ## Validation and limits
 
-Browser tested: initial hidden roots/cards; automated seed-to-fruit progression; stage seek; pause/replay controls; sequential five-root unlock; guide content after growth; retention of earlier roots; mouse drag and wheel growth; mobile horizontal drag and automatic guide scroll. Mobile 390 and 320 px frames have no page-level horizontal overflow (320 frame leaves 305 px content due to the browser scrollbar; clientWidth equals scrollWidth). Exact 905 × 505 capture has no scrollbar. Final browser error log contained no application errors.
+Eight automated tests pass, including care sequencing, duplicate-action prevention, corrupt/restored state and existing guide/GLB tests. Production build and syntax/whitespace checks pass. This browser has WebGL disabled; browser validation therefore exercises the real animated Blender fallback. The direct GLB path is source/asset validated, not visually GPU-tested here. No physical iPhone test or full accessibility certification is asserted. Server login/sync remains outside this UI change. MagicPath returned quota exceeded; no MagicPath-generated design is claimed.
 
-Five automated tests pass, including state sequencing, Vietnamese search and GLB anatomy/animation metadata. Syntax checks and production build pass. Local preview relay was unavailable after restart/reload, so verification used actual Vercel previews. The cloud browser uses the animated-video path because WebGL is disabled; direct GPU rendering was not visually tested in this environment. GLB contents and Blender rendering were validated separately. No physical iPhone hardware test was performed.
-
-P3 follow-up: plant/soil/root details differ from the original photographic artwork, and software-rendered fallback has less fine material detail than direct GPU rendering. Numeric 90% similarity is not asserted. These are documented artistic/platform differences, not broken interactions.
-
-Production checklist: remove public viewport helper; publish this tested source/assets; verify the production alias and live page.
+P3 follow-up: existing Blender mesh art can receive further botanical/detail refinement; this iteration changes care control and root presentation rather than claiming newly sculpted roots. Minor landscape reuse across sample field cards is intentional.
 
 final result: passed
