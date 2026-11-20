@@ -74,41 +74,49 @@ site.innerHTML = `
         <div class="earth-intro">
           <div class="hero-kicker-row">
             <p class="earth-eyebrow">${icon('plant')} Nông nghiệp thông minh</p>
-            <span class="hero-issue" aria-hidden="true">GREEN FIELD / 2026</span>
+            <span class="hero-issue" aria-hidden="true">FIELD JOURNAL / 01</span>
           </div>
           <h1 id="start-title">Từ hạt giống<br>đến mùa vụ<br><em>bền vững.</em></h1>
-          <p class="earth-intro-copy">Quản lý cánh đồng, theo dõi cây trồng và lên kế hoạch mùa vụ từ một nơi.</p>
+          <p class="earth-intro-copy">Chăm sóc từng mảnh đất, theo dõi cây trồng và hoạch định mùa vụ — tất cả trong một không gian xanh.</p>
           <div class="earth-intro-actions">
-            <button type="button" class="earth-primary" data-enter-page="home">Bắt đầu miễn phí ${icon('right')}</button>
+            <button type="button" class="earth-primary" data-enter-page="home">Bắt đầu hành trình ${icon('right')}</button>
             <a class="earth-secondary" href="#rg-roots">${icon('down')} Khám phá bộ rễ</a>
           </div>
-          <a href="#rg-roots" class="hero-scroll-note">
-            <span class="hero-scroll-icon">${icon('down')}</span>
-            <span><strong>KHÁM PHÁ TỪ GỐC RỄ</strong><small>Cuộn xuống để thấy cách hệ sinh thái vận hành</small></span>
-          </a>
+          <div class="hero-editorial-note" aria-label="Bức ảnh nông nghiệp thực tế">
+            ${startPhoto(START_IMAGES.hero,"hero-editorial-photo","(max-width:760px) 110px, 156px")}
+            <div class="hero-editorial-copy">
+              <span class="hero-editorial-index">TỪ THỰC TẾ ĐẾN CÔNG NGHỆ</span>
+              <strong>Từng mùa xanh bắt đầu từ sự thấu hiểu.</strong>
+            </div>
+          </div>
         </div>
         <figure class="plant-journey" aria-labelledby="journey-title">
           <div class="plant-art">
-            <div class="plant-art-topline" aria-hidden="true"><span class="plant-live-dot"></span> MÔ PHỎNG CÂY 3D <span>01 / 05</span></div>
+            <div class="plant-art-topline" aria-hidden="true"><span class="plant-live-dot"></span> MÔ PHỎNG SINH TRƯỞNG <span>BLENDER / 3D</span></div>
             <div class="plant-model" id="live-earth" data-scene-state="loading" aria-hidden="true">
               <img class="plant-poster" src="/assets/start-botanical-lifecycle-0.webp" alt="" width="580" height="580" fetchpriority="high">
             </div>
-            <span class="plant-art-side" aria-hidden="true">GROW WITH NATURE · 2026</span>
+            <span class="plant-art-side" aria-hidden="true">GROW WITH NATURE</span>
+            <div class="plant-art-groundnote" aria-hidden="true"><span>SOIL / ROOTS / GROWTH</span><span>AGRIDELTA</span></div>
           </div>
           <figcaption class="plant-controls">
             <div class="plant-controls-heading">
-              <div class="plant-controls-copy">
-                <span class="plant-controls-kicker">HÀNH TRÌNH SINH TRƯỞNG</span>
-                <h2 id="journey-title">Vòng đời cây đậu</h2>
-                <p id="lifecycle-label">${stageNotes[0]}</p>
-              </div>
+              <span class="plant-controls-kicker">THE GROWTH JOURNEY</span>
+              <h2 id="journey-title">Vòng đời<br>cây đậu.</h2>
+              <p id="lifecycle-label" aria-live="polite">${stageNotes[0]}</p>
               <button type="button" class="earth-icon-button" data-pause aria-label="Tạm dừng chuyển động" title="Tạm dừng chuyển động">${icon('pause')}</button>
             </div>
             <ol class="plant-stages" aria-label="Các giai đoạn của cây đậu">${stages.map((stage,i) => `
               <li${i === 0 ? ' aria-current="step"' : ''}>${icon(stageIcons[i])}<span>${stage}</span></li>`).join('')}
             </ol>
+            <div class="plant-controls-foot"><span>GIAI ĐOẠN</span><strong id="journey-current-step">01 <small>/ 05</small></strong></div>
           </figcaption>
         </figure>
+      </div>
+      <div class="earth-container hero-bottom-rail">
+        <span class="hero-bottom-label">AGRIDELTA — GIEO MẦM CHO MỘT TƯƠNG LAI XANH</span>
+        <a href="#rg-roots" aria-label="Cuộn xuống khám phá bộ rễ">KHÁM PHÁ BỘ RỄ ${icon('down')}</a>
+        <span class="hero-bottom-index">01 — 03</span>
       </div>
     </section>
 
@@ -224,6 +232,7 @@ const find = selector => site.querySelector(selector);
 const stageIndicators = [...site.querySelectorAll('.plant-stages li')];
 const plantControl = find('[data-pause]');
 const lifecycleLabel = find('#lifecycle-label');
+const stageReadout = find('#journey-current-step');
 const phaseNotes = {
   ripe: 'Cây đã có quả. Cuộn xuống để xem thu hoạch.',
   harvesting: 'Quả đậu lần lượt rơi xuống đất.',
@@ -242,6 +251,7 @@ const plant = createLiveEarth(find('#live-earth'), (stage, phase, paused, care) 
     if (index === stage) indicator.setAttribute('aria-current', 'step');
     else indicator.removeAttribute('aria-current');
   });
+  if (stageReadout) stageReadout.innerHTML = `${String(stage+1).padStart(2,'0')} <small>/ 05</small>`;
   lifecycleLabel.textContent = phaseNotes[phase] ?? careNotes[care] ?? stageNotes[stage];
   const playbackLabel = paused ? 'Tiếp tục chuyển động' : 'Tạm dừng chuyển động';
   plantControl.hidden = phase === 'ripe' || phase === 'harvested';
