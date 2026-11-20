@@ -1,6 +1,7 @@
 import {createLiveEarth, createRootEarth} from './live-earth.js';
 import {storyProgress, rootCountAt, rootRevealAt, rootScrollTarget} from './scroll-story-state.js';
 import {FEATURES, guideIndex, searchGuides} from './root-guide-data.js';
+import {START_IMAGES, startPhoto} from './start-photography.js';
 import farmIcon from '@phosphor-icons/core/assets/regular/farm.svg?raw';
 import calendarIcon from '@phosphor-icons/core/assets/regular/calendar-dots.svg?raw';
 import clipboardIcon from '@phosphor-icons/core/assets/regular/clipboard-text.svg?raw';
@@ -101,10 +102,10 @@ site.innerHTML = `
     <section class="start-workflow earth-container" aria-labelledby="workflow-title">
       <h2 id="workflow-title">Bắt đầu một mùa vụ.</h2>
       <ol class="workflow-steps">
-        ${workflow.map(({title, detail, image, width = 508, height = 508},i) => `
+        ${workflow.map(({title, detail},i) => `
           <li style="--step: ${i}">
             <button class="workflow-card" type="button" data-open-guide="${i}" aria-haspopup="dialog" aria-controls="earth-dialog">
-              <img src="${image ?? `/assets/start-feature-${FEATURES[i].image}.webp`}" alt="" width="${width}" height="${height}" loading="lazy" decoding="async">
+              ${startPhoto(START_IMAGES.workflow[i],"workflow-photo","(max-width:760px) 38vw, 31vw")}
               <span class="workflow-content">
                 <span class="workflow-index">Bước ${i+1}</span>
                 <strong>${title}</strong>
@@ -157,7 +158,7 @@ site.innerHTML = `
       </div>
       <div class="start-feature-dock">${FEATURES.map((feature,i) => `
         <button type="button" class="start-dock-button" style="--lane: ${i-2}; --distance: ${Math.abs(i-2)}" data-open-guide="${i}" aria-haspopup="dialog" aria-controls="earth-dialog">
-          <img class="dock-image" src="/assets/start-feature-${feature.image}.webp" alt="" width="508" height="508" loading="lazy" decoding="async">
+          ${startPhoto(START_IMAGES.features[i],"dock-image","(max-width:760px) 38vw, (max-width:980px) 50vw, 32vw")}
           <span class="dock-content">
             <strong><span class="dock-icon">${icon(symbols[i])}</span>${feature.label}</strong>
             <span class="dock-summary">${feature.summary}</span>
@@ -168,7 +169,7 @@ site.innerHTML = `
     </section>
     <section class="earth-container start-close" aria-labelledby="start-close-title">
       <div class="start-close-frame">
-        <img src="/assets/start-field-sunrise.webp" alt="" width="1600" height="900" loading="lazy" decoding="async">
+        ${startPhoto(START_IMAGES.closing,"start-closing-photo","(max-width:760px) 100vw, 90vw")}
         <div class="start-close-copy">
           <h2 id="start-close-title">Sẵn sàng cho mùa vụ tới?</h2>
           <button type="button" class="earth-primary" data-enter-page="home">Mở bản dùng thử ${icon('right')}</button>
@@ -179,7 +180,7 @@ site.innerHTML = `
   <footer class="earth-footer">
     <div class="earth-container earth-footer-inner">
       <a class="earth-brand" href="#rg-top" aria-label="AGRIDELTA — Về đầu trang">${brand}</a>
-      <span>© 2026 AGRIDELTA</span>
+      <span>© 2026 AGRIDELTA</span><span class="start-photo-credit"><a href="https://unsplash.com/license" target="_blank" rel="noopener noreferrer">Ảnh chụp thực tế · Unsplash Free License</a></span>
       <button type="button" data-open-guide="0">Hướng dẫn sử dụng ${icon('right')}</button>
     </div>
   </footer>
@@ -192,6 +193,16 @@ site.innerHTML = `
 `;
 document.body.insertBefore(site, document.querySelector('#app'));
 document.body.classList.add('rg-experience-mode');
+// Capture non-bubbling <img> error events and switch to the offline project asset.
+site.addEventListener('error', event => {
+  const img = event.target;
+  if (!(img instanceof HTMLImageElement) || !img.dataset.photoFallback) return;
+  const local = img.dataset.photoFallback;
+  delete img.dataset.photoFallback;
+  img.removeAttribute('srcset');
+  img.removeAttribute('sizes');
+  img.src = local;
+}, true);
 
 const find = selector => site.querySelector(selector);
 const stageIndicators = [...site.querySelectorAll('.plant-stages li')];

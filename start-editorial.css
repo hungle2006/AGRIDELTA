@@ -1,0 +1,135 @@
+/* AGRIDELTA Start · thoughtful editorial & motion design; scoped to Start only. */
+body.rg-experience-mode {background:#f6f5ed}
+.earth-site{--paper:#fffef8;--ink:#1c3827;--muted:#506656;--accent:#2d6a47;--rule:#cbd8c4;--gutter:clamp(19px,5.5vw,90px);background:#f6f5ed}
+.earth-site :is(button,a):focus-visible{outline:3px solid #9db971;outline-offset:3px}
+.earth-site :is(.earth-primary,.earth-secondary,.earth-icon-button,.root-next){min-height:44px}
+.earth-site .earth-primary{background:#245b3d;box-shadow:0 8px 20px #1d50301f;transition:transform .25s cubic-bezier(.2,.8,.2,1),background-color .25s,box-shadow .25s}
+.earth-site .earth-primary:hover{background:#16482d;transform:translateY(-2px);box-shadow:0 12px 25px #1d503036}
+.earth-site .earth-primary:active{transform:scale(.985)}
+.earth-header{z-index:30;background:#f8faf2ee;border-bottom:1px solid #d3dfce;box-shadow:none}
+.earth-header-inner{min-height:76px}
+.earth-nav{background:#eff3e9;border-color:#d4e0ce}
+.start-hero{position:relative;isolation:isolate;min-height:calc(100svh - 76px);background:linear-gradient(115deg,#f8f8ef,#edf2e5 70%,#e4eddd);overflow:clip}
+.start-hero::before{content:"";position:absolute;inset:0 0 0 42%;z-index:-1;pointer-events:none;opacity:.19;background-image:linear-gradient(90deg,#f6f7eebc,#f6f7ee08),url("https://images.unsplash.com/photo-1721292175149-8a929b7635f7?auto=format&fit=crop&w=1800&q=82");background-position:center;background-size:cover;mask-image:linear-gradient(90deg,transparent,#000 35%)}
+.start-hero .hero-layout{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);align-items:center;gap:clamp(25px,4vw,70px);min-height:calc(100svh - 76px);padding-block:clamp(22px,4vw,54px)}
+.start-hero .hero-layout::after{display:none}
+.earth-intro{min-width:0;padding:0;position:relative;z-index:2}
+.earth-intro h1{font-size:clamp(48px,5.55vw,87px);max-width:11ch;line-height:1.12;font-weight:800;letter-spacing:-.067em;margin:22px 0 24px;text-wrap:balance}
+.earth-intro h1 em{display:inline;color:#34764a}
+.earth-intro>.earth-intro-copy{font-size:clamp(15px,1.3vw,19px);line-height:1.75;max-width:39ch}
+.earth-intro-actions{gap:10px;margin-top:29px}
+.earth-intro-actions :is(.earth-primary,.earth-secondary){min-height:53px;padding-inline:19px}
+.plant-journey{position:relative;top:auto;max-width:670px;margin-inline:auto;width:100%}
+.plant-art{height:clamp(300px,49svh,560px)}
+.plant-model{width:min(105cqw,112cqh)}
+.plant-controls{border-radius:17px;background:#fffcf4f3;box-shadow:0 18px 48px #25392120;border-color:#c9d8c2}
+.plant-stages li{border-radius:10px;min-height:53px}
+.plant-stages [aria-current=step]{background:#e3eed7}
+.start-workflow{padding-block:clamp(67px,8vw,118px)}
+.start-workflow h2{font-size:clamp(37px,4.7vw,65px)}
+.workflow-steps{gap:clamp(13px,2vw,24px);margin-top:35px}
+.workflow-card,.start-dock-button{background:#fffdf8;border:1px solid #cfddca;border-radius:16px;box-shadow:0 8px 26px #1e3b2210;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s}
+.workflow-card{overflow:hidden}
+.workflow-card img{display:block;height:clamp(175px,18vw,275px);width:100%;object-fit:cover;background:#dee8d5;transition:transform .5s}
+.workflow-card:hover,.start-dock-button:hover,.start-dock-button:focus-visible{transform:translateY(-3px);box-shadow:0 16px 34px #1b3e2225}
+.workflow-card:hover img,.start-dock-button:hover .dock-image{transform:scale(1.025)}
+.workflow-content{gap:8px;padding:22px 54px 27px 23px}
+.workflow-content strong{font-size:clamp(19px,1.7vw,25px)}
+.workflow-content>span:last-child{line-height:1.65}
+.root-features{background:#eaf0e3;border-color:#d0dfc8}
+.root-spread{grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);gap:clamp(22px,5vw,85px)}
+.root-visual{border-radius:19px;box-shadow:0 15px 45px #1c2f1c25}
+.root-discovery .root-story-desc{font-size:clamp(13px,1.2vw,16px);max-width:43ch;line-height:1.75}
+.root-next{padding-inline:19px;transition:transform .2s,background-color .2s}
+.root-next:hover{transform:translateY(-2px)}
+.root-feature{width:48px;height:48px;transition:transform .2s,box-shadow .2s}
+.root-feature:hover{transform:translate(-50%,-50%) scale(1.07);box-shadow:0 0 0 5px #8eaa76a6,0 5px 20px #1e2317ac}
+.start-guides{padding-block:clamp(70px,8vw,120px)}
+.guide-intro{margin-bottom:32px}
+.start-feature-dock{grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(12px,1.9vw,24px);perspective:none}
+.start-dock-button{grid-column:span 2;min-height:0;overflow:hidden}
+.start-dock-button:nth-child(n+4){grid-column:span 3}
+.dock-image{height:clamp(195px,19vw,280px);width:100%;display:block;object-fit:cover;background:#dfe9d9;transition:transform .5s}
+.dock-content{gap:10px;padding:21px 57px 26px 22px}
+.start-dock-button strong{font-size:clamp(17px,1.55vw,22px);line-height:1.3}
+.dock-summary{font-size:13px;line-height:1.65}
+.workflow-arrow,.dock-arrow{background:#e8f2df;border-color:#c4d8bf;transition:transform .25s}
+:is(.workflow-card,.start-dock-button):hover :is(.workflow-arrow,.dock-arrow){transform:translateX(3px)}
+.dock-arrow{width:40px;height:40px;bottom:15px;right:15px}
+.start-close{padding-bottom:clamp(65px,7vw,110px)}
+.start-close-frame{min-height:clamp(310px,35vw,470px);background:#1b3e2b;border-radius:18px}
+.start-close-frame img{object-position:center}
+.start-close-frame::after{background:linear-gradient(90deg,#142c20b8,#173b2e9a 65%,#29482c77)}
+.start-close-copy,.start-close h2{color:#fffdf4}
+.start-close h2{font-size:clamp(38px,4.8vw,64px);text-shadow:0 2px 28px #15231b67}
+.start-close .earth-primary{background:#f5f8ec;color:#205337;border:1px solid #d0e6c5}
+.start-close .earth-primary:hover{background:#e2f0d5}
+.earth-footer-inner{flex-wrap:wrap;padding-block:14px}
+.start-photo-credit{font-size:11px!important}
+.start-photo-credit a{text-decoration:underline;text-underline-offset:3px}
+@media(max-width:1100px){.start-hero .hero-layout{gap:18px}.earth-intro h1{font-size:clamp(45px,5.4vw,68px)}}
+@media(max-width:980px){
+ .earth-header-inner{min-height:70px}
+ .start-hero,.start-hero .hero-layout{min-height:calc(100svh - 70px)}
+ .start-feature-dock{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .start-dock-button,.start-dock-button:nth-child(n+4){grid-column:auto}
+ .start-dock-button:last-child{grid-column:span 2}
+ .dock-image{height:225px}
+}
+@media(max-width:760px){
+ .earth-site{--gutter:clamp(17px,5vw,30px)}
+ .earth-header-inner{min-height:66px}
+ .earth-nav{inset:calc(100% + 1px) 0 auto;border-radius:0 0 15px 15px;padding:13px var(--gutter)}
+ .start-hero{min-height:0}
+ .start-hero::before{inset:30% 0 0;opacity:.12;mask-image:linear-gradient(180deg,transparent,#000 45%)}
+ .start-hero .hero-layout{display:flex;flex-direction:column;align-items:stretch;min-height:0;padding-block:27px 29px;gap:14px}
+ .earth-intro h1{font-size:clamp(38px,9.3vw,56px);max-width:17ch;margin:14px 0 13px}
+ .earth-intro>.earth-intro-copy{font-size:13px;line-height:1.65}
+ .earth-intro-actions{margin-top:19px}
+ .earth-intro-actions :is(.earth-primary,.earth-secondary){min-height:46px;padding-inline:12px;font-size:12px}
+ .plant-journey{max-width:550px}
+ .plant-art{height:clamp(218px,40svh,350px)}
+ .plant-model{width:min(100cqw,116cqh)}
+ .plant-controls{padding:11px 10px;border-radius:13px}
+ .plant-controls h2{font-size:13px}
+ .plant-controls #lifecycle-label{font-size:11px}
+ .plant-stages li{min-height:46px;font-size:9px}
+ .plant-stages .earth-icon{font-size:16px}
+ .start-workflow{padding-block:62px}
+ .workflow-steps{grid-template-columns:1fr;gap:13px;margin-top:24px}
+ .workflow-card{display:grid;grid-template-columns:minmax(120px,37%) minmax(0,1fr);min-height:149px}
+ .workflow-card img{width:100%;max-width:none;min-height:149px;height:100%;object-fit:cover}
+ .workflow-content{align-content:center;padding:14px 38px 14px 15px;gap:5px}
+ .workflow-content strong{font-size:clamp(16px,4.2vw,21px)}
+ .workflow-content>span:last-child{font-size:11px;line-height:1.48}
+ .workflow-arrow{width:32px;height:32px;bottom:9px;right:8px}
+ .root-spread{grid-template-columns:1fr;gap:16px}
+ .root-visual{border-radius:13px}
+ .root-discovery .root-story-desc{font-size:12px;line-height:1.58}
+ .root-feature{width:44px;height:44px}
+ .start-guides{padding-block:65px}
+ .guide-intro h2{font-size:clamp(34px,8vw,48px)}
+ .start-feature-dock{grid-template-columns:1fr;gap:13px}
+ .start-dock-button,.start-dock-button:first-child,.start-dock-button:last-child,.start-dock-button:nth-child(n+4){grid-column:1;display:grid;grid-template-columns:minmax(120px,36%) minmax(0,1fr);min-height:150px}
+ .dock-image,.start-dock-button:first-child .dock-image{height:100%;min-height:150px;width:100%}
+ .dock-content{padding:15px 34px 15px 14px;gap:5px;align-content:center}
+ .start-dock-button strong{font-size:clamp(15px,3.9vw,20px);gap:6px}
+ .dock-summary{font-size:11px;line-height:1.48}
+ .dock-arrow{width:30px;height:30px;bottom:9px;right:9px}
+ .start-close-frame{min-height:310px}
+ .start-close h2{font-size:clamp(33px,8vw,48px)}
+ .start-photo-credit{order:5;width:100%;text-align:center}
+}
+@media(max-width:380px){
+ .earth-intro h1{font-size:36px}
+ .earth-intro-actions :is(.earth-primary,.earth-secondary){font-size:11px}
+ .plant-art{height:max(210px,33svh)}
+ .workflow-content{padding:12px 34px 12px 11px}
+ .dock-content{padding:13px 33px 13px 11px}
+ .dock-summary{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}
+ .earth-site .earth-primary,.workflow-card,.workflow-card img,.start-dock-button,.dock-image,.workflow-arrow,.dock-arrow,.root-feature,.root-next{animation:none!important;transition:none!important}
+ .root-feature{transform:translate(-50%,-50%)!important}
+}
