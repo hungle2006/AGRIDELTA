@@ -23,26 +23,28 @@ test('five Blender roots grow monotonically and retract on reverse scroll',()=>{
  }
  assert.equal(rootCountAt(0),1);
  assert.equal(rootCountAt(1),5);
- assert.equal(rootScrollTarget(0)>ROOT_STARTS[0],true);
+ assert.ok(rootScrollTarget(0)>ROOT_STARTS[ROOT_ORDER[0]]);
  assert.equal(rootScrollTarget(4)<1,true);
  assert.deepEqual(ROOT_ORDER,[2,1,3,0,4]);
- for(let i=0;i<ROOT_ORDER.length-1;i++)assert.ok(rootScrollTarget(i)<ROOT_STARTS[ROOT_ORDER[i+1]],'next root button should not skip branches');
+ for(let i=0;i<ROOT_ORDER.length;i++){
+  assert.ok(rootRevealAt(rootScrollTarget(i),ROOT_ORDER[i])>.93,'next root exposes its guide');
+  if(i<ROOT_ORDER.length-1)assert.ok(rootScrollTarget(i)<ROOT_STARTS[ROOT_ORDER[i+1]],'next root button should not skip branches');
+ }
 });
 
-test('Start scroll story retains real GLB and never blocks vertical wheel scrolling',()=>{
+test('Start scroll story keeps native scrolling and clips the Blender geometry by root travel',()=>{
  const script=readFileSync(new URL('../root-guide.js',import.meta.url),'utf8');
  const css=readFileSync(new URL('../start-scroll-story.css',import.meta.url),'utf8');
  const live=readFileSync(new URL('../live-earth.js',import.meta.url),'utf8');
- const fallback=readFileSync(new URL('../video-earth.js',import.meta.url),'utf8');
+ const fallback=readFileSync(new URL('../earth-fallback.js',import.meta.url),'utf8');
  assert.ok(script.includes("window.addEventListener('scroll'"));
  assert.ok(script.includes('earth.setScrollRoots(progress)'));
- assert.ok(!script.includes('e.preventDefault();if(newGesture)growNext'));
- assert.ok(css.includes('position:sticky!important'));
- assert.ok(css.includes('overflow-y:auto!important'));
- assert.ok(live.includes('trunk.uniform.value=.34+.66*THREE.MathUtils.smoothstep'));
- assert.ok(fallback.includes('setScrollRoots(progress)'));
- assert.ok(fallback.includes('lastSeek[i]'),'mobile fallback throttles expensive video seeks');
- assert.ok(script.includes('Math.exp(-dt/95)'),'scroll animation uses time-based damping');
- assert.ok(script.includes('--root-mobile-x'),'mobile root nodes use separate layout anchors');
- assert.ok(css.includes('.root-story-title'),'Start introduces the root system before scrolling');
+ assert.ok(!script.includes("addEventListener('wheel'"));
+ assert.match(css,/position:\s*sticky/);
+ assert.match(css,/root-scroll-track::after\s*\{/);
+ assert.ok(live.includes('vRootTravel > uRootGrowth'));
+ assert.ok(fallback.includes("asset('root', index)"));
+ assert.ok(fallback.includes('start-lifecycle-film.webm'));
+ assert.ok(script.includes('Math.exp(-elapsed/95)'));
+ assert.ok(css.includes('.root-story-title'));
 });

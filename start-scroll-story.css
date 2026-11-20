@@ -1,479 +1,124 @@
-/* AGRIDELTA Start · reversible Blender root scroll story
-   The app dashboard remains a normal document; only Start uses the sticky canvas. */
-html.rg-fullscreen{height:auto!important;overflow-y:auto!important;overflow-x:clip!important}
-html.rg-fullscreen body.rg-experience-mode,body.rg-experience-mode{
-  height:auto!important;min-height:100%!important;overflow-x:clip!important;
-  overflow-y:auto!important;overscroll-behavior-y:auto!important;
+.root-features { background: #192d25; color: #faf5e2; }
+.root-scroll-track {
+  --story-travel: clamp(340px, 70vh, 690px);
+  position: relative;
 }
-body.rg-experience-mode.earth-modal-open{overflow-y:hidden!important}
-body.rg-experience-mode .earth-site,body.rg-experience-mode .earth-site main{
-  height:auto!important;min-height:100svh!important;overflow:visible!important;
+.root-scroll-track::after { content: ""; display: block; height: var(--story-travel); }
+.root-spread {
+  position: sticky;
+  top: var(--root-pin-top, 0px);
+  display: grid;
+  grid-template-columns: minmax(0, .76fr) minmax(0, 1.24fr);
+  gap: clamp(19px, 6vw, 90px);
+  align-items: center;
+  padding-block: clamp(32px, 4.7vw, 70px);
 }
-body.rg-experience-mode .earth-stage{
-  position:relative!important;height:245svh!important;min-height:0!important;
-  max-width:none!important;aspect-ratio:auto!important;overflow:visible!important;
-  isolation:isolate;
+.root-discovery .earth-eyebrow { color: #c5dc99; }
+.root-story-title {
+  font: 500 clamp(36px, 4.9vw, 70px)/1.08 var(--serif);
+  letter-spacing: -.065em;
+  margin-top: 15px !important;
 }
-body.rg-experience-mode .earth-footer{
-  display:flex!important;max-width:none;min-height:90px;padding:24px clamp(20px,6vw,96px);
-  background:#172a1d;color:#d3dcbe;border-top:1px solid #b4d78d33;
+.root-discovery .root-story-desc {
+  color: #d0dccd;
+  max-width: 37ch;
+  margin-top: 19px;
+  font-size: 14px;
+  line-height: 1.7;
 }
-/* The real animated Blender GLB stays pinned while scrolling through its root story. */
-body.rg-experience-mode .scene-illustration{
-  position:sticky!important;top:0!important;left:0;right:0;bottom:auto!important;
-  width:100%!important;height:100svh!important;height:100dvh!important;
-  overflow:hidden!important;z-index:0;pointer-events:none;
+.root-progress {
+  max-width: 320px;
+  display: grid;
+  gap: 7px;
+  margin-top: 28px;
+  color: #e4eccf;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
-body.rg-experience-mode .scene-illustration>.scene-landscape{
-  height:64%!important;object-fit:cover;object-position:center 76%;
+.root-progress-meter { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.root-progress-meter i { display: block; height: 4px; border-radius: 4px; background: #577063; }
+.root-progress-meter i.is-grown { background: #d0e891; }
+.root-discovery-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 11px 19px; margin-top: 18px; }
+.root-discovery :is(.root-next, .root-skip) {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-size: 12px;
+  font-weight: 700;
 }
-body.rg-experience-mode .live-earth{
-  position:absolute!important;inset:0!important;width:100%;height:100%;
-  transform:translate3d(0,var(--scene-drift,0px),0);
-  will-change:transform;
-}
-body.rg-experience-mode .earth-header{z-index:30}
-body.rg-experience-mode .earth-intro{
-  position:absolute;top:clamp(100px,14dvh,157px);z-index:13;
-}
-body.rg-experience-mode .plant-journey{
-  position:absolute;top:clamp(120px,16dvh,180px);z-index:20;
-}
-body.rg-experience-mode .scene-load-status{z-index:16}
-body.rg-experience-mode .root-features{
-  position:absolute!important;inset:auto!important;top:0!important;left:0!important;
-  width:100%!important;height:100svh!important;height:100dvh!important;
-  z-index:14;pointer-events:none!important;touch-action:pan-y!important;
-  transform:translate3d(0,calc(var(--story-scroll-px,0px) + var(--scene-drift,0px)),0);
-  will-change:transform;
-}
-body.rg-experience-mode .root-gesture-plane{pointer-events:none!important}
-body.rg-experience-mode .root-feature-track{
-  display:contents!important;position:static!important;
-  overflow:visible!important;touch-action:pan-y!important;
-}
-body.rg-experience-mode .root-feature{
-  position:absolute!important;top:calc(var(--root-y) - 30px + var(--node-drift,0px))!important;
-  left:var(--root-x)!important;width:64px!important;min-width:0!important;
-  height:auto!important;transform:translateX(-50%)!important;pointer-events:auto!important;
-  touch-action:manipulation!important;scroll-snap-align:none!important;
-  animation:none!important;transition:opacity .18s ease!important;
-}
-body.rg-experience-mode .root-feature .root-orb{
-  width:60px!important;height:60px!important;min-width:0!important;min-height:0!important;
-  max-width:none!important;max-height:none!important;margin:0!important;
-  transform:scale(var(--node-scale,1))!important;
-  transform-origin:center center!important;transition:filter .18s ease!important;
-  filter:drop-shadow(0 0 10px #daf07a6a)!important;
-}
-body.rg-experience-mode .root-feature .root-orb>.earth-icon{
-  width:28px!important;height:28px!important;max-width:none!important;
-  min-width:0!important;min-height:0!important;
-}
-body.rg-experience-mode .root-feature:is(:hover,:focus-visible,.is-selected) .root-orb{
-  filter:drop-shadow(0 0 20px #e1fc9ce8)!important;
-}
-body.rg-experience-mode .root-feature .root-card{display:none!important}
-/* The dock stays available throughout the scroll story. */
-body.rg-experience-mode .start-feature-dock{
-  position:fixed!important;left:50%!important;right:auto!important;
-  bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;
-  transform:translateX(-50%)!important;z-index:80!important;
-  width:min(990px,92vw)!important;max-width:calc(100vw - 22px)!important;
-}
-body.rg-experience-mode .guide-sheet{
-  position:fixed!important;z-index:90!important;
-  right:clamp(18px,3.8vw,65px)!important;
-  bottom:clamp(124px,17dvh,172px)!important;
-  max-height:calc(100dvh - 165px)!important;
-}
-body.rg-experience-mode .earth-site.has-open-guide .plant-journey{
-  opacity:0!important;visibility:hidden!important;pointer-events:none!important;
-}
-body.rg-experience-mode .root-discovery,
-body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{
-  top:auto!important;bottom:134px!important;left:clamp(28px,5vw,96px)!important;
-  right:auto!important;transform:none!important;align-items:flex-start!important;
-  text-align:left;z-index:20!important;gap:5px!important;
-}
-body.rg-experience-mode .root-discovery>span{font-weight:650}
-body.rg-experience-mode .root-features[data-revealed="5"] .root-discovery{display:none!important}
-/* A clear first-viewport hint, not a fake vertical swipe target. */
-body.rg-experience-mode .earth-scroll{
-  position:absolute;top:calc(100svh - 180px)!important;left:50%!important;
-  z-index:22!important;display:flex!important;align-items:center;
-  transform:translateX(-50%)!important;padding:5px 10px;
-  opacity:1;transition:opacity .2s ease;
-}
-body.rg-experience-mode .earth-scroll>span{
-  width:31px;height:40px;border-radius:18px;
-  background:#264b30c9;border:1px solid #d8f1a194;
-}
-body.rg-experience-mode .earth-scroll>span>.earth-icon{width:17px;height:17px}
-body.rg-experience-mode .earth-scroll small{
-  max-width:200px;font-size:11px;line-height:1.5;color:#ecf8d3;font-weight:650;
-  text-align:center;text-shadow:0 2px 7px #132018;
-}
-body.rg-experience-mode .earth-site.story-scrolled .earth-scroll{
-  opacity:0;pointer-events:none;
-}
-.journey-toggle{display:none}
-.journey-details{display:block}
-@media(min-width:720px) and (max-width:1180px){
- body.rg-experience-mode .earth-intro{left:5%;max-width:38%}
- body.rg-experience-mode .plant-journey{right:4%;width:min(300px,29vw)}
- body.rg-experience-mode .earth-scroll{left:50%!important}
-}
-@media(max-height:700px) and (min-width:720px){
- body.rg-experience-mode .earth-intro{top:85px}
- body.rg-experience-mode .earth-intro h1{font-size:clamp(27px,3vw,39px)}
- body.rg-experience-mode .plant-journey{top:88px}
- body.rg-experience-mode .earth-scroll{top:calc(100svh - 150px)!important}
- body.rg-experience-mode .root-discovery,
- body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{bottom:118px!important}
-}
-@media(max-width:719px){
- body.rg-experience-mode .earth-stage{height:230svh!important}
- body.rg-experience-mode .earth-header{z-index:32}
- body.rg-experience-mode .earth-intro{
-  position:absolute!important;top:clamp(69px,9dvh,90px)!important;
-  left:17px;right:17px;z-index:12;max-width:none;
- }
- body.rg-experience-mode .earth-intro h1{font-size:clamp(23px,6.7vw,32px)}
- body.rg-experience-mode .earth-intro>p{max-width:335px}
- body.rg-experience-mode .scene-illustration>.scene-landscape{
-  height:75%!important;object-position:48% 68%;
- }
- body.rg-experience-mode .live-earth{
-  inset:auto 0!important;top:clamp(115px,17dvh,184px)!important;
-  width:100%!important;height:clamp(400px,72dvh,630px)!important;
- }
- body.rg-experience-mode .blender-lifecycle-video,
- body.rg-experience-mode .blender-root-video{
-  inset:0 auto!important;left:50%!important;
-  width:1164px!important;height:100%!important;max-width:none!important;
-  transform:translateX(-50%)!important;
- }
- body.rg-experience-mode .blender-root-video{transform:translateX(-50%) scaleX(.39)!important}
- body.rg-experience-mode .plant-journey{
-  top:clamp(246px,34dvh,300px)!important;left:auto!important;right:12px!important;
-  width:min(226px,calc(100% - 24px))!important;max-width:none!important;
-  padding:7px 10px!important;border-radius:16px!important;
-  background:#183a29e8!important;z-index:38!important;
-  box-shadow:0 8px 26px #07171048;
-  transition:width .2s ease,background .2s ease;
- }
- body.rg-experience-mode .plant-journey h2{display:none!important}
- .journey-toggle{
-  display:flex;align-items:center;justify-content:space-between;gap:8px;
-  width:100%;background:none;color:#eff7db;padding:4px 2px;
-  font-size:11px!important;font-weight:700;min-height:33px;
- }
- .journey-toggle>.earth-icon{width:18px;height:18px;color:#cbe99b}
- .journey-toggle>span:nth-child(2){flex:1;text-align:left}
- .journey-toggle>span:last-child{font-size:14px;color:#d7f1b1;transition:transform .2s}
- .journey-details{display:none!important}
- body.rg-experience-mode .earth-site.journey-open .plant-journey{
-  left:12px!important;right:12px!important;width:auto!important;
- }
- body.rg-experience-mode .earth-site.journey-open .journey-details{display:block!important}
- body.rg-experience-mode .earth-site.journey-open .journey-toggle>span:last-child{transform:rotate(180deg)}
- body.rg-experience-mode .earth-site.journey-open .plant-stages{margin-top:11px}
- body.rg-experience-mode .earth-site.journey-open .lifecycle-controls{margin-top:8px}
- body.rg-experience-mode .root-feature{
-  top:calc(var(--root-y) - 21px + var(--node-drift,0px))!important;
-  width:45px!important;min-width:0!important;display:flex;flex-direction:column;
-  align-items:center;
- }
- body.rg-experience-mode .root-feature .root-orb{
-  width:clamp(28px,8.8vw,44px)!important;
-  height:clamp(28px,8.8vw,44px)!important;
- }
- body.rg-experience-mode .root-feature .root-orb>.earth-icon{
-  width:clamp(16px,5vw,22px)!important;height:clamp(16px,5vw,22px)!important;
- }
- body.rg-experience-mode .root-discovery{display:none!important}
- body.rg-experience-mode .earth-scroll{
-  top:calc(100svh - 172px)!important;left:50%!important;padding:4px 6px!important;
- }
- body.rg-experience-mode .earth-scroll>span{width:28px;height:34px}
- body.rg-experience-mode .earth-scroll small{font-size:9px;max-width:170px}
- body.rg-experience-mode .start-feature-dock{
-  left:9px!important;right:9px!important;
-  width:auto!important;max-width:none!important;
-  transform:none!important;bottom:calc(7px + env(safe-area-inset-bottom,0px))!important;
-  padding:6px!important;z-index:80!important;
- }
- body.rg-experience-mode .guide-sheet{
-  left:10px!important;right:10px!important;
-  top:auto!important;bottom:calc(88px + env(safe-area-inset-bottom,0px))!important;
-  width:auto!important;max-height:min(64dvh,calc(100dvh - 175px))!important;
-  margin:0!important;z-index:90!important;
- }
- body.rg-experience-mode .guide-sheet>.guide-note{display:none!important}
- body.rg-experience-mode .earth-site.has-open-guide .plant-journey{display:none!important}
- body.rg-experience-mode .earth-footer{min-height:78px;padding:17px 16px;gap:8px}
- body.rg-experience-mode .earth-footer>span:nth-child(2){display:none}
-}
-@media(max-width:380px){
- body.rg-experience-mode .plant-journey{top:clamp(220px,34dvh,274px)!important}
- body.rg-experience-mode .root-feature .root-orb{width:30px!important;height:30px!important}
- body.rg-experience-mode .root-feature .root-orb>.earth-icon{width:17px!important;height:17px!important}
-}
-@media(max-width:719px) and (max-height:670px){
- body.rg-experience-mode .earth-intro h1{font-size:clamp(20px,6vw,27px)}
- body.rg-experience-mode .earth-intro>p{font-size:9px}
- body.rg-experience-mode .plant-journey{top:clamp(214px,36dvh,246px)!important}
- body.rg-experience-mode .live-earth{top:115px!important;height:clamp(360px,73dvh,470px)!important}
- body.rg-experience-mode .earth-scroll{top:calc(100svh - 145px)!important}
- body.rg-experience-mode .guide-sheet{bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}
- body.rg-experience-mode .start-dock-button{min-height:57px!important}
-}
-@media(prefers-reduced-motion:reduce){
- body.rg-experience-mode .earth-scroll,
- .journey-toggle>span:last-child{transition:none!important}
- body.rg-experience-mode .root-feature .root-orb{transition:none!important}
-}
+.root-next { background: #dfedaa; color: #1c3a2b; border: 1px solid #dfedaa; border-radius: 8px; padding: 9px 14px; }
+.root-next:hover { background: #eaf6c2; }
+.root-discovery .root-skip { color: #e0eccf; }
+.root-skip:hover { text-decoration: underline; text-underline-offset: 4px; }
 
+.root-visual {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  height: clamp(340px, 42vw, 545px);
+  border-radius: 16px;
+  border: 1px solid #81907c65;
+  background-color: #2c231b;
+  background-image: radial-gradient(ellipse at 50% 42%, #3a2c1f40, #1d1c17d9 80%), url('/assets/soil-albedo-v2.webp');
+  background-size: cover;
+  background-position: center;
+  container-type: size;
+}
+.root-visual-horizon {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #273d30 3%, #41503b 16%, transparent 34%), linear-gradient(0deg,#1e2319b0,transparent 50%);
+  pointer-events: none;
+}
+.root-model-frame {
+  position: relative;
+  width: min(94cqw, 108cqh);
+  aspect-ratio: 1;
+}
+.root-model, .root-feature-track { position: absolute; inset: 0; }
+.root-model { pointer-events: none; }
+.root-poster { clip-path: circle(16% at 50% 26%); }
+.root-fallback-layer { clip-path: circle(var(--reach, 0%) at 50% var(--junction-y, 26%)); }
+.root-fallback-layer:nth-of-type(2) { --junction-y: 35%; }
+.root-fallback-layer:nth-of-type(3) { --junction-y: 40%; }
+.root-fallback-layer:nth-of-type(5) { --junction-y: 43%; }
+.root-fallback-layer:nth-of-type(6) { --junction-y: 34%; }
+.root-feature {
+  position: absolute;
+  left: var(--root-x);
+  top: var(--root-y);
+  transform: translate(-50%,-50%);
+  width: 45px;
+  height: 45px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  color: #f0f4d8;
+  border: 1px solid #e3e7ae;
+  background: #233d30;
+  box-shadow: 0 0 0 3px #263b3299, 0 2px 12px #18150faa;
+  border-radius: 50%;
+  font-size: 20px !important;
+}
+.root-feature:hover { background: #dfedaa; color: #20392c; }
+.root-features :focus-visible { outline-color: #e3eba8; }
 
-/* Start UX 2026-11-20: simplify the first fold and eliminate competing scroll prompts. */
-body.rg-experience-mode .earth-header{
- top:10px;height:66px;left:clamp(14px,4.6vw,76px);right:clamp(14px,4.6vw,76px);
- padding:7px 15px;border-radius:22px;
- background:linear-gradient(115deg,rgba(247,252,242,.86),rgba(249,253,246,.63));
- border:1px solid rgba(246,255,233,.62);
- box-shadow:0 8px 28px rgba(9,38,24,.08);
- backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+@media (max-width: 720px) {
+  .root-spread { grid-template-columns: minmax(0,1fr); align-content: start; gap: 16px; padding-block: 20px; }
+  .root-story-title { font-size: clamp(32px, 7.6vw, 52px); margin-top: 5px !important; }
+  .root-story-title br { display: none; }
+  .root-discovery .root-story-desc { font-size: 12px; line-height: 1.55; margin-top: 7px; }
+  .root-progress { margin-top: 12px; }
+  .root-discovery-actions { margin-top: 7px; gap: 7px 16px; }
+  .root-visual { height: min(47svh, 410px); min-height: 235px; }
+  .root-visual-label { left: 10px; top: 10px; }
+  .root-feature { width: 42px; height: 42px; }
 }
-body.rg-experience-mode .earth-brand-name{letter-spacing:-.04em}
-body.rg-experience-mode .earth-intro{
- top:clamp(103px,14dvh,140px);left:clamp(24px,6.8vw,110px);max-width:min(415px,35vw);
-}
-body.rg-experience-mode .earth-intro h1{
- font-size:clamp(29px,3.05vw,45px);line-height:1.08;letter-spacing:-.055em;
- margin:10px 0 15px;text-wrap:balance;
-}
-body.rg-experience-mode .earth-intro>p{
- display:block;max-width:375px;padding:10px 13px;
- font-size:clamp(11px,.94vw,13px);line-height:1.55;
- color:#24432b;background:rgba(249,253,242,.85);
- border:1px solid rgba(255,255,243,.73);border-radius:12px;
- box-shadow:0 8px 24px rgba(18,54,29,.08);
- -webkit-box-orient:unset;-webkit-line-clamp:unset;overflow:visible;
-}
-body.rg-experience-mode .earth-intro-actions{margin-top:14px;gap:9px}
-body.rg-experience-mode .earth-cta,body.rg-experience-mode .earth-secondary{
- min-height:43px;padding:10px 15px;transition:transform .23s cubic-bezier(.2,.8,.2,1),background .23s,box-shadow .23s;
-}
-body.rg-experience-mode .plant-journey{
- right:clamp(20px,5vw,80px);top:clamp(115px,16dvh,160px);
- background:linear-gradient(140deg,rgba(24,68,52,.94),rgba(27,60,39,.89));
- border:1px solid rgba(221,248,190,.32);
- box-shadow:0 15px 36px rgba(16,42,30,.18),inset 0 1px 0 rgba(255,255,255,.13);
-}
-body.rg-experience-mode .earth-scroll{display:none!important}
-
-/* One integrated scroll-story explanation replaces the old left button + center hint. */
-body.rg-experience-mode .root-discovery,
-body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{
- display:flex!important;flex-direction:column!important;
- align-items:stretch!important;text-align:left!important;
- bottom:135px!important;left:clamp(25px,6.8vw,110px)!important;
- right:auto!important;top:auto!important;transform:none!important;
- width:min(365px,34vw)!important;max-width:none!important;
- min-width:0!important;padding:12px 15px!important;gap:5px!important;
- border:1px solid rgba(198,235,159,.32);border-radius:17px;
- background:linear-gradient(145deg,rgba(18,52,35,.90),rgba(21,43,27,.86));
- box-shadow:0 18px 40px rgba(8,25,15,.24),inset 0 1px 0 rgba(255,255,235,.12);
- backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
- color:#edf6da;pointer-events:auto;z-index:25!important;
- opacity:1;transition:opacity .32s ease,transform .32s ease;
-}
-body.rg-experience-mode .root-story-eyebrow{
- display:flex;align-items:center;gap:7px;letter-spacing:.12em;
- color:#d2ef9b;font-size:9px;font-weight:750;
-}
-body.rg-experience-mode .root-story-eyebrow .earth-icon{width:14px;height:14px}
-body.rg-experience-mode .root-story-title{
- color:#fbfff1;font-size:clamp(14px,1.14vw,18px);line-height:1.32;
- font-weight:750;letter-spacing:-.025em;white-space:normal;
-}
-body.rg-experience-mode .root-discovery .root-story-desc{
- color:#c9daba;font-size:11px;line-height:1.62;white-space:normal;margin:0;
-}
-body.rg-experience-mode .root-progress-line{
- height:4px;background:#d8f8c124;border-radius:999px;
- overflow:hidden;width:100%;margin:2px 0;
-}
-body.rg-experience-mode .root-progress-line>span{
- display:block;width:100%;height:100%;background:linear-gradient(90deg,#88c86e,#d9f59d);
- transform:scaleX(var(--story-progress,0));transform-origin:left center;
- border-radius:inherit;
-}
-body.rg-experience-mode .root-discovery-actions{
- display:flex;align-items:center;justify-content:space-between;gap:9px;width:100%;
-}
-body.rg-experience-mode .root-discovery-actions>span{
- font-size:10px;letter-spacing:.04em;color:#ddf2c3;font-weight:700;white-space:nowrap;
-}
-body.rg-experience-mode .root-grow-next,
-body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-grow-next{
- flex-shrink:0;min-height:34px!important;padding:7px 11px!important;
- font-size:10px!important;line-height:1.2;gap:6px;
- border:1px solid rgba(217,244,160,.55)!important;
- background:#cdebaa;color:#173e26!important;
- box-shadow:none;
- transition:transform .2s ease,background .2s ease,box-shadow .2s ease;
-}
-body.rg-experience-mode .root-grow-next>.earth-icon{width:14px;height:14px}
-body.rg-experience-mode .root-grow-next:hover{
- transform:translateY(-2px);background:#e5f6c2;
- box-shadow:0 6px 18px #091b1238;
-}
-body.rg-experience-mode .earth-site.roots-active .root-discovery{
- opacity:0!important;pointer-events:none!important;transform:translateY(14px)!important;
-}
-body.rg-experience-mode .root-feature{
- will-change:opacity;outline-offset:5px;
-}
-body.rg-experience-mode .root-feature .root-orb{
- transform:translate3d(0,0,0) scale(var(--node-scale,1))!important;
- backface-visibility:hidden;
-}
-body.rg-experience-mode .root-feature .root-orb>img{
- border-radius:50%;filter:drop-shadow(0 2px 9px rgba(10,34,14,.25));
-}
-body.rg-experience-mode .start-feature-dock{
- bottom:calc(11px + env(safe-area-inset-bottom,0px))!important;
- border-radius:18px!important;padding:11px 14px 12px!important;
- background:linear-gradient(125deg,rgba(13,48,28,.95),rgba(22,56,37,.94));
- box-shadow:0 16px 38px rgba(6,22,12,.32),inset 0 1px 0 rgba(255,255,255,.17);
-}
-body.rg-experience-mode .start-feature-dock .start-dock-button{
- border-radius:11px;min-height:48px;transition:background .18s ease,transform .18s ease,border-color .18s ease;
-}
-body.rg-experience-mode .start-feature-dock .start-dock-button:active{
- transform:scale(.97);
-}
-
-/* Narrow laptop: protect the GLB viewport and keep a breathable left-hand story card. */
-@media(min-width:720px) and (max-width:1180px){
- body.rg-experience-mode .earth-header{left:18px;right:18px}
- body.rg-experience-mode .earth-intro{left:5%;max-width:38vw}
- body.rg-experience-mode .earth-intro h1{font-size:clamp(26px,3.2vw,39px)}
- body.rg-experience-mode .root-discovery,
- body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{
-  left:5%!important;width:min(345px,39vw)!important;padding:13px 15px!important;
- }
- body.rg-experience-mode .plant-journey{right:3%;width:min(310px,30vw)}
-}
-@media(max-height:730px) and (min-width:720px){
- body.rg-experience-mode .earth-intro{top:90px}
- body.rg-experience-mode .earth-intro h1{font-size:clamp(28px,2.8vw,40px)}
- body.rg-experience-mode .earth-intro>p{padding:8px 11px;font-size:11px}
- body.rg-experience-mode .earth-intro-actions{margin-top:10px}
- body.rg-experience-mode .root-discovery,
- body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{
-  bottom:118px!important;padding:12px 14px!important;gap:6px!important;
- }
- body.rg-experience-mode .root-story-title{font-size:14px}
- body.rg-experience-mode .root-discovery .root-story-desc{font-size:10px}
-}
-
-/* Mobile: preserve the entire seedling between the introduction and the soil. */
-@media(max-width:719px){
- body.rg-experience-mode .earth-header{
-  top:7px;left:8px;right:8px;height:56px;padding:6px 9px;
-  border-radius:17px;gap:5px;background:rgba(250,254,246,.82);
- }
- body.rg-experience-mode .earth-brand-name{font-size:15px}
- body.rg-experience-mode .earth-intro{
-  top:73px!important;left:17px!important;right:17px!important;max-width:none!important;
- }
- body.rg-experience-mode .earth-intro h1{
-  font-size:clamp(23px,6.3vw,30px);line-height:1.06;margin:6px 0 9px;
- }
- body.rg-experience-mode .earth-intro>p{
-  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
-  overflow:hidden;max-width:350px;padding:7px 10px;
-  font-size:10px;line-height:1.48;border-radius:10px;
- }
- body.rg-experience-mode .earth-intro-actions{margin-top:9px;gap:7px}
- body.rg-experience-mode .earth-cta,body.rg-experience-mode .earth-secondary{
-  min-height:36px;padding:7px 10px;font-size:10px!important;
- }
- body.rg-experience-mode .live-earth{
-  top:clamp(198px,23dvh,242px)!important;
-  height:clamp(398px,64dvh,558px)!important;
- }
- body.rg-experience-mode .scene-illustration>.scene-landscape{
-  height:77%!important;object-position:48% 72%;
- }
- body.rg-experience-mode .plant-journey{
-  top:clamp(470px,57dvh,515px)!important;
-  right:12px!important;left:auto!important;
-  width:min(226px,calc(100% - 24px))!important;
-  background:rgba(19,52,35,.92)!important;
- }
- body.rg-experience-mode .root-feature{
-  left:var(--root-mobile-x,var(--root-x))!important;
-  top:calc(var(--root-mobile-y,var(--root-y)) - 21px + var(--node-drift,0px))!important;
-  width:46px!important;
- }
- body.rg-experience-mode .root-feature .root-orb{
-  width:32px!important;height:32px!important;max-width:none!important;
- }
- body.rg-experience-mode .root-feature .root-orb>.earth-icon{
-  width:18px!important;height:18px!important;
- }
- body.rg-experience-mode .root-discovery,
- body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{
-  display:flex!important;left:14px!important;right:auto!important;top:auto!important;
-  bottom:calc(94px + env(safe-area-inset-bottom,0px))!important;
-  width:min(278px,calc(100vw - 28px))!important;
-  max-width:none!important;padding:11px 13px!important;
-  gap:6px!important;border-radius:14px;
- }
- body.rg-experience-mode .root-story-eyebrow{font-size:8px}
- body.rg-experience-mode .root-story-title{font-size:13px;line-height:1.22}
- body.rg-experience-mode .root-discovery .root-story-desc{font-size:10px;line-height:1.48}
- body.rg-experience-mode .root-discovery-actions>span{font-size:9px}
- body.rg-experience-mode .root-grow-next,
- body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-grow-next{
-  min-height:30px!important;padding:5px 8px!important;font-size:9px!important;
- }
- body.rg-experience-mode .start-feature-dock{
-  padding:6px!important;bottom:calc(7px + env(safe-area-inset-bottom,0px))!important;
- }
- body.rg-experience-mode .start-feature-dock .start-dock-button{
-  min-height:60px;font-size:clamp(8px,2.3vw,10px)!important;
- }
- body.rg-experience-mode .earth-site.journey-open .root-discovery{
-  opacity:0!important;pointer-events:none!important;
- }
-}
-@media(max-width:719px) and (max-height:680px){
- body.rg-experience-mode .earth-intro{top:68px!important}
- body.rg-experience-mode .earth-intro h1{font-size:clamp(20px,6vw,27px)}
- body.rg-experience-mode .live-earth{
-  top:clamp(188px,27dvh,216px)!important;height:clamp(340px,64dvh,435px)!important;
- }
- body.rg-experience-mode .plant-journey{top:clamp(385px,60dvh,430px)!important}
- body.rg-experience-mode .root-discovery,
- body.rg-experience-mode .root-features[data-revealed]:not([data-revealed="0"]) .root-discovery{
-  bottom:calc(83px + env(safe-area-inset-bottom,0px))!important;
-  padding:9px 11px!important;gap:4px!important;
- }
- body.rg-experience-mode .root-story-eyebrow{font-size:7px}
- body.rg-experience-mode .root-story-title{font-size:12px}
- body.rg-experience-mode .root-discovery .root-story-desc{font-size:9px}
-}
-@media(prefers-reduced-motion:reduce){
- body.rg-experience-mode .root-discovery,
- body.rg-experience-mode .root-grow-next,
- body.rg-experience-mode .start-feature-dock .start-dock-button{transition:none!important}
-}
-
-@media(max-width:719px){
- body.rg-experience-mode .blender-root-video{transform:translateX(-50%) scaleX(.46)!important}
+@media (max-height: 540px) {
+  .root-scroll-track { --story-travel: 210px; }
 }

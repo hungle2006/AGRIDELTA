@@ -1,22 +1,92 @@
-"""Blender-rendered animated fallback for browsers without WebGL2, never photo stand-ins."""
-import bpy,os,time,math
+"""Render the exact Start model for devices without WebGL2.
+
+Run blender -b -t 3 --python blender/render_start_fallback.py
+The intermediate PNGs can be converted using scripts/encode-start-fallback.sh.
+"""
+import os
+from pathlib import Path
+
+import bpy
 from mathutils import Vector
-ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-bpy.ops.wm.open_mainfile(filepath=ROOT+'/blender/start_lifecycle.blend')
-s=bpy.context.scene;s.render.engine='CYCLES';s.cycles.samples=8;s.cycles.use_denoising=False;s.cycles.max_bounces=3;s.cycles.diffuse_bounces=1;s.cycles.glossy_bounces=1;s.cycles.transmission_bounces=1;s.render.film_transparent=True
-s.render.resolution_x=960;s.render.resolution_y=536;s.render.resolution_percentage=100;s.render.image_settings.file_format='PNG';s.render.image_settings.color_mode='RGBA';s.render.image_settings.compression=15
-s.world.use_nodes=True;s.world.node_tree.nodes.get('Background').inputs['Color'].default_value=(.65,.78,.9,1);s.world.node_tree.nodes.get('Background').inputs['Strength'].default_value=.45
-s.view_settings.view_transform='AgX';s.view_settings.look='AgX - Medium High Contrast'
-def area(loc,power,color,size):
- bpy.ops.object.light_add(type='AREA',location=loc);o=bpy.context.object;o.data.energy=power;o.data.color=color;o.data.shape='DISK';o.data.size=size;o.rotation_euler=(Vector((0,0,.4))-o.location).to_track_quat('-Z','Y').to_euler()
-area((-3,3,5),1000,(1,.84,.51),3);area((2,-5,4),450,(.84,1,.92),5)
-bpy.ops.object.camera_add(location=(0,-13,2.2));cam=bpy.context.object;cam.rotation_euler=(Vector((0,0,-.16))-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.type='ORTHO';cam.data.ortho_scale=11.1;s.camera=cam
-roots=[o for o in s.objects if 'rootIndex' in o]
-for o in roots:o.hide_render=True
-out='/tmp/agridelta-live-frames';os.makedirs(out,exist_ok=True)
-# Preserve a fresh green leaf colour under physical light.
-m=bpy.data.materials.get('Translucent leaf lamina');p=m.node_tree.nodes.get('Principled BSDF');links=m.node_tree.links;source=p.inputs['Base Color'].links[0].from_socket;mix=m.node_tree.nodes.new('ShaderNodeMixRGB');mix.blend_type='MULTIPLY';mix.inputs[0].default_value=1;mix.inputs[2].default_value=(.55,.76,.32,1);links.new(source,mix.inputs[1]);links.new(mix.outputs[0],p.inputs['Base Color'])
-# One benchmark frame, then the full 12fps botanical lifecycle.
-frames=[int(x) for x in os.environ.get('START_FRAMES','').split(',') if x] or range(1,673,3)
-for i,f in enumerate(frames):
- s.frame_set(f);s.render.filepath=out+'/plant_%04d.png'%((f-1)//3);t=time.time();bpy.ops.render.render(write_still=True);print('START FRAME',i,f,round(time.time()-t,2),flush=True)
+
+PROJECT = Path(__file__).resolve().parents[1]
+bpy.ops.wm.open_mainfile(filepath=str(PROJECT / 'blender/start_lifecycle.blend'))
+scene = bpy.context.scene
+scene.render.engine = 'CYCLES'
+scene.cycles.samples = 16
+scene.cycles.use_denoising = False
+scene.cycles.max_bounces = 3
+scene.render.resolution_x = scene.render.resolution_y = 580
+scene.render.resolution_percentage = 100
+scene.render.film_transparent = True
+scene.render.image_settings.file_format = 'PNG'
+scene.render.image_settings.color_mode = 'RGBA'
+scene.view_settings.view_transform = 'AgX'
+scene.world = bpy.data.worlds.new('Open sky')
+scene.world.use_nodes = True
+background = scene.world.node_tree.nodes.get('Background')
+background.inputs['Color'].default_value = (.77, .89, 1, 1)
+background.inputs['Strength'].default_value = .48
+
+out = Path(os.environ.get('AGRIDELTA_START_FRAMES', '/tmp/agridelta-start-frames'))
+out.mkdir(parents=True, exist_ok=True)
+
+
+def aim(obj, point):
+    obj.rotation_euler = (Vector(point)-obj.location).to_track_quat('-Z', 'Y').to_euler()
+
+
+def light(name, loc, power, color, size):
+    bpy.ops.object.light_add(type='AREA', location=loc)
+    obj = bpy.context.object
+    obj.name = name
+    obj.data.energy, obj.data.color, obj.data.size = power, color, size
+    aim(obj, (0,0,.8))
+
+
+light('Sunlight from upper left', (-3, -2, 5), 680, (1, .91, .69), 3.6)
+light('Soft sky from above', (3, 1.5, 4.0), 880, (.86, .95, 1), 4)
+light('Soft fill for underground', (-.8, -4, -1), 300, (1, .86, .66), 3)
+bpy.ops.object.camera_add()
+camera = bpy.context.object
+scene.camera = camera
+camera.data.type = 'ORTHO'
+
+
+def render(name):
+    scene.render.filepath = str(out / f'{name}.png')
+    bpy.ops.render.render(write_still=True)
+
+
+roots = bpy.data.collections['Roots']
+soil = bpy.data.collections['Soil']
+plants = bpy.data.collections['Plant']
+roots.hide_render = True
+camera.location = (0, -10, 3.10)
+aim(camera, (0, 0, 1.23))
+camera.data.ortho_scale = 3.65
+for i, frame in enumerate((1, 82, 396, 462, 657)):
+    scene.frame_set(frame)
+    render(f'lifecycle-{i}')
+
+if os.environ.get('AGRIDELTA_START_STILLS_ONLY') != '1':
+    scene.render.resolution_x = scene.render.resolution_y = 352
+    scene.cycles.samples = 7
+    for index, frame in enumerate(range(1, 674, 6)):
+        scene.frame_set(frame)
+        render(f'motion-{index:03d}')
+
+scene.render.resolution_x = scene.render.resolution_y = 580
+scene.cycles.samples = 16
+soil.hide_render = True
+for obj in plants.objects:
+    obj.hide_render = not obj.get('rootCollar')
+roots.hide_render = False
+camera.location = (0,-10,-1.37)
+aim(camera, (0,0,-1.12))
+camera.data.ortho_scale = 4.64
+for marker in [obj for obj in roots.objects if 'rootIndex' in obj]:
+    plants.hide_render = marker['rootIndex'] != 2
+    for obj in roots.objects:
+        obj.hide_render = obj.type == 'MESH' and obj.parent != marker
+    render(f'root-{marker["rootIndex"]}')

@@ -20,5 +20,5 @@ export function rootCountAt(progress){
 }
 export function rootScrollTarget(index){
  const i=Math.max(0,Math.min(ROOT_STARTS.length-1,Math.trunc(Number(index)||0)));
- return clamp01(ROOT_STARTS[ROOT_ORDER[i]]+ROOT_GROW_SPAN*.62);
+ return clamp01(ROOT_STARTS[ROOT_ORDER[i]]+ROOT_GROW_SPAN*.86);
 }
