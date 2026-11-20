@@ -5,6 +5,7 @@ html.rg-fullscreen body.rg-experience-mode,body.rg-experience-mode{
   height:auto!important;min-height:100%!important;overflow-x:clip!important;
   overflow-y:auto!important;overscroll-behavior-y:auto!important;
 }
+body.rg-experience-mode.earth-modal-open{overflow-y:hidden!important}
 body.rg-experience-mode .earth-site,body.rg-experience-mode .earth-site main{
   height:auto!important;min-height:100svh!important;overflow:visible!important;
 }

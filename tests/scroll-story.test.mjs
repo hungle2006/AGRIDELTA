@@ -24,6 +24,7 @@ test('five Blender roots grow monotonically and retract on reverse scroll',()=>{
  assert.equal(rootCountAt(1),5);
  assert.equal(rootScrollTarget(0)>ROOT_STARTS[0],true);
  assert.equal(rootScrollTarget(4)<1,true);
+ for(let i=0;i<ROOT_STARTS.length-1;i++)assert.ok(rootScrollTarget(i)<ROOT_STARTS[i+1],'next root button should not skip branches');
 });
 
 test('Start scroll story retains real GLB and never blocks vertical wheel scrolling',()=>{
