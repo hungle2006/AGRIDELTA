@@ -24,5 +24,5 @@ test('Start v4 has mobile, small laptop and reduced-motion geometry safeguards',
   assert.match(visual,/prefers-reduced-motion:reduce/);
   assert.match(visual,/plant-art-topline/);
   assert.match(visual,/plant-journey::before/);
-  assert.match(visual,/grid-template-columns:minmax\(0,\.96fr\) minmax\(0,1\.04fr\)/);
+  assert.match(visual,/grid-template-columns:\s*minmax\(0,\s*\.96fr\)\s+minmax\(0,\s*1\.04fr\)/);
 });
