@@ -185,14 +185,12 @@ for i,(x,y,z) in enumerate(anchors):
   fraction=.16+j*.049;pt=points[min(len(points)-1,int(fraction*(len(points)-1)))];bx,by,bz=pt
   sign=(1 if x>0 else -1) if j%3 else (-1 if x>0 else 1)
   ex=bx+sign*random.uniform(.12,.50);ez=bz-random.uniform(.12,.55)
-  pts2=[(bx,by,bz),(bx+(ex-bx)*.22,by-.008,bz-.035),(bx+(ex-bx)*.67,by-.015,ez+.08),(ex,by-.022,ez)]
+  pts2=[(bx,by-.012,bz),(bx+(ex-bx)*.22,by-.03,bz-.035),(bx+(ex-bx)*.67,by-.037,ez+.08),(ex,by-.045,ez)]
   branch=curve('Lateral %d.%02d'%(i,j),pts2,random.uniform(.007,.012),rootmat)
-  bpy.context.view_layer.update();hair_points=[]
-  for p0,p1 in zip(branch.data.splines[0].bezier_points,branch.data.splines[0].bezier_points[1:]):
-   hair_points.extend(interpolate_bezier(p0.co,p0.handle_right,p1.handle_left,p1.co,16))
+  bpy.context.view_layer.update();p0,p1=branch.data.splines[0].bezier_points[:2]
   for k in range(4):
-   u=.18+.20*k;hp=hair_points[int(u*(len(hair_points)-1))];hx,hy,hz=hp
-   curve('Root hair %d.%d.%d'%(i,j,k),[(hx,hy,hz),(hx+sign*.05,hy-.004,hz-.05),(hx+sign*random.uniform(.10,.22),hy-.009,hz-random.uniform(.09,.23))],.0028,fineroot)
+   u=.12+.20*k;hx=bx+(ex-bx)*u;hz=bz+(ez-bz)*u
+   curve('Root hair %d.%d.%d'%(i,j,k),[(hx,by-.055,hz),(hx+sign*.05,by-.06,hz-.05),(hx+sign*random.uniform(.10,.22),by-.065,hz-random.uniform(.09,.23))],.0028,fineroot)
 # The central taproot continues past the large branch junctions.
 curve('Taproot connection',[(0,-.10,.14),(.015,-.13,-.40),(-.015,-.15,-1.30),(.04,-.16,-2.30)],.040,rootmat)
 # Out-of-focus foreground foliage frames the scene as in the photograph.
@@ -217,9 +215,6 @@ with open(OUT+'/earth-layout.json','w') as f:json.dump(layout,f)
 # Save editable scene with its full studio, then render independent web layers.
 COL['Extra leaves'].hide_render=True;COL['Flowers'].hide_render=True;COL['Pods'].hide_render=True
 bpy.ops.wm.save_as_mainfile(filepath=ROOT+'/blender/reference_earth.blend')
-if os.environ.get('GEOMETRY_ONLY'):
- import sys
- sys.exit(0)
 def render(name):s.render.filepath=OUT+'/'+name+'.png';bpy.ops.render.render(write_still=True)
 # Main environment: earth, exposed roots and foreground plants.
 COL['Plant'].hide_render=True;render('earth-ground-v2')

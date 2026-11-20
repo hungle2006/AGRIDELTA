@@ -1,438 +1,68 @@
-import {readCare} from './garden-care.js';
-import {normalizeQuery} from './root-guide-data.js';
-import {listObservations, saveObservation, deleteObservation} from './observations.js';
+const $=s=>document.querySelector(s);
+const icons={leaf:'<path d="M20 4C12 3 5 7 5 15a6 6 0 0 0 6 6c8 0 11-9 9-17Z"/><path d="M4 22c3-6 7-10 13-13"/>',home:'<path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/>',calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/>',map:'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15m6-12v15"/>',scan:'<path d="M7 3H5a2 2 0 0 0-2 2v2m14-4h2a2 2 0 0 1 2 2v2M3 17v2a2 2 0 0 0 2 2h2m14-4v2a2 2 0 0 1-2 2h-2"/><circle cx="12" cy="12" r="4"/>',box:'<path d="m3 7 9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4m-9 4v10"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 4-8 8-8s8 3 8 8"/>',bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 9h18c0-1-3-2-3-9zm-8 13h4"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/>',cloud:'<path d="M7 19h11a4 4 0 0 0 0-8h-1a6 6 0 0 0-11.6 2A3 3 0 0 0 7 19Z"/>',drop:'<path d="M12 3c-4 6-7 10-7 13a7 7 0 0 0 14 0c0-3-3-7-7-13Z"/>',arrow:'<path d="M5 12h14m-6-6 6 6-6 6"/>',chevron:'<path d="m9 18 6-6-6-6"/>',check:'<path d="m4 12 5 5L20 6"/>',plus:'<path d="M12 5v14M5 12h14"/>',close:'<path d="M5 5l14 14M19 5 5 19"/>',logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m7 14 5-5-5-5m5 5H9"/>',menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',camera:'<path d="M14 4h-4L8 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3.5"/>',wind:'<path d="M3 8h12a3 3 0 1 0-3-3M2 12h17a2 2 0 1 1-2 2M4 16h8a3 3 0 1 1-3 3"/>',spark:'<path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5z"/>',filter:'<path d="M4 7h16M7 12h10m-7 5h4"/>',trash:'<path d="M4 7h16M9 7V4h6v3m3 0-1 14H7L6 7m4 4v6m4-6v6"/>',edit:'<path d="m4 20 4-.8L20 7l-3-3L5 16z"/>',eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',heart:'<path d="M20.8 8.5c0 5-8.8 11-8.8 11s-8.8-6-8.8-11a5 5 0 0 1 8.8-3.1 5 5 0 0 1 8.8 3.1Z"/>',shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>'};
+const I=(name,size=20)=>`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name]||icons.leaf}</svg>`;
+const seedling=`<div class="seed-stage seed-stage--photographic" aria-label="Mầm cây lớn lên từ lòng đất"><img src="/assets/living-growth-poster.webp" alt="Cây non lớn lên trên lớp đất màu với ánh nắng buổi sớm" loading="lazy"/><div class="seed-caption"><span class="pulse"></span> TỪ HẠT GIỐNG ĐẾN MÙA VỤ</div></div>`;
+const startingTasks=[{id:1,title:'Kiểm tra độ ẩm đất',field:'Vườn rau phía Đông',time:'07:00',done:false},{id:2,title:'Tưới nhỏ giọt khu A2',field:'Khu canh tác A2',time:'09:30',done:true},{id:3,title:'Ghi nhật ký mùa vụ',field:'Tất cả khu vực',time:'15:00',done:false}];
+const defaultFields=[{id:1,name:'Vườn rau phía Đông',type:'Rau xanh',area:'1,2 ha',status:'Đang phát triển',tone:'mint',moisture:72},{id:2,name:'Khu canh tác A2',type:'Lúa hữu cơ',area:'2,8 ha',status:'Cần kiểm tra',tone:'sand',moisture:48},{id:3,name:'Khu vườn Mặt Trời',type:'Cây ăn quả',area:'0,8 ha',status:'Ổn định',tone:'sage',moisture:65}];
+const store=(key,value)=>localStorage.setItem('agri_'+key,JSON.stringify(value));const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem('agri_'+key))??fallback}catch{return fallback}};
+let state={user:load('user',null),page:'home',tasks:load('tasks',startingTasks),fields:load('fields',defaultFields),orders:load('orders',[]),season:load('season',[]),modal:null,auth:'login',toast:'',scanImage:null};
+const save=()=>{store('tasks',state.tasks);store('fields',state.fields);store('orders',state.orders);store('season',state.season)};
+const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nav=[['home','Tổng quan','home'],['fields','Cánh đồng','map'],['season','Mùa vụ','calendar'],['scan','Góc quan sát','scan'],['orders','Đơn hàng','box']];
+function header(){return `<header class="header"><div class="header-inner"><button class="brand" data-action="home" aria-label="Về trang chủ"><span class="brand-icon">${I('leaf',24)}</span><span class="brand-name">AGRI<span>DELTA</span><small>GREEN FIELD OS</small></span></button><nav class="desktop-nav" aria-label="Điều hướng chính">${nav.map(([id,label,icon])=>`<button data-page="${id}" class="nav-item ${state.page===id?'active':''}">${label}</button>`).join('')}<button class="nav-item rg-nav-entry" data-action="guide">Cách hoạt động ↗</button></nav><div class="header-right"><span class="top-chip">${I('sun',16)} Hôm nay tươi đẹp</span><button class="icon-button" data-action="notice" title="Thông báo">${I('bell')}</button><button class="avatar" data-page="profile" title="Hồ sơ">${escapeHtml(state.user?.name?.charAt(0)?.toUpperCase()||'A')}</button></div></div></header>`}
+function bottomNav(){return `<nav class="bottom-nav" aria-label="Điều hướng di động">${nav.map(([id,label,icon])=>`<button data-page="${id}" class="bottom-item ${state.page===id?'active':''}">${I(icon,20)}<span>${id==='fields'?'Vườn':id==='season'?'Mùa vụ':id==='scan'?'Quan sát':id==='orders'?'Đơn hàng':'Trang chủ'}</span></button>`).join('')}</nav>`}
+function auth(){return `<div class="auth-shell"><div class="auth-cover"><div class="cover-top"><span class="auth-logo">${I('leaf',23)} AGRIDELTA</span><span class="micro-tag">CULTIVATING A BETTER FUTURE · 2026</span></div><div class="auth-visual">${seedling}</div><div class="cover-copy"><span class="eyebrow pale">TỪ NHỮNG ĐIỀU NHỎ BÉ</span><h1>Nuôi dưỡng<br><em>một tương lai xanh.</em></h1><p>Hãy chăm sóc cánh đồng của bạn, từ một nhánh rễ đầu tiên đến mùa vụ tốt.</p></div><div class="cover-foot"><span>Made for a greener tomorrow.</span><span>01 / 03</span></div></div><div class="auth-panel"><div class="auth-backdrop"></div><div class="auth-box"><div class="auth-mobile-brand">${I('leaf',24)} AGRIDELTA</div><div class="auth-kicker">CÙNG NHAU ƯƠM MẦM</div><h2>Hành trình xanh<br><em>bắt đầu từ bạn.</em></h2><p class="auth-sub">Khám phá bản dùng thử với đầy đủ màn hình quản lý cánh đồng, mùa vụ và công việc — không cần tài khoản, không cần mật khẩu.</p><button class="primary wide" type="button" data-action="demo">Vào khu vườn dùng thử ${I('arrow',18)}</button><button class="story-replay" type="button" data-action="guide">${I('leaf',16)} Cách AGRIDELTA hoạt động</button><button class="story-replay" type="button" onclick="window.AGRIDELTAStory?.replay()">${I('spark',16)} Xem lại hành trình từ hạt giống</button><div class="demo-note">${I('shield',17)} <span><b>CHẾ ĐỘ DEMO CÔNG KHAI.</b> Dữ liệu chỉ được lưu trong trình duyệt. Chưa có hệ thống tài khoản hay đồng bộ máy chủ. Đừng nhập thông tin cá nhân hoặc dữ liệu canh tác nhạy cảm.</span></div></div><div class="auth-footer">© 2026 AGRIDELTA <span>GROW WITH PURPOSE.</span></div></div></div>`}
+function home(){let done=state.tasks.filter(t=>t.done).length;return `<section class="welcome"><div><span class="eyebrow">KHÔNG GIAN CANH TÁC CỦA BẠN <span class="eyebrow-line"></span></span><h1>Mỗi ngày là một<br><em>khởi đầu xanh.</em></h1><p>Chào ${escapeHtml(state.user?.name||'bạn')}, cùng nhìn lại nhịp sống của khu vườn hôm nay.</p><div class="welcome-actions"><button class="primary" data-page="fields">Khám phá khu vườn ${I('arrow',18)}</button><button class="text-link" data-page="season">Xem lịch mùa vụ ${I('chevron',17)}</button><button class="text-link" data-action="show3d">${I('eye',16)} Xem cây 3D</button></div></div><div class="welcome-art">${seedling}<span class="art-deco art-deco-1"></span><span class="art-deco art-deco-2"></span></div><span class="welcome-index">AGRIDELTA / FIELD JOURNAL</span></section><section class="section-pad"><div class="section-head"><div><span class="eyebrow dark">GÓC NHÌN HÔM NAY</span><h2>Khu vườn của bạn <span class="head-flower">✳</span></h2></div><span class="section-note">Dữ liệu mẫu · cập nhật trên thiết bị</span></div><div class="stats-grid"><div class="stat-card"><span class="stat-icon mint">${I('map',23)}</span><span class="stat-label">Khu canh tác</span><strong>${state.fields.length.toString().padStart(2,'0')}</strong><span class="stat-foot">Đang theo dõi</span></div><div class="stat-card"><span class="stat-icon lilac">${I('calendar',23)}</span><span class="stat-label">Công việc hoàn thành</span><strong>${done}/${state.tasks.length}</strong><span class="stat-foot">Tiến độ trong ngày</span></div><div class="stat-card"><span class="stat-icon sand">${I('drop',23)}</span><span class="stat-label">Độ ẩm tham khảo</span><strong>${state.fields.length?Math.round(state.fields.reduce((s,f)=>s+(+f.moisture||0),0)/state.fields.length):0}<small>%</small></strong><span class="stat-foot">Giá trị nhập thủ công</span></div><div class="stat-card"><span class="stat-icon warm">${I('sun',23)}</span><span class="stat-label">Mùa vụ theo dõi</span><strong>${state.season.length.toString().padStart(2,'0')}</strong><span class="stat-foot">Kế hoạch đã thêm</span></div></div><div class="content-grid"><div class="surface task-panel"><div class="panel-heading"><div><span class="eyebrow dark">NHỊP ĐỘ HÔM NAY</span><h3>Việc cần làm <span class="counter">${state.tasks.filter(t=>!t.done).length}</span></h3></div><button class="circle-action" data-action="new-task" title="Thêm việc">${I('plus',20)}</button></div><div class="task-list">${state.tasks.length?state.tasks.map(t=>`<div class="task-row ${t.done?'is-done':''}"><button class="task-check" data-toggle-task="${t.id}" aria-label="${t.done?'Đánh dấu chưa xong':'Hoàn thành'} ${escapeHtml(t.title)}">${t.done?I('check',15):''}</button><div class="task-copy"><strong>${escapeHtml(t.title)}</strong><span>${escapeHtml(t.field)}</span></div><span class="task-time">${escapeHtml(t.time)}</span><button class="task-remove" data-delete-task="${t.id}" title="Xóa việc">${I('close',16)}</button></div>`).join(''):'<div class="empty">Chưa có việc nào. Bắt đầu bằng nút + nhé.</div>'}</div><div class="panel-footer"><span>${done} việc đã hoàn thành</span><span>${state.tasks.length?Math.round(done/state.tasks.length*100):0}% trong ngày</span></div><div class="progress"><span style="width:${state.tasks.length?done/state.tasks.length*100:0}%"></span></div></div><div class="surface field-spotlight"><div class="panel-heading"><div><span class="eyebrow dark">ĐIỂM CHẠM THIÊN NHIÊN</span><h3>Mảnh đất đang lớn</h3></div><button class="plain-icon" data-page="fields" aria-label="Xem khu vườn">${I('arrow',21)}</button></div><div class="field-illustration"><div class="hill hill-back"></div><div class="hill hill-front"></div><div class="field-sun"></div><div class="field-line"></div><div class="field-line l2"></div><div class="field-line l3"></div><div class="field-bird"></div><span class="land-label">${I('leaf',15)} GROWING TOGETHER</span></div><div class="spotlight-bottom"><div><h4>${escapeHtml(state.fields[0]?.name||'Mảnh đất đầu tiên')}</h4><p>${state.fields[0]?escapeHtml(state.fields[0].type+' · '+state.fields[0].area):'Hãy thêm một khu canh tác'}</p></div><button class="small-outline" data-page="fields">Chi tiết ${I('arrow',16)}</button></div></div></div><div class="bottom-quote"><span class="quote-icon">${I('heart',22)}</span><p>“Đất đai không chỉ là nơi gieo hạt. Đó là nơi chúng ta gieo những thay đổi tốt đẹp.”</p><span class="quote-id">THE AGRIDELTA WAY</span></div></section>`}
+function fields(){return `<section class="page-intro"><span class="eyebrow dark">NƠI SỰ SỐNG BẮT ĐẦU</span><h1>Những mảnh đất<br><em>của bạn.</em></h1><p>Quản lý từng khu canh tác và ghi lại hành trình phát triển.</p></section><section class="section-pad compact"><div class="toolbar"><div class="search"><span>${I('search',19)}</span><input id="field-search" placeholder="Tìm khu canh tác..." aria-label="Tìm khu canh tác"/></div><button class="primary" data-action="new-field">${I('plus',19)} Thêm khu vườn</button></div><div id="fields-list" class="field-grid">${renderFields()}</div></section>`}
+function renderFields(q=''){let entries=state.fields.filter(f=>(f.name+' '+f.type).toLowerCase().includes(q.toLowerCase()));return entries.length?entries.map((f,i)=>`<article class="field-card"><div class="field-card-picture field-pic-${i%3}"><span class="field-badge">${I('leaf',14)} ${escapeHtml(f.status)}</span><div class="simple-plants"><i></i><i></i><i></i><i></i><i></i></div></div><div class="field-card-inner"><span class="eyebrow dark">KHU VỰC ${String(i+1).padStart(2,'0')}</span><h3>${escapeHtml(f.name)}</h3><p>${escapeHtml(f.type)} · ${escapeHtml(f.area)}</p><div class="field-bottom"><span>${I('drop',17)} Độ ẩm ${+f.moisture||0}%</span><button class="small-outline" data-action="field-detail" data-id="${f.id}">Xem chi tiết ${I('arrow',16)}</button></div></div></article>`).join(''):'<div class="empty wide-empty">Không có khu canh tác phù hợp.</div>'}
+function season(){return `<section class="page-intro"><span class="eyebrow dark">MỘT NĂM CÓ BỐN MÙA</span><h1>Lịch gieo trồng<br><em>đầy hy vọng.</em></h1><p>Lên kế hoạch chăm sóc và theo dõi tiến độ từng mùa vụ.</p></section><section class="section-pad compact"><div class="toolbar"><span class="muted">${state.season.length} kế hoạch mùa vụ</span><button class="primary" data-action="new-season">${I('plus',19)} Lên kế hoạch</button></div><div class="surface list-surface">${state.season.length?state.season.map(s=>`<div class="season-row"><span class="season-icon">${I('leaf',22)}</span><div class="flex-fill"><strong>${escapeHtml(s.name)}</strong><small>${escapeHtml(s.field)} · ${escapeHtml(s.date)}</small></div><span class="tag">Đã lên lịch</span><button class="plain-icon" data-action="remove-season" data-id="${s.id}" title="Xóa kế hoạch">${I('trash',18)}</button></div>`).join(''):`<div class="illustrated-empty">${I('calendar',42)}<h3>Một mùa vụ mới đang đợi</h3><p>Hãy ghi lại kế hoạch đầu tiên để theo dõi từ lúc gieo hạt đến ngày thu hoạch.</p><button class="small-outline" data-action="new-season">Tạo kế hoạch ${I('arrow',17)}</button></div>`}</div></section>`}
+function scan(){return `<section class="page-intro"><span class="eyebrow dark">THẤU HIỂU TỪNG CHIẾC LÁ</span><h1>Góc quan sát<br><em>thiên nhiên.</em></h1><p>Chụp hoặc tải ảnh cây trồng để lưu lại tình trạng trực quan.</p></section><section class="section-pad compact"><div class="scan-layout"><div class="surface scan-view"><div id="scan-preview" class="scan-preview">${state.scanImage?`<img src="${state.scanImage}" alt="Ảnh cây trồng đã chọn"/>`:`<div class="scan-placeholder">${I('camera',56)}<span>Ánh sáng tốt, hình ảnh rõ nét</span><small>Ảnh chưa được tải lên</small></div>`}</div><div class="scan-buttons"><label class="primary file-label">${I('plus',18)} Tải ảnh cây trồng<input type="file" id="scan-file" accept="image/*" hidden/></label><label class="small-outline file-label">${I('camera',18)} Mở camera<input type="file" id="scan-camera" accept="image/*" capture="environment" hidden/></label></div></div><div class="scan-detail"><div class="notice-icon">${I('spark',22)}</div><span class="eyebrow dark">FIELD NOTES / OBSERVATION</span><h2>Quan sát tốt hơn.<br><em>Chăm sóc tốt hơn.</em></h2><p>Đây là công cụ xem trước ảnh. Hệ thống chưa kết nối mô hình AI phân tích hình ảnh, vì vậy sẽ không đưa ra chẩn đoán chưa được kiểm chứng.</p><div class="scan-tip">${I('shield',19)} Hình ảnh được xử lý trực tiếp trên trình duyệt và không tải lên máy chủ trong bản này.</div></div></div></section>`}
+function orders(){return `<section class="page-intro"><span class="eyebrow dark">TỪ KHU VƯỜN ĐẾN BÀN ĂN</span><h1>Đơn hàng<br><em>thuận tự nhiên.</em></h1><p>Ghi lại đơn hàng và theo dõi hành trình sản phẩm.</p></section><section class="section-pad compact"><div class="toolbar"><span class="muted">${state.orders.length} đơn hàng đã lưu trên thiết bị</span><button class="primary" data-action="new-order">${I('plus',19)} Tạo đơn hàng</button></div><div class="surface list-surface">${state.orders.length?state.orders.map(o=>`<div class="season-row"><span class="season-icon amber">${I('box',22)}</span><div class="flex-fill"><strong>${escapeHtml(o.name)}</strong><small>${escapeHtml(o.customer)} · ${escapeHtml(o.quantity)}</small></div><span class="tag">Mới tạo</span><button class="plain-icon" data-action="remove-order" data-id="${o.id}" title="Xóa đơn hàng">${I('trash',18)}</button></div>`).join(''):`<div class="illustrated-empty">${I('box',42)}<h3>Đơn hàng đầu tiên đang đợi</h3><p>Tạo một đơn hàng mới để quản lý đơn giản, rõ ràng.</p><button class="small-outline" data-action="new-order">Tạo đơn hàng ${I('arrow',17)}</button></div>`}</div></section>`}
+function profile(){return `<section class="page-intro"><span class="eyebrow dark">NGƯỜI GIEO HẠT</span><h1>Không gian<br><em>của riêng bạn.</em></h1><p>Thông tin tài khoản bản xem trước.</p></section><section class="section-pad compact"><div class="surface profile-card"><div class="profile-avatar">${escapeHtml(state.user?.name?.charAt(0)?.toUpperCase()||'A')}</div><div class="profile-info"><h2>${escapeHtml(state.user?.name||'Người dùng')}</h2><p>${escapeHtml(state.user?.email||'')}</p><span class="tag">Thành viên AGRIDELTA</span></div><button class="small-outline" data-action="logout">${I('logout',18)} Đăng xuất</button></div><div class="profile-disclaimer">${I('shield',20)} Tài khoản demo dùng localStorage, không được dùng cho dữ liệu cá nhân nhạy cảm. Khi triển khai thực tế cần xác thực máy chủ và cơ sở dữ liệu.</div></section>`}
+function main(){let page=({home,fields,season,scan,orders,profile})[state.page]||home;return `${header()}<main id="main-content">${page()}</main>${bottomNav()}<footer class="site-footer"><span>© 2026 AGRIDELTA · Gieo điều tốt đẹp.</span><span>ROOTS EDITION · 2026</span></footer>`}
+function modal(){if(!state.modal)return '';let m=state.modal;const types={task:['Một việc mới','Đặt tên công việc, chọn khu vực và giờ thực hiện.',[['title','Tên công việc','text','Ví dụ: Kiểm tra lá cây'],['field','Khu vực','text','Ví dụ: Vườn phía Đông'],['time','Thời gian','time','09:00']]],field:['Thêm mảnh đất','Mỗi khu vườn đều có một câu chuyện bắt đầu.',[['name','Tên khu canh tác','text','Ví dụ: Vườn mùa xuân'],['type','Loại cây trồng','text','Ví dụ: Rau hữu cơ'],['area','Diện tích','text','Ví dụ: 1,5 ha'],['moisture','Độ ẩm tham khảo (%)','number','60']]],season:['Lên kế hoạch mùa vụ','Ghi lại cột mốc cho hành trình sắp tới.',[['name','Tên mùa vụ','text','Ví dụ: Vụ hè thu'],['field','Khu vực','text','Ví dụ: Vườn phía Đông'],['date','Ngày bắt đầu','date','']]],order:['Tạo đơn hàng','Lưu thông tin đơn hàng trên thiết bị.',[['name','Sản phẩm','text','Ví dụ: Rau củ hữu cơ'],['customer','Tên khách hàng','text','Ví dụ: Nguyễn An'],['quantity','Số lượng','text','Ví dụ: 20 kg']]]};if(m.type==='field-detail'){let f=state.fields.find(f=>f.id===m.id);if(!f)return '';return `<div class="modal-overlay" data-close="1"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="modal-close" data-action="close" aria-label="Đóng">${I('close',21)}</button><span class="eyebrow dark">CHI TIẾT KHU CANH TÁC</span><h2 id="modal-title">${escapeHtml(f.name)}</h2><p>${escapeHtml(f.type)} · ${escapeHtml(f.area)}</p><div class="detail-facts"><div>Trạng thái <strong>${escapeHtml(f.status)}</strong></div><div>Độ ẩm ghi nhận <strong>${+f.moisture||0}%</strong></div></div><button class="outline-danger" data-action="delete-field" data-id="${f.id}">${I('trash',17)} Xóa khu canh tác</button></div></div>`}let [title,description,fields]=types[m.type]||types.task;return `<div class="modal-overlay" data-close="1"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="modal-close" data-action="close" aria-label="Đóng">${I('close',21)}</button><span class="eyebrow dark">AGRIDELTA / NEW ENTRY</span><h2 id="modal-title">${title}</h2><p>${description}</p><form id="modal-form" class="modal-form">${fields.map(([name,label,type,placeholder])=>`<label>${label}<input name="${name}" type="${type}" ${type==='time'?`value="09:00"`:type==='number'?`min="0" max="100" value="60"`:`placeholder="${placeholder}"`} required maxlength="100"/></label>`).join('')}<button type="submit" class="primary wide">Lưu thông tin ${I('arrow',18)}</button></form></div></div>`}
+function render(){document.body.classList.toggle('logged-in',!!state.user);$('#app').innerHTML=(state.user?main():auth())+modal()+(state.toast?`<div class="toast" role="status">${I('check',17)} ${escapeHtml(state.toast)}</div>`:'')}
+function showToast(s){state.toast=s;render();setTimeout(()=>{state.toast='';if($('.toast'))$('.toast').remove()},2800)}
+function navigate(id){state.page=id;state.modal=null;render();window.scrollTo({top:0,behavior:'smooth'})}
+document.addEventListener('click',e=>{let b=e.target.closest('button,[data-action],[data-toggle-task],[data-delete-task]');if(e.target.dataset.close){state.modal=null;render();return}if(!b)return;let action=b.dataset.action,id=Number(b.dataset.id);if(b.dataset.page){navigate(b.dataset.page);return}if(b.dataset.toggleTask){let t=state.tasks.find(t=>t.id===+b.dataset.toggleTask);if(t)t.done=!t.done;save();render();return}if(b.dataset.deleteTask){state.tasks=state.tasks.filter(t=>t.id!==+b.dataset.deleteTask);save();render();return}if(action==='demo'){window.AGRIDELTAOpenDemo('home')}else if(action==='guide'){window.AGRIDELTARootGuide?.open()}else if(action==='home'){navigate('home')}else if(action==='auth-switch'){state.auth=state.auth==='login'?'register':'login';render()}else if(action==='password'){let p=$('#password');p.type=p.type==='password'?'text':'password'}else if(action==='logout'){state.user=null;store('user',null);state.page='home';render()}else if(action==='close'){state.modal=null;render()}else if(action==='new-task'||action==='new-field'||action==='new-season'||action==='new-order'){state.modal={type:action.replace('new-','').replace('field','field').replace('order','order')};render();$('#modal-form input')?.focus()}else if(action==='field-detail'){state.modal={type:'field-detail',id};render()}else if(action==='delete-field'){if(confirm('Xóa khu canh tác này?')){state.fields=state.fields.filter(f=>f.id!==id);save();state.modal=null;showToast('Đã xóa khu canh tác')}}else if(action==='remove-season'){state.season=state.season.filter(s=>s.id!==id);save();render()}else if(action==='remove-order'){state.orders=state.orders.filter(s=>s.id!==id);save();render()}else if(action==='show3d'){window.AGRIDELTAOpen3D?.()}else if(action==='notice'){showToast('Bạn đang sử dụng phiên bản giới thiệu')}});
+document.addEventListener('submit',e=>{if(e.target.id==='modal-form'){e.preventDefault();let f=new FormData(e.target),obj=Object.fromEntries(f.entries()),type=state.modal?.type;obj.id=Date.now();if(type==='task'){obj.done=false;state.tasks.unshift(obj)}if(type==='field'){obj.status='Đang phát triển';obj.moisture=Math.min(100,Math.max(0,Number(obj.moisture)||0));state.fields.unshift(obj)}if(type==='season')state.season.unshift(obj);if(type==='order')state.orders.unshift(obj);save();state.modal=null;showToast('Đã lưu thành công')}});
+document.addEventListener('input',e=>{if(e.target.id==='field-search')$('#fields-list').innerHTML=renderFields(e.target.value)});
+document.addEventListener('change',e=>{if(['scan-file','scan-camera'].includes(e.target.id)){let file=e.target.files?.[0];if(!file)return;if(!file.type.startsWith('image/')){showToast('Vui lòng chọn tệp hình ảnh');return}if(file.size>8*1024*1024){showToast('Hình ảnh tối đa 8MB');return}let reader=new FileReader();reader.onload=()=>{state.scanImage=reader.result;render()};reader.readAsDataURL(file)}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.modal){state.modal=null;render()}});
+render();
 
-import ui0 from '@phosphor-icons/core/assets/regular/leaf.svg?raw';
-import ui1 from '@phosphor-icons/core/assets/regular/house.svg?raw';
-import ui2 from '@phosphor-icons/core/assets/regular/calendar-dots.svg?raw';
-import ui3 from '@phosphor-icons/core/assets/regular/map-trifold.svg?raw';
-import ui4 from '@phosphor-icons/core/assets/regular/camera.svg?raw';
-import ui5 from '@phosphor-icons/core/assets/regular/package.svg?raw';
-import ui6 from '@phosphor-icons/core/assets/regular/user.svg?raw';
-import ui7 from '@phosphor-icons/core/assets/regular/bell.svg?raw';
-import ui8 from '@phosphor-icons/core/assets/regular/drop.svg?raw';
-import ui9 from '@phosphor-icons/core/assets/regular/arrow-up-right.svg?raw';
-import ui10 from '@phosphor-icons/core/assets/regular/check.svg?raw';
-import ui11 from '@phosphor-icons/core/assets/regular/plus.svg?raw';
-import ui12 from '@phosphor-icons/core/assets/regular/x.svg?raw';
-import ui13 from '@phosphor-icons/core/assets/regular/magnifying-glass.svg?raw';
-import ui14 from '@phosphor-icons/core/assets/regular/trash.svg?raw';
-import ui15 from '@phosphor-icons/core/assets/regular/pencil-simple.svg?raw';
-import ui16 from '@phosphor-icons/core/assets/regular/clipboard-text.svg?raw';
-import ui17 from '@phosphor-icons/core/assets/regular/arrow-left.svg?raw';
-import ui18 from '@phosphor-icons/core/assets/regular/sign-out.svg?raw';
-import ui19 from '@phosphor-icons/core/assets/regular/plant.svg?raw';
+/* Optional real-geometry glTF viewer: does not replace cinematic intro. */
+window.AGRIDELTAOpen3D=function(){
+ if(document.getElementById('agri-3d-modal'))return;
+ const wrapper=document.createElement('div');wrapper.id='agri-3d-modal';wrapper.className='agri-3d-overlay';
+ wrapper.innerHTML=`<section class="agri-3d-dialog" role="dialog" aria-modal="true" aria-labelledby="agri-3d-title"><header><div><span class="eyebrow dark">AGRIDELTA / MÔ HÌNH CÂY 3D</span><h2 id="agri-3d-title">Một mầm cây, muôn khả năng.</h2></div><button type="button" id="agri-3d-close" aria-label="Đóng mô hình 3D">×</button></header><model-viewer src="/assets/living-growth.glb" alt="Mô hình 3D với đất, rễ, thân cây và lá xanh"  shadow-intensity="0.8" exposure="1.25" environment-image="neutral" poster="/assets/living-growth-poster.webp" loading="eager" camera-orbit="7deg 76deg 4.7m" camera-target="0m 0.78m 0m"><div slot="poster" class="agri-3d-poster"><img src="/assets/living-growth-poster.webp" alt="Minh họa mầm cây"/><p>Đang chuẩn bị trình xem 3D…</p></div></model-viewer><footer><p>Hạt tách vỏ, thân vươn lên và từng lá mở dần. Hoạt ảnh phát một lần với góc nhìn cố định.</p><a href="/assets/living-growth.glb" download="agridelta-model.glb">Tải mô hình .glb ↗</a></footer></section>`;
+ document.body.appendChild(wrapper);
+ const close=()=>wrapper.remove();
+ wrapper.querySelector('#agri-3d-close').onclick=close;
+ wrapper.addEventListener('click',e=>{if(e.target===wrapper)close()});
+ const onEsc=e=>{if(e.key==='Escape'){close();document.removeEventListener('keydown',onEsc)}};
+ document.addEventListener('keydown',onEsc);
+ const probe=document.createElement('canvas');const gl=probe.getContext('webgl2')||probe.getContext('webgl');if(!gl){wrapper.querySelector('model-viewer').outerHTML='<div class="agri-static-3d"><img src="/assets/living-growth-poster.webp" alt="Ảnh render từ mô hình Blender"><p>Thiết bị đang hiển thị ảnh render. Bạn có thể tải mô hình GLB bên dưới.</p></div>';return;}gl.getExtension('WEBGL_lose_context')?.loseContext();
+ import('@google/model-viewer').then(()=>{const m=wrapper.querySelector('model-viewer');m.addEventListener('load',()=>m.play({repetitions:1}),{once:true});});
+};
 
-const icons = {
-  'leaf':ui0,
-  'house':ui1,
-  'calendar-dots':ui2,
-  'map-trifold':ui3,
-  'camera':ui4,
-  'package':ui5,
-  'user':ui6,
-  'bell':ui7,
-  'drop':ui8,
-  'arrow-up-right':ui9,
-  'check':ui10,
-  'plus':ui11,
-  'x':ui12,
-  'magnifying-glass':ui13,
-  'trash':ui14,
-  'pencil-simple':ui15,
-  'clipboard-text':ui16,
-  'arrow-left':ui17,
-  'sign-out':ui18,
-  'plant':ui19,
+// Public demonstration entry: no passwords, no real user accounts, no server session.
+window.AGRIDELTAOpenDemo=function(page='home'){
+  const pages=['home','fields','season','scan','orders','profile'];
+  state.user={name:'Người gieo hạt',email:''};
+  state.page=pages.includes(page)?page:'home';
+  store('user',state.user);
+  state.modal=null;render();
+  window.scrollTo({top:0,behavior:'instant'});
 };
-const I = name => `<span class="app-icon" aria-hidden="true">${icons[name] ?? icons.leaf}</span>`;
-const $ = selector => document.querySelector(selector);
-const app = $('#app');
-const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
-const eq = (a, b) => String(a) === String(b);
-const nav = [
-  ['home','Tổng quan','house'], ['fields','Cánh đồng','map-trifold'], ['season','Mùa vụ','calendar-dots'],
-  ['tasks','Công việc','clipboard-text'], ['scan','Quan sát','camera'], ['orders','Đơn hàng','package'],
-];
-const status = {
-  field:['Đang phát triển','Ổn định','Cần kiểm tra'],
-  season:['Đã lên lịch','Đang canh tác','Đã thu hoạch'],
-  order:['Mới tạo','Đang chuẩn bị','Đã giao','Đã hủy'],
-  task:['Cần làm','Hoàn thành'],
-  observation:['Ổn định','Cần theo dõi','Cần xử lý'],
-};
-const sampleTasks = [
-  {id:1,title:'Kiểm tra độ ẩm đất',field:'Vườn rau phía Đông',time:'07:00',done:false},
-  {id:2,title:'Tưới nhỏ giọt khu A2',field:'Khu canh tác A2',time:'09:30',done:true},
-  {id:3,title:'Ghi nhật ký mùa vụ',field:'Tất cả khu vực',time:'15:00',done:false},
-];
-const sampleFields = [
-  {id:1,name:'Vườn rau phía Đông',type:'Rau xanh',area:'1,2 ha',status:'Đang phát triển',moisture:72},
-  {id:2,name:'Khu canh tác A2',type:'Lúa hữu cơ',area:'2,8 ha',status:'Cần kiểm tra',moisture:48},
-  {id:3,name:'Khu vườn Mặt Trời',type:'Cây ăn quả',area:'0,8 ha',status:'Ổn định',moisture:65},
-];
-function load(key, fallback) {
-  try { return JSON.parse(localStorage.getItem('agri_' + key)) ?? fallback; }
-  catch { return fallback; }
-}
 
-const data = {
-  fields:load('fields',sampleFields), season:load('season',[]), tasks:load('tasks',sampleTasks), orders:load('orders',[]),
+// An explicit login action from the marketing page opens the existing demo auth UI.
+// Real production authentication still requires a secure backend.
+window.AGRIDELTAOpenAuth=function(){
+  state.user=null;
+  store('user',null);
+  state.auth='login';
+  state.modal=null;
+  render();
+  window.scrollTo({top:0,behavior:'instant'});
 };
-for (const key of Object.keys(data)) if (!Array.isArray(data[key])) data[key] = [];
-let page = 'home';
-let demo = false;
-let filters = {query:'',status:''};
-let trigger;
-let currentForm;
-let imageFile;
-let previewUrl;
-let observationStatus = 'loading';
-let observations = [];
-let photoUrls = [];
-
-const sectionCopy = {
-  fields:['Cánh đồng','Lưu diện tích, cây đang trồng và tình trạng từng khu canh tác.'],
-  season:['Mùa vụ','Theo dõi các mốc từ ngày gieo đến lúc thu hoạch.'],
-  tasks:['Công việc','Sắp xếp việc chăm sóc theo khu vực, thời hạn và người phụ trách.'],
-  scan:['Quan sát cây trồng','Lưu ảnh, tình trạng và nhận xét để đối chiếu theo thời gian.'],
-  orders:['Đơn hàng','Theo dõi sản phẩm, số lượng và trạng thái giao hàng.'],
-  profile:['Phiên dùng thử','Xem thông tin về dữ liệu đang lưu trên thiết bị.'],
-};
-const fieldOptions = () => data.fields.map(item => item.name);
-const schemas = {
-  field:{store:'fields',label:'khu canh tác',title:'Tên khu canh tác',fields:[
-    ['name','Tên khu canh tác','text'], ['type','Loại cây trồng','text'], ['area','Diện tích','text'],
-    ['moisture','Độ ẩm tham khảo (%)','number',false], ['status','Trạng thái','select',true,() => status.field],
-  ]},
-  season:{store:'season',label:'mùa vụ',title:'Tên mùa vụ',fields:[
-    ['name','Tên mùa vụ','text'], ['field','Khu vực','text',true,fieldOptions], ['date','Ngày bắt đầu','date'],
-    ['harvest','Ngày thu hoạch dự kiến','date',false], ['status','Trạng thái','select',true,() => status.season],
-  ]},
-  task:{store:'tasks',label:'công việc',title:'Tên công việc',fields:[
-    ['title','Tên công việc','text'], ['field','Khu vực','text',true,fieldOptions], ['date','Ngày thực hiện','date',false],
-    ['time','Giờ thực hiện','time',false], ['assignee','Người phụ trách','text',false],
-    ['category','Loại công việc','select',true,() => ['Chăm sóc','Kiểm tra','Thu hoạch','Khác']],
-  ]},
-  order:{store:'orders',label:'đơn hàng',title:'Sản phẩm',fields:[
-    ['name','Sản phẩm','text'], ['customer','Khách hàng','text'], ['quantity','Số lượng','text'],
-    ['status','Trạng thái','select',true,() => status.order], ['note','Ghi chú','textarea',false],
-  ]},
-  observation:{label:'quan sát',title:'Tên quan sát',fields:[
-    ['name','Tên quan sát','text'], ['field','Khu vực','text',true,fieldOptions], ['date','Ngày quan sát','date'],
-    ['status','Tình trạng cây','select',true,() => status.observation], ['note','Ghi chú','textarea',true],
-  ]},
-};
-const activeLabel = () => nav.find(([id]) => id === page)?.[1] ?? 'Phiên dùng thử';
-function badge(text) {
-  const tone = ['Cần kiểm tra','Cần theo dõi','Đang chuẩn bị'].includes(text) ? 'amber' : ['Cần xử lý','Đã hủy'].includes(text) ? 'red' : 'green';
-  return `<span class="farm-badge" data-tone="${tone}">${escapeHtml(text)}</span>`;
-}
-function formatDate(value) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value ?? '')) return '';
-  return value.split('-').reverse().join('/');
-}
-const validPage = id => [...nav.map(item => item[0]),'profile'].includes(id) ? id : 'home';
-const records = type => type === 'observation' ? observations : data[schemas[type].store];
-const recordTitle = (type, item) => item[type === 'task' ? 'title' : 'name'];
-const recordStatus = (type,item) => type === 'task' ? status.task[Number(Boolean(item.done))] : item.status || status[type][0];
-
-function toolbar(type) {
-  return `<div class="farm-toolbar">
-    <label class="farm-search">${I('magnifying-glass')}<input type="search" id="record-search" aria-label="Tìm ${schemas[type].label}" placeholder="Tìm ${schemas[type].label}…" value="${escapeHtml(filters.query)}"></label>
-    <label class="farm-filter"><span class="farm-sr">Lọc trạng thái</span><select id="record-filter"><option value="">Mọi trạng thái</option>
-      ${status[type].map(value => `<option ${filters.status === value ? 'selected' : ''}>${value}</option>`).join('')}
-    </select></label>
-    <button class="farm-primary" data-create="${type}">${I('plus')} ${type === 'observation' ? 'Ghi quan sát' : 'Thêm ' + schemas[type].label}</button>
-  </div>`;
-}
-function filtered(type) {
-  const query = normalizeQuery(filters.query).trim();
-  return records(type).filter(item => (!filters.status || recordStatus(type,item) === filters.status) &&
-    normalizeQuery([recordTitle(type,item),item.type,item.field,item.customer,item.assignee,item.category,item.note].filter(Boolean).join(' ')).includes(query));
-}
-function empty(type) {
-  return `<div class="farm-empty">${I('leaf')}<h2>${filters.query || filters.status ? 'Không có kết quả phù hợp' : 'Chưa có ' + schemas[type].label}</h2>
-    <p>${filters.query || filters.status ? 'Đổi từ khóa hoặc bộ lọc để tìm lại.' : 'Thêm bản ghi đầu tiên để bắt đầu theo dõi.'}</p></div>`;
-}
-function list(type) {
-  if (type === 'observation' && observationStatus !== 'ready') {
-    return `<p class="farm-empty" role="status">${observationStatus === 'loading' ? 'Đang tải lịch sử quan sát…' : 'Không mở được lịch sử quan sát trên trình duyệt này.'}</p>`;
-  }
-  const entries = filtered(type);
-  if (!entries.length) return empty(type);
-  if (type === 'field') return `<div class="farm-field-grid">${entries.map(item => `<article class="farm-field">
-    <div class="farm-field-header"><span class="farm-module-icon">${I('map-trifold')}</span>${badge(recordStatus(type,item))}</div>
-    <h2>${escapeHtml(item.name)}</h2><p>${escapeHtml(item.type)} · ${escapeHtml(item.area)}</p>
-    <div class="farm-field-footer"><span>${I('drop')} ${item.moisture === '' || item.moisture == null ? 'Chưa ghi độ ẩm' : escapeHtml(item.moisture) + '% độ ẩm'}</span>
-      <button class="farm-outline" data-detail="field" data-id="${escapeHtml(item.id)}">Chi tiết</button></div>
-  </article>`).join('')}</div>`;
-  const columns = {
-    season:['Mùa vụ','Khu vực','Lịch gieo / thu hoạch'],
-    task:['Công việc','Khu vực / Phụ trách','Thời hạn'],
-    observation:['Quan sát','Khu vực','Ngày ghi nhận'],
-    order:['Sản phẩm','Khách hàng','Số lượng'],
-  }[type];
-  return `<table class="farm-table"><thead><tr>${columns.map(column=>`<th scope="col">${column}</th>`).join('')}<th scope="col">Trạng thái</th><th scope="col"><span class="farm-sr">Thao tác</span></th></tr></thead><tbody>
-    ${entries.map(item => {
-      const subtitle = type === 'order' ? item.customer : [item.field,item.assignee].filter(Boolean).join(' · ');
-      const date = type === 'order' ? item.quantity : [formatDate(item.date),formatDate(item.harvest),item.time].filter(Boolean).join(' · ');
-      const itemName = escapeHtml(recordTitle(type,item));
-      return `<tr><td><button class="farm-name" data-detail="${type}" data-id="${escapeHtml(item.id)}">${itemName}</button>${item.category ? `<small>${escapeHtml(item.category)}</small>` : ''}</td>
-      <td data-col="${columns[1]}">${escapeHtml(subtitle || '—')}</td><td data-col="${columns[2]}">${escapeHtml(date || '—')}</td>
-      <td>${badge(recordStatus(type,item))}</td><td><div class="farm-row-actions">
-        ${type === 'task' ? `<button class="farm-outline" data-toggle-task data-id="${escapeHtml(item.id)}" aria-label="${item.done ? 'Mở lại' : 'Hoàn thành'} ${itemName}">${I(item.done ? 'x' : 'check')}${item.done ? 'Mở lại' : 'Xong'}</button>` : ''}
-        <button class="farm-outline" data-detail="${type}" data-id="${escapeHtml(item.id)}">Chi tiết</button>
-      </div></td></tr>`;
-    }).join('')}
-  </tbody></table>`;
-}
-function dashboard() {
-  const done = data.tasks.filter(item => item.done).length;
-  const pending = data.tasks.filter(item => !item.done);
-  const moisture = data.fields.map(field => field.moisture).filter(v => v !== '' && v != null && Number.isFinite(Number(v)));
-  const moistureLabel = moisture.length ? Math.round(moisture.reduce((sum,n) => sum + Number(n),0) / moisture.length) + '%' : '—';
-  const gardenLabels = ['Hạt giống','Nảy mầm','Sinh trưởng','Ra hoa','Cà chua chín đỏ'];
-  return `<section class="farm-overview">
-    <div class="farm-hero">
-      <span>Không gian canh tác · Dùng thử</span>
-      <h1 tabindex="-1">Khu vườn của bạn</h1><p>Xem các việc cần làm, tình trạng cánh đồng và kế hoạch mùa vụ.</p>
-      <button class="farm-primary" data-create="field">${I('plus')} Thêm khu canh tác</button>
-    </div>
-    <aside class="farm-story-card"><span>Vòng đời cây cà chua</span><strong>${gardenLabels[readCare().level]}</strong>
-      <button class="farm-inverse" data-farm-action="garden">Về cảnh cây 3D ${I('arrow-up-right')}</button>
-    </aside>
-  </section>
-  <div class="farm-stat-grid">
-    ${[['map-trifold',data.fields.length,'Khu canh tác','fields'],['clipboard-text',done + '/' + data.tasks.length,'Công việc hoàn thành','tasks'],['drop',moistureLabel,'Độ ẩm nhập thủ công','fields'],['calendar-dots',data.season.length,'Kế hoạch mùa vụ','season']].map(([icon,value,label,destination])=>`<button class="farm-stat" data-page="${destination}">${I(icon)}<strong>${value}</strong><span>${label}</span></button>`).join('')}
-  </div>
-  <section class="farm-panel farm-today"><div class="farm-panel-head"><h2>Việc cần làm <span>${pending.length}</span></h2><button class="farm-outline" data-page="tasks">Mở công việc ${I('arrow-up-right')}</button></div>
-    ${pending.length ? pending.slice(0,5).map(item => `<div class="farm-todo"><button class="farm-icon" aria-label="Hoàn thành ${escapeHtml(item.title)}" data-toggle-task data-id="${escapeHtml(item.id)}">${I('check')}</button><div><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.field)}</small></div><span>${escapeHtml(item.time || formatDate(item.date))}</span></div>`).join('') : '<p>Hiện không còn việc đang chờ.</p>'}
-    ${data.tasks.length ? `<div class="farm-completion"><span>${done} / ${data.tasks.length} công việc đã hoàn thành</span><progress max="${data.tasks.length}" value="${done}" aria-label="Tiến độ công việc"></progress></div>` : ''}
-  </section>`;
-}
-function profile() {
-  return `<div class="farm-panel farm-profile"><h2>Dữ liệu trên thiết bị</h2><p>Bản dùng thử lưu dữ liệu trong trình duyệt này. Dữ liệu không đồng bộ giữa thiết bị và có thể mất nếu xóa dữ liệu trình duyệt.</p>
-    <button class="farm-outline" data-farm-action="leave">${I('sign-out')} Thoát bản dùng thử</button></div>`;
-}
-function account() {
-  return `<section class="farm-account">
-    <button class="farm-outline" data-farm-action="garden">${I('arrow-left')} Trang chủ</button>
-    <div class="farm-account-card"><img src="/assets/agridelta-mark.svg" width="54" height="54" alt=""><h1 tabindex="-1">Tài khoản AGRIDELTA</h1>
-      <p>Đăng nhập và đăng ký chưa khả dụng trên phiên bản này. Bạn có thể vào bản dùng thử để tạo và quản lý bản ghi trên thiết bị.</p>
-      <button class="farm-primary" data-farm-action="demo">Vào bản dùng thử ${I('arrow-up-right')}</button>
-    </div>
-  </section>`;
-}
-function modulePage() {
-  if (page === 'home') return dashboard();
-  const [heading,description] = sectionCopy[page];
-  const type = {fields:'field',season:'season',tasks:'task',scan:'observation',orders:'order'}[page];
-  return `<div class="farm-page-heading"><h1 tabindex="-1">${heading}</h1><p>${description}</p></div>${page === 'profile' ? profile() :
-    `${toolbar(type)}<section class="farm-panel farm-records" id="farm-records" data-type="${type}" aria-label="Danh sách ${schemas[type].label}">${list(type)}</section>`}`;
-}
-function draw({focus = false} = {}) {
-  let content = account();
-  if (demo) {
-    content = `<header class="farm-header"><div class="farm-container farm-header-row">
-      <button class="farm-brand" data-page="home" aria-label="AGRIDELTA, tổng quan"><img src="/assets/agridelta-mark.svg" width="37" height="37" alt=""><span>AGRIDELTA</span></button>
-      <nav class="farm-nav" aria-label="Các chức năng quản lý">${nav.map(([id,label,symbol]) => `<button data-page="${id}" ${page === id ? 'aria-current="page"' : ''}>${I(symbol)}<span>${label}</span></button>`).join('')}</nav>
-      <div class="farm-header-actions"><button class="farm-icon" data-farm-action="notice" aria-label="Công việc đang chờ">${I('bell')}</button><button class="farm-icon" data-page="profile" aria-label="Phiên dùng thử">${I('user')}</button></div>
-    </div></header>
-    <main class="farm-container farm-main" id="main-content">
-      <div class="farm-crumb"><span>Bản dùng thử <span aria-hidden="true">/</span> ${activeLabel()}</span><button class="farm-text" data-farm-action="garden">${I('plant')} Trở về cảnh cây</button></div>
-      ${modulePage()}
-    </main>
-    <footer class="farm-container farm-footer">© 2026 AGRIDELTA <span>Dữ liệu mẫu và bản ghi trên thiết bị</span></footer>`;
-  }
-  app.innerHTML = `<div class="farm-app">${content}<dialog class="farm-dialog" aria-labelledby="farm-dialog-title"></dialog><div class="farm-toast" role="status"></div></div>`;
-  if (focus) app.querySelector('h1')?.focus({preventScroll:true});
-}
-function showToast(message) {
-  const toast = app.querySelector('.farm-toast');
-  toast.textContent = message;
-  clearTimeout(showToast.timer);
-  showToast.timer = setTimeout(() => { toast.textContent = ''; }, 3300);
-}
-function navigate(destination) {
-  closeDialog();
-  page = validPage(destination);
-  filters = {query:'',status:''};
-  draw({focus:true});
-  scrollTo({top:0,behavior:'instant'});
-  if (page === 'scan') refreshObservations();
-}
-function refreshList() {
-  const panel = $('#farm-records');
-  if (panel) panel.innerHTML = list(panel.dataset.type);
-}
-async function refreshObservations() {
-  try {
-    observations = (await listObservations()).sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
-    observationStatus = 'ready';
-  } catch { observationStatus = 'error'; }
-  if (page === 'scan') refreshList();
-}
-function persist(type, entries) {
-  const key = schemas[type].store;
-  try { localStorage.setItem('agri_' + key,JSON.stringify(entries)); }
-  catch { return false; }
-  data[key] = entries;
-  return true;
-}
-function showDialog(content, source) {
-  const dialog = app.querySelector('.farm-dialog');
-  if (!dialog.open) trigger = source;
-  dialog.innerHTML = `<div class="farm-dialog-content"><button class="farm-icon farm-dialog-close" data-farm-action="close" aria-label="Đóng">${I('x')}</button>${content}</div>`;
-  if (!dialog.open) {
-    dialog.showModal();
-    dialog.addEventListener('close', () => {
-    for (const url of photoUrls.splice(0)) URL.revokeObjectURL(url);
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    previewUrl = null;
-    imageFile = null;
-    currentForm = null;
-      if (trigger?.isConnected) trigger.focus();
-      else app.querySelector('[data-create], h1')?.focus({preventScroll:true});
-    }, {once:true});
-  }
-  (dialog.querySelector('input:not([type=file]), h2') ?? dialog).focus();
-}
-function fieldInput([key,label,kind,required = true,options], entry, type) {
-  const value = entry?.[key] ?? (key === 'date' && type === 'observation' ? new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Ho_Chi_Minh'}) : '');
-  const needed = required ? 'required' : '';
-  let control;
-  if (kind === 'select') control = `<select name="${key}" ${needed}>${options().map(option=>`<option ${option === value ? 'selected' : ''}>${escapeHtml(option)}</option>`).join('')}</select>`;
-  else if (kind === 'textarea') control = `<textarea name="${key}" maxlength="500" rows="3" ${needed}>${escapeHtml(value)}</textarea>`;
-  else control = `<input name="${key}" type="${kind}" value="${escapeHtml(value)}" ${needed} ${kind === 'number' ? 'min="0" max="100" step="1"' : ''} ${kind === 'text' ? 'maxlength="100"' : ''} ${options ? `list="farm-options-${key}"` : ''}>${options ? `<datalist id="farm-options-${key}">${options().map(item=>`<option value="${escapeHtml(item)}"></option>`).join('')}</datalist>` : ''}`;
-  return `<label>${label}${control}</label>`;
-}
-function openForm(type, entry, source) {
-  const schema = schemas[type];
-  currentForm = {type,entry};
-  imageFile = null;
-  showDialog(`<h2 id="farm-dialog-title" tabindex="-1">${entry ? 'Sửa' : 'Thêm'} ${schema.label}</h2>
-    <form id="farm-form" class="farm-form">${schema.fields.map(field=>fieldInput(field,entry,type)).join('')}
-    ${type === 'observation' ? `<div class="farm-photo-controls"><label>Ảnh từ thiết bị<input id="farm-image" type="file" accept="image/*"></label><label>Chụp ảnh<input id="farm-camera" type="file" accept="image/*" capture="environment"></label><img id="farm-photo-preview" alt="Xem trước ảnh" hidden></div>` : ''}
-    <p class="farm-form-error" role="alert"></p><button type="submit" class="farm-primary">Lưu ${schema.label}</button></form>`,source);
-}
-function detail(type, entry, source) {
-  const schema = schemas[type];
-  const url = entry.photo ? URL.createObjectURL(entry.photo) : '';
-  if (url) photoUrls.push(url);
-  const fields = schema.fields.filter(([key]) => key !== 'title' && key !== 'name' && entry[key] !== '' && entry[key] != null);
-  showDialog(`<h2 id="farm-dialog-title" tabindex="-1">${escapeHtml(recordTitle(type,entry))}</h2>
-    ${url ? `<img class="farm-detail-photo" src="${url}" alt="Ảnh từ lần quan sát này">` : ''}
-    <dl class="farm-detail-grid">${fields.map(([key,label,input]) => `<div><dt>${label}</dt><dd>${escapeHtml(input === 'date' ? formatDate(entry[key]) : entry[key])}</dd></div>`).join('')}</dl>
-    <div class="farm-dialog-actions"><button class="farm-primary" data-edit="${type}" data-id="${escapeHtml(entry.id)}">${I('pencil-simple')} Sửa</button>
-    <button class="farm-outline farm-danger" data-remove="${type}" data-id="${escapeHtml(entry.id)}">${I('trash')} Xóa</button></div>`,source);
-}
-function closeDialog() { app.querySelector('.farm-dialog')?.close(); }
-async function removeRecord(type, id) {
-  try {
-    if (type === 'observation') { await deleteObservation(String(id)); await refreshObservations(); }
-    else if (!persist(type,records(type).filter(item => !eq(item.id,id)))) throw Error('Lưu thất bại');
-    closeDialog();
-    if (page === 'home') draw();
-    else refreshList();
-    showToast('Đã xóa bản ghi.');
-  } catch { app.querySelector('.farm-form-error').textContent = 'Không thể xóa bản ghi. Hãy thử lại.'; }
-}
-app.addEventListener('click', event => {
-  const button = event.target.closest('button');
-  if (!button) return;
-  const {page:destination, create, detail:showDetail, edit, remove, confirmRemove, id, farmAction} = button.dataset;
-  if (destination) navigate(destination);
-  if (create) openForm(create,null,button);
-  if (showDetail) {
-    const record = records(showDetail).find(item => eq(item.id,id));
-    if (record) detail(showDetail,record,button);
-  }
-  if (edit) {
-    const record = records(edit).find(item => eq(item.id,id));
-    if (record) openForm(edit,record,trigger);
-  }
-  if (remove) showDialog(`<h2 id="farm-dialog-title" tabindex="-1">Xóa ${schemas[remove].label}?</h2><p>Bản ghi sẽ bị xóa khỏi thiết bị này.</p><p class="farm-form-error" role="alert"></p>
-    <div class="farm-dialog-actions"><button class="farm-outline" data-farm-action="close">Hủy</button><button class="farm-primary farm-danger" data-confirm-remove="${remove}" data-id="${escapeHtml(id)}">Xóa bản ghi</button></div>`,trigger);
-  if (confirmRemove) removeRecord(confirmRemove,id);
-  if (button.hasAttribute('data-toggle-task')) {
-    const ok = persist('task',data.tasks.map(item=>eq(item.id,id)?{...item,done:!item.done}:item));
-    if (ok && page === 'home') draw();
-    else if (ok) refreshList();
-    showToast(ok ? 'Đã cập nhật công việc.' : 'Không lưu được thay đổi.');
-    app.querySelector(`[data-toggle-task][data-id="${CSS.escape(id)}"]`)?.focus();
-  }
-  if (farmAction === 'close') closeDialog();
-  if (farmAction === 'garden' || farmAction === 'leave') window.AGRIDELTARootGuide?.open();
-  if (farmAction === 'demo') window.AGRIDELTAOpenDemo('home');
-  if (farmAction === 'notice') {
-    const pending = data.tasks.filter(item=>!item.done);
-    showDialog(`<h2 id="farm-dialog-title" tabindex="-1">Công việc đang chờ</h2><p>Bạn có ${pending.length} công việc chưa hoàn thành.</p><button class="farm-primary" data-page="tasks">Xem công việc</button>`,button);
-  }
-});
-app.addEventListener('input', event => {
-  if (event.target.id === 'record-search') { filters.query = event.target.value; refreshList(); }
-});
-app.addEventListener('change', event => {
-  const input = event.target;
-  if (input.id === 'record-filter') { filters.status = input.value; refreshList(); }
-  if (!['farm-image','farm-camera'].includes(input.id)) return;
-  const file = input.files?.[0];
-  if (!file) return;
-  const error = $('#farm-form .farm-form-error');
-  if (!file.type.startsWith('image/') || file.size > 8 * 1024 * 1024) {
-    error.textContent = 'Chọn ảnh có dung lượng không quá 8 MB.';
-    input.value = '';
-    return;
-  }
-  if (previewUrl) URL.revokeObjectURL(previewUrl);
-  imageFile = file;
-  previewUrl = URL.createObjectURL(file);
-  const preview = $('#farm-photo-preview');
-  preview.src = previewUrl;
-  preview.hidden = false;
-  error.textContent = '';
-});
-app.addEventListener('submit', async event => {
-  if (event.target.id !== 'farm-form' || !currentForm) return;
-  event.preventDefault();
-  const form = event.target;
-  const {type,entry} = currentForm;
-  const values = Object.fromEntries([...new FormData(form)].map(([key,value]) => [key,value.trim()]));
-  const error = form.querySelector('.farm-form-error');
-  if (schemas[type].fields.some(([key,, ,required = true]) => required && !values[key])) { error.textContent = 'Vui lòng điền đủ các mục bắt buộc.'; return; }
-  if (values.harvest && values.date && values.harvest < values.date) { error.textContent = 'Ngày thu hoạch cần sau hoặc trùng ngày bắt đầu.'; return; }
-  const next = {...(entry ?? {}),...values,id:entry?.id ?? crypto.randomUUID()};
-  if (type === 'task' && !entry) next.done = false;
-  const submit = form.querySelector('button[type=submit]');
-  submit.disabled = true;
-  try {
-    if (type === 'observation') {
-      if (imageFile) next.photo = imageFile;
-      await saveObservation(next);
-      await refreshObservations();
-    } else {
-      const previous = records(type);
-      const saved = entry ? previous.map(item => eq(item.id,entry.id) ? next : item) : [next,...previous];
-      if (!persist(type,saved)) throw Error('Lưu thất bại');
-    }
-    closeDialog();
-    if (page === 'home') draw();
-    else refreshList();
-    showToast('Đã lưu thông tin.');
-  } catch {
-    error.textContent = 'Không lưu được bản ghi trên thiết bị này. Hãy thử lại.';
-    submit.disabled = false;
-  }
-});
-window.AGRIDELTAOpenDemo = function(destination = 'home') {
-  demo = true;
-  navigate(destination);
-};
-window.AGRIDELTAOpenAuth = function() {
-  demo = false;
-  draw({focus:true});
-};
-window.addEventListener('agridelta-care-changed', () => {
-  if (demo && page === 'home' && !app.querySelector('dialog[open]') && !app.closest('body.rg-experience-mode')) draw();
-});

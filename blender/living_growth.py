@@ -177,7 +177,6 @@ area('Large soft morning light',(-3,-4,6),650,(1,.9,.7),4)
 area('Soft fill',(3,-1,3),220,(.8,.9,1),3)
 area('Leaf translucency rim',(0,3,4),500,(1,1,.8),3)
 bpy.ops.object.camera_add(location=(.5,-4,2.0));cam=bpy.context.object;cam.rotation_euler=(Vector((0,0,.82))-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.type='ORTHO';cam.data.ortho_scale=2.8;scene.camera=cam
-scene.render.filepath=os.path.join(OUT,'living-growth-poster.png')
-if not os.environ.get('GEOMETRY_ONLY'):bpy.ops.render.render(write_still=True)
+scene.render.filepath=os.path.join(OUT,'living-growth-poster.png');bpy.ops.render.render(write_still=True)
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(ROOT,'blender/living_growth.blend'))
 print('GROWTH EXPORT COMPLETE')

@@ -2,54 +2,34 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
-import {createGrowthClock,MAX_GROWTH_TIME,STAGE_TIMES,stageAt} from './lifecycle-state.js';
+import {LIFECYCLE_SECONDS,STAGE_TIMES,stageAt} from './lifecycle-state.js';
 import {createVideoEarth} from './video-earth.js';
 
 /** Actual Blender geometry/animation rendered live; no plant or soil image planes. */
-export function createLiveEarth(host,{onStage=()=>{},onTime=()=>{},onReady=()=>{},onRootFinished=()=>{},onComplete=()=>{},onError=()=>{}}={}){
+export function createLiveEarth(host,{onStage=()=>{},onReady=()=>{},onRootFinished=()=>{},onComplete=()=>{},onError=()=>{}}={}){
  const canvas=document.createElement('canvas');
  const context=canvas.getContext('webgl2',{alpha:true,antialias:true});
- if(!context)return createVideoEarth(host,{onStage,onTime,onReady,onRootFinished,onComplete,onError});
+ if(!context)return createVideoEarth(host,{onStage,onReady,onRootFinished,onComplete,onError});
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const actions=[];
- const growth=createGrowthClock();
- const events=new AbortController();
- let observer,environment,renderIdle=false,rootScale=1,destroyed=false,qualitySamples=0,slowFrames=0;
- let renderer,scene,camera,mixer,model,clock=0,running=false,visible=true,lastStage=-1,ready=false,manualTarget=null,frameCount=0,lastRender=0,completeNotified=false,growthLimit=0;
+ let renderer,scene,camera,mixer,model,clock=0,last=0,running=!reduced,visible=true,lastStage=-1,ready=false,manualTarget=null,frameCount=0,lastRender=0,completeNotified=false;
  const branches=Array.from({length:5},()=>({meshes:[],uniform:{value:0},progress:0,target:0,done:false}));
  const trunk={meshes:[],uniform:{value:0}};
- const control={
-  setGrowthLimit(time){growthLimit=Math.max(0,Math.min(MAX_GROWTH_TIME,time));running=clock<growthLimit;wake();},
-  setRootScale(scale){if(scale!==rootScale){rootScale=scale;resize();}},
-  revealRoot(index){if(branches[index]&&!branches[index].target){branches[index].target=1;wake();}},
-  seekStage(index){manualTarget=Math.min(growthLimit,STAGE_TIMES[index]??0);running=false;wake();},
-  replay(){clock=growth.seek(0);manualTarget=null;running=true;lastStage=-1;completeNotified=false;wake();},
-  toggle(){if(clock>=growthLimit){this.replay();return true;}running=!running;wake();return running;},
-  setVisible(value){visible=value;if(value)wake();else{renderer?.setAnimationLoop(null);renderIdle=true;}},
-  destroy(){
-   destroyed=true;events.abort();observer?.disconnect();renderer?.setAnimationLoop(null);
-   scene?.traverse(object=>{object.geometry?.dispose();for(const material of [object.material].flat().filter(Boolean)){for(const value of Object.values(material)){if(value?.isTexture)value.dispose();}material.dispose();}});
-   environment?.dispose();renderer?.dispose();canvas.remove();
-  },
-  get ready(){return ready;}
- };
- function wake(){if(renderIdle&&visible&&!destroyed){lastRender=0;renderer.setAnimationLoop(render);renderIdle=false;}}
+ const control={revealRoot(i){if(i>=0&&i<5)branches[i].target=1;},seekStage(i){manualTarget=STAGE_TIMES[i]??0;running=false;},replay(){clock=0;manualTarget=null;running=true;lastStage=-1;completeNotified=false;},toggle(){if(clock>=LIFECYCLE_SECONDS){clock=0;completeNotified=false;}running=!running;return running;},setVisible(v){visible=v;last=0;},get ready(){return ready;}};
  function fail(e){host.dataset.sceneState='error';onError(e);}
  try{
   renderer=new THREE.WebGLRenderer({canvas,context,alpha:true,antialias:true,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(devicePixelRatio,innerWidth<720?1.65:2));renderer.setClearColor(0,0);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.14;
   host.append(renderer.domElement);renderer.domElement.setAttribute('aria-hidden','true');
   scene=new THREE.Scene();camera=new THREE.OrthographicCamera(-5.55,5.55,3.1,-3.1,.1,60);camera.position.set(0,2.2,13);camera.lookAt(0,-.16,0);
-  const pmrem=new THREE.PMREMGenerator(renderer),room=new RoomEnvironment();environment=pmrem.fromScene(room,.04);scene.environment=environment.texture;room.dispose();pmrem.dispose();scene.environmentIntensity=.38;
+  const pmrem=new THREE.PMREMGenerator(renderer),room=new RoomEnvironment();scene.environment=pmrem.fromScene(room,.04).texture;room.dispose();pmrem.dispose();scene.environmentIntensity=.38;
   scene.add(new THREE.HemisphereLight(0xeaffef,0x53300e,2.1));
   const sun=new THREE.DirectionalLight(0xffe9b4,3.4);sun.position.set(-4,6,-3);scene.add(sun);
   const fill=new THREE.DirectionalLight(0xffffff,1.5);fill.position.set(2,4,7);scene.add(fill);
   const rootsLight=new THREE.PointLight(0xffbd54,2.5,8);rootsLight.position.set(0,-.6,2);scene.add(rootsLight);
-  renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();fail(new Error('WebGL context lost'));},{signal:events.signal});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){renderer.setAnimationLoop(null);renderIdle=true;}else wake();},{signal:events.signal});
-  observer=new ResizeObserver(resize);observer.observe(host);resize();
+  renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();fail(new Error('WebGL context lost'));});
+  new ResizeObserver(resize).observe(host);resize();
   new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('/assets/start-lifecycle-live.glb',g=>{
-   if(destroyed)return;
    model=g.scene;scene.add(model);model.updateMatrixWorld(true);
    model.traverse(o=>{if(!o.isMesh)return;
     let ancestor=o;while(ancestor&&!Number.isInteger(ancestor.userData.rootIndex))ancestor=ancestor.parent;
@@ -64,39 +44,20 @@ export function createLiveEarth(host,{onStage=()=>{},onTime=()=>{},onReady=()=>{
    mixer=new THREE.AnimationMixer(model);for(const clip of g.animations){const action=mixer.clipAction(clip);action.setLoop(THREE.LoopOnce,1);action.clampWhenFinished=true;action.play();actions.push(action);}
    ready=true;clock=0;mixer.setTime(0);host.dataset.sceneState='ready';host.dataset.geometry='blender-glb';resize();onReady();
   },undefined,fail);
-  function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h||!renderer)return;renderer.setSize(w,h,false);
-   const span=11.1*536/960;
-   camera.left=-span*w/h/2;camera.right=span*w/h/2;camera.top=span/2;camera.bottom=-span/2;
-   camera.updateProjectionMatrix();
-   // Scale roots and their translated origins together about the shared collar.
-   if(model){model.traverse(o=>{if(Number.isInteger(o.userData.rootIndex)){if(!o.userData.baseRootTransform)o.userData.baseRootTransform={x:o.position.x,scale:o.scale.x};const base=o.userData.baseRootTransform;o.scale.x=base.scale*rootScale;o.position.x=base.x*rootScale;}});model.updateMatrixWorld(true);}
-   wake();
+  function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);const mobile=innerWidth<720;
+   if(mobile){const span=6.2;camera.left=-span*w/h/2;camera.right=span*w/h/2;camera.top=span/2;camera.bottom=-span/2;}
+   else{camera.left=-5.55;camera.right=5.55;camera.top=11.1*h/w/2;camera.bottom=-camera.top;}camera.updateProjectionMatrix();
+   if(model){model.traverse(o=>{if(Number.isInteger(o.userData.rootIndex))o.scale.x=mobile?.39:1;});model.updateMatrixWorld(true);}
   }
-  renderer.setAnimationLoop(render);
- }catch(e){fail(e);}
- function render(now){
-   if(!visible||document.hidden||host.closest('[hidden]'))return;
-   const interval=innerWidth<800?1000/30:1000/60;
-   if(lastRender&&now-lastRender<interval-1)return;
-   const dt=lastRender ? Math.min((now-lastRender)/1000,.1) : 1/60;
-   lastRender=now;
-   qualitySamples+=1;
-   if(dt>.048)slowFrames+=1;
-   if(qualitySamples===70){
-    if(slowFrames>18&&renderer.getPixelRatio()>1)renderer.setPixelRatio(Math.max(1,renderer.getPixelRatio()-.25));
-    qualitySamples=0;slowFrames=0;
-   }
-   if(ready){if(manualTarget!==null){const diff=manualTarget-clock;clock+=diff*(1-Math.exp(-dt*6));if(Math.abs(diff)<.015){clock=growth.seek(manualTarget);manualTarget=null;}}
-    else if(running)clock=growth.advance(Math.min(growthLimit,clock+dt));actions.forEach(a=>a.paused=false);mixer.setTime(clock);const st=stageAt(clock);if(st!==lastStage){lastStage=st;host.dataset.plantStage=String(st);onStage(st);}if(clock>=growthLimit)running=false;if(clock>=MAX_GROWTH_TIME){running=false;if(!completeNotified){completeNotified=true;onComplete();}}
-    trunk.uniform.value=Math.min(1,clock/4);
-    onTime(clock);host.dataset.growthState=growth.state;
+  renderer.setAnimationLoop(now=>{if(!last)last=now;let dt=Math.min((now-last)/1000,.05);last=now;if(!visible||document.hidden||host.closest('[hidden]'))return;if(now-lastRender<1000/30)return;const renderDelta=Math.min((now-lastRender)/1000,.12);lastRender=now;dt=renderDelta;
+   if(ready){if(manualTarget!==null){const diff=manualTarget-clock;clock+=diff*(1-Math.exp(-dt*6));if(Math.abs(diff)<.015){clock=manualTarget;manualTarget=null;}}
+    else if(running)clock=Math.min(LIFECYCLE_SECONDS,clock+dt);actions.forEach(a=>a.paused=false);mixer.setTime(clock);const st=stageAt(clock);if(st!==lastStage){lastStage=st;host.dataset.plantStage=String(st);onStage(st);}if(clock>=LIFECYCLE_SECONDS){running=false;if(!completeNotified){completeNotified=true;onComplete();}}
+    trunk.uniform.value=Math.min(.31,clock*.065);
     branches.forEach((b,i)=>{if(b.target){b.meshes.forEach(o=>o.visible=true);b.progress=Math.min(1,b.progress+dt/(reduced?.05:1.35));b.uniform.value=THREE.MathUtils.smoothstep(b.progress,0,1);if(b.progress===1&&!b.done){b.done=true;host.dataset.rootCount=String(branches.filter(x=>x.done).length);onRootFinished(i);}}});
     frameCount++;if(frameCount%45===0){host.dataset.lifecycleTime=clock.toFixed(1);host.dataset.drawCalls=String(renderer.info.render.calls);host.dataset.triangles=String(renderer.info.render.triangles);}
    }
    renderer.render(scene,camera);
-   if(ready&&!running&&manualTarget===null&&branches.every(branch=>!branch.target||branch.done)){
-    renderer.setAnimationLoop(null);renderIdle=true;
-   }
- }
+  });
+ }catch(e){fail(e);}
  return control;
 }
