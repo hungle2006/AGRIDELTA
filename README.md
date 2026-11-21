@@ -43,24 +43,33 @@ node --test tests/*.test.mjs
 npm run build
 ```
 
-## Đăng nhập bắt buộc — Google/Gmail, Facebook, GitHub và email
+## Đăng nhập Firebase chính thức (AGRIDELTA)
 
-AGRIDELTA mặc định mở **trang Start 3D**; khi nhấn **Bắt đầu/Vào ứng dụng**, người chưa xác thực sẽ chuyển đến trang đăng nhập trước khi cho vào workspace. Không còn quyền vào hệ thống qua `AGRIDELTAOpenDemo`, đường dẫn `?app=1` hay API điều hướng frontend mà chưa xác minh phiên.
+Trang **Start 3D/Blender** vẫn mở mặc định tại https://agridelta.vercel.app. Nhấn **Bắt đầu/Vào ứng dụng** để mở trang đăng nhập. Truy cập trực tiếp bằng `/?app=1` cũng phải xác thực.
 
-- Nút **Google** là đăng nhập OAuth qua tài khoản Google, bao gồm Gmail.
-- Form **Gmail/email** là **đăng ký và đăng nhập bằng email + mật khẩu**, không dùng mật khẩu tài khoản Google nếu bạn chưa đặt mật khẩu AGRIDELTA.
-- **Facebook** và **GitHub** đăng nhập qua OAuth. Luồng PKCE dùng mã verifier trong sessionStorage, callback tại `https://agridelta.vercel.app/auth/callback`, sau đó gọi Supabase `/auth/v1/user` để xác minh token trước khi hiển thị workspace.
-- Trang Start hiển thị mặc định tại `/` hoặc `/start`; `/?intro=1` vẫn hoạt động. Các đường dẫn `?app=1`, `?login=1`, `/login` và `/auth/callback` vào trang xác thực; nút Bắt đầu luôn yêu cầu xác thực trước khi vào workspace.
+Firebase Web App đã kết nối với **project `agridelta-a40b7`**, sử dụng Firebase Authentication chính thức:
 
-**Cấu hình còn thiếu trên production (không có đăng nhập giả):**
+- **Google**: `GoogleAuthProvider` (đăng nhập được tài khoản Gmail).
+- **Facebook**: `FacebookAuthProvider`, cần cấu hình Meta OAuth hợp lệ.
+- **GitHub**: `GithubAuthProvider`, cần cấu hình GitHub OAuth callback.
+- **Email/Mật khẩu**: `createUserWithEmailAndPassword` và `signInWithEmailAndPassword`; có chức năng khôi phục mật khẩu qua email.
 
-1. Tạo một Supabase project **riêng cho AGRIDELTA**, không tái sử dụng database của ứng dụng khác. Chạy SQL trong `supabase/agridelta_records.sql`, giữ RLS và quyền sở hữu.
-2. Thêm `VITE_SUPABASE_URL` và `VITE_SUPABASE_PUBLISHABLE_KEY` của project riêng vào Vercel cho Production và Preview, rồi redeploy.
-3. Trong Supabase **Authentication > URL Configuration**, đặt Site URL thành `https://agridelta.vercel.app` và thêm redirect URL `https://agridelta.vercel.app/auth/callback` (thêm preview origin riêng nếu cần). Cấu hình email confirmation và SMTP/email deliverability.
-4. Trong **Authentication > Sign In / Providers**, bật Google, Facebook, GitHub. Mỗi provider yêu cầu OAuth app riêng và Client ID/Secret cấu hình **ở Supabase**, không nhúng secret vào Vite hay mã nguồn. Callback đăng ký trên bảng điều khiển Google/Meta/GitHub phải trỏ đến `https://<project-ref>.supabase.co/auth/v1/callback` (URL cụ thể hiển thị trong Supabase), không trỏ trực tiếp vào Vercel.
-5. Thử OAuth cho cả ba nhà cung cấp bằng tài khoản thật; kiểm tra email signup, refresh session, logout, truy cập thẳng `/?app=1` chưa đăng nhập, và xác nhận mỗi tài khoản không thấy bản ghi của tài khoản khác.
+Trang Start không bị thay đổi mô hình GLB, bộ rễ, vòng đời cây hoặc nút điều hướng. Không còn lệnh Supabase auth hoặc nút demo cho phép vào ứng dụng không cần xác thực.
 
-**Quan trọng:** Frontend có route guard; `/api/plant-diagnose` cũng xác minh token Supabase trước khi cho phép gọi Gemini. Bảo vệ dữ liệu thực tế phụ thuộc vào Supabase RLS và việc xác thực request trên server. OAuth hiện chỉ có giao diện và luồng mã nguồn; nếu chưa cấu hình Supabase/provider, các nút sẽ thông báo chưa hoạt động, không hiển thị đăng nhập giả.
+**Cấu hình Firebase (public web config):** `firebase-auth.js` sử dụng Firebase Web SDK chính thức phiên bản **12.19.0** từ `www.gstatic.com` được cố định phiên bản, không cần gói npm mới; không tải Firebase Analytics vì chưa cần. Giá trị `apiKey` của Firebase Web App không phải service-account private key. Cần giới hạn/giám sát API key phù hợp, không bao giờ đưa OAuth Client Secret vào client.
+
+**Bắt buộc kiểm tra trên Firebase Console:**
+
+1. Firebase Authentication → Sign-in method: Enable Google, Facebook, GitHub và Email/Password.
+2. Firebase Authentication → Settings → Authorized domains: `agridelta.vercel.app`.
+3. Facebook OAuth callback và GitHub callback ở trang nhà cung cấp: `https://agridelta-a40b7.firebaseapp.com/__/auth/handler`.
+4. Facebook Login app phải có quyền hoạt động phù hợp (tài khoản tester khi còn development); GitHub OAuth App phải có client credentials hợp lệ.
+5. Kiểm thử đăng nhập lần đầu, refresh, logout, quên mật khẩu, dùng 2 tài khoản và browser mobile (cửa sổ popup có thể bị trình duyệt chặn). Nếu popup bị chặn, cho phép popup cho domain này.
+
+**Dữ liệu nông trại:** hiện lưu **cục bộ, chia khóa theo Firebase UID**. Chưa tự đồng bộ qua thiết bị hoặc dùng Cloud Firestore. Dữ liệu cũ `agridelta_workspace_v2` và ảnh cũ được giữ nguyên, không bị chuyển tự động sang tài khoản bất kỳ; trong Cài đặt có nút **Nhập dữ liệu cũ trên máy** (cần xác nhận) để nhập vào tài khoản hiện tại. Ảnh ở bản sao JSON chưa bao gồm byte ảnh. Đây chưa phải lưu trữ đám mây an toàn cấp máy chủ; trước khi bật Firestore cần cấu hình Firestore Security Rules theo `request.auth.uid`.
+
+**Plant Doctor API:** `/api/plant-diagnose` kiểm tra Firebase ID token với Firebase Identity Toolkit `accounts:lookup` trước khi gọi Gemini. Riêng tính năng nhận diện bệnh qua AI vẫn cần cấu hình `GEMINI_API_KEY` trên Vercel. Không gửi khóa Gemini, OAuth secrets hoặc Firebase Admin service account ra client.
+
 
 ## Phát triển
 
