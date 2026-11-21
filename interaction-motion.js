@@ -4,7 +4,9 @@
  */
 const INTERACT='.earth-site button,.earth-site .earth-secondary,.earth-site .hero-bottom-rail a,.ag-app button,.ag-app .ag-btn';
 const PRIMARY='.earth-site .earth-primary,.earth-site .root-next,.ag-app .ag-btn-primary';
-const REVEALS='.workflow-card,.start-dock-button,.guide-intro,.start-workflow-head,.root-discovery,.start-close-frame';
+// Feature cards use the original scroll-driven guide-spread (NOT the generic reveal).
+const REVEALS='.workflow-card,.guide-intro,.start-workflow-head,.root-discovery,.start-close-frame';
+const DOCK_CARDS='.start-feature-dock .start-dock-button';
 export function initAgrideltaMotion(site){
   if(document.documentElement.dataset.agMotionReady==='true')return;
   document.documentElement.dataset.agMotionReady='true';
@@ -42,6 +44,29 @@ export function initAgrideltaMotion(site){
       el.dataset.agReveal='pending';
       el.style.setProperty('--ag-stagger',Math.min(i%3,2)*40+'ms');
       io.observe(el);
+    });
+  }
+  // Restore the original reversible, scroll-driven 3D card fan.
+  // Browsers without CSS scroll timelines get a one-time staggered entrance.
+  const cards=[...site.querySelectorAll(DOCK_CARDS)];
+  const nativeTimeline=typeof CSS!=='undefined'&&CSS.supports('animation-timeline: view()');
+  // Clear stale markers if the landing experience was resumed instead of reloaded.
+  cards.forEach(card=>{
+    delete card.dataset.agReveal;
+    card.style.removeProperty('--ag-stagger');
+  });
+  if(!reduced.matches&&!nativeTimeline&&'IntersectionObserver' in window){
+    const cardObserver=new IntersectionObserver(entries=>{
+      for(const entry of entries){
+        if(!entry.isIntersecting)continue;
+        entry.target.dataset.dockReveal='shown';
+        cardObserver.unobserve(entry.target);
+      }
+    },{threshold:.08,rootMargin:'0px 0px -28px 0px'});
+    cards.forEach((card,index)=>{
+      card.dataset.dockReveal='pending';
+      card.style.setProperty('--dock-stagger',(index%3)*65+'ms');
+      cardObserver.observe(card);
     });
   }
   const header=site.querySelector('.earth-header');

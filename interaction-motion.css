@@ -72,3 +72,81 @@ body.ag-modal-open{overflow:hidden}
  .ag-app .ag-sidebar,.earth-site .earth-nav{transition-duration:75ms!important}
  .ag-tap-ripple{display:none!important}
 }
+
+/* Restored feature-card choreography (previously suppressed by the shared
+   IntersectionObserver reveal). The original guide-spread / guide-arrival
+   keyframes and five-card positions remain in root-guide.css. */
+.earth-site .start-feature-dock{
+  perspective:1050px;
+  perspective-origin:50% 44%;
+}
+.earth-site .start-feature-dock .start-dock-button{
+  backface-visibility:hidden;
+  transform-style:preserve-3d;
+  transition:transform 230ms var(--ag-kinetic),
+             border-color 230ms var(--ag-kinetic),
+             box-shadow 270ms var(--ag-kinetic);
+}
+@supports (animation-timeline: view()) {
+  @media (min-width:981px) and (prefers-reduced-motion:no-preference) {
+    .earth-site .start-feature-dock{
+      view-timeline:--guide-deck block;
+    }
+    .earth-site .start-feature-dock:not(:has(:focus-visible)) .start-dock-button{
+      animation:guide-spread ease-out both;
+      animation-timeline:--guide-deck;
+      animation-range:entry 25% cover 48%;
+    }
+  }
+  @media (max-width:980px) and (prefers-reduced-motion:no-preference) {
+    .earth-site .start-feature-dock .start-dock-button:not(:focus-visible){
+      animation:guide-arrival ease-out both;
+      animation-timeline:view();
+      animation-range:entry 0% entry 92%;
+    }
+  }
+}
+/* Progressive enhancement for Safari versions without scroll timelines. */
+.earth-site .start-feature-dock .start-dock-button[data-dock-reveal]{
+  transition:translate 570ms cubic-bezier(.2,.74,.2,1),
+             rotate 570ms cubic-bezier(.2,.74,.2,1),
+             opacity 410ms ease,
+             transform 230ms var(--ag-kinetic),
+             box-shadow 270ms var(--ag-kinetic);
+  transition-delay:var(--dock-stagger,0ms);
+}
+.earth-site .start-feature-dock .start-dock-button[data-dock-reveal="pending"]{
+  opacity:0;
+  translate:calc(var(--lane,0) * -14px) 35px;
+  rotate:y calc(var(--lane,0) * -4deg);
+}
+.earth-site .start-feature-dock .start-dock-button[data-dock-reveal="shown"]{
+  opacity:1;
+  translate:0 0;
+  rotate:y 0deg;
+}
+@media (hover:hover) and (pointer:fine){
+  .earth-site .start-feature-dock .start-dock-button:is(:hover,:focus-visible){
+    transform:translateY(-5px);
+    border-color:#6f9962;
+    box-shadow:0 18px 38px #30462b29;
+  }
+  .earth-site .start-feature-dock .start-dock-button:is(:hover,:focus-visible) .dock-image{
+    transform:scale(1.035);
+  }
+}
+@media (hover:none),(pointer:coarse){
+  .earth-site .start-feature-dock .start-dock-button.ag-pressing{
+    transform:scale(.985);
+    border-color:#8cae82;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .earth-site .start-feature-dock .start-dock-button{
+    animation:none!important;
+    transition:none!important;
+    opacity:1!important;
+    translate:none!important;
+    rotate:none!important;
+  }
+}
