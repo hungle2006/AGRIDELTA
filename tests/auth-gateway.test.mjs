@@ -26,6 +26,15 @@ test('email and provider login never display fake success in unconfigured state'
  assert.match(ws,/grant_type=pkce/);
  assert.doesNotMatch(ws,/window\.AGRIDELTAOpenDemo/);
 });
+test('plant doctor API requires authenticated Supabase account before analysis',()=>{
+ const api=file('api/plant-diagnose.js');
+ const frontend=file('farm-intelligence.js');
+ assert.match(api,/AUTH_NOT_CONFIGURED/);
+ assert.match(api,/LOGIN_REQUIRED/);
+ assert.match(api,/INVALID_SESSION/);
+ assert.match(frontend,/getAccessToken/);
+ assert.match(frontend,/Authorization/);
+});
 test('root redirects entry routes to auth, with explicit optional intro',()=>{
  const root=file('root-guide.js');
  assert.match(root,/else enter\('home', true\)/);
