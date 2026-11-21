@@ -1,3 +1,4 @@
+import {createFarmIntelligence} from './farm-intelligence.js';
 const app = document.querySelector('#app');
   const TYPES = ['fields','seasons','tasks','observations','orders'];
   const KEY = 'agridelta_workspace_v2';
@@ -49,13 +50,14 @@ const app = document.querySelector('#app');
   };
   let local=normalize(read(KEY,blank()));
   let records=local;
+  const intelligence=createFarmIntelligence({getFields:()=>records.fields,getSeasons:()=>records.seasons});
   let page='overview', query='', filter='all', modal=null, editing=null, notice='', noticeTimer=0, menuOpen=false, loginMode='login', cloudSession=read(CLOUD_SESSION,null);
   let syncState='local', working=false, authError='', selectedPhoto=null, hydrationToken=0;
   const NAV=[
     ['overview','Tổng quan','grid'],['fields','Cánh đồng','field'],['seasons','Mùa vụ','calendar'],['tasks','Công việc','clipboard'],
-    ['observations','Quan sát','camera'],['orders','Đơn hàng','box']
+    ['observations','Quan sát','camera'],['intelligence','AI nông nghiệp','sun'],['orders','Đơn hàng','box']
   ];
-  const titleOf={overview:'Tổng quan',fields:'Cánh đồng',seasons:'Mùa vụ',tasks:'Công việc',observations:'Góc quan sát',orders:'Đơn hàng',settings:'Tài khoản & dữ liệu'};
+  const titleOf={overview:'Tổng quan',fields:'Cánh đồng',seasons:'Mùa vụ',tasks:'Công việc',observations:'Góc quan sát',intelligence:'AI nông nghiệp',orders:'Đơn hàng',settings:'Tài khoản & dữ liệu'};
   const fmt = n => new Intl.NumberFormat('vi-VN').format(Number(n)||0);
   const money = n => fmt(n)+' ₫';
   const dateText = v => { if(!v)return 'Chưa có ngày';const d=new Date(v);return Number.isNaN(d.getTime())?'Chưa có ngày':d.toLocaleDateString('vi-VN'); };
@@ -74,7 +76,7 @@ const app = document.querySelector('#app');
   function sidebar(){
     return '<aside id="ag-app-sidebar" class="ag-sidebar '+(menuOpen?'is-open':'')+'"><div class="ag-brand"><img class="ag-eco-wordmark" src="/assets/agridelta-eco-logo.svg" alt="AGRIDELTA" width="2172" height="724" decoding="async"/><button class="ag-sidebar-close" data-menu aria-label="Đóng điều hướng">'+I('close',18)+'</button></div><div class="ag-nav-kicker">KHÔNG GIAN LÀM VIỆC</div><nav class="ag-nav" aria-label="Quản lý canh tác">'+NAV.map(([p,label,ico])=>'<button type="button" class="'+(page===p?'is-active':'')+'" data-go="'+p+'">'+I(ico,19)+' <span>'+label+'</span>'+(p==='tasks'&&records.tasks.filter(t=>!t.done).length?'<small>'+records.tasks.filter(t=>!t.done).length+'</small>':'')+'</button>').join('')+'</nav><div class="ag-nav-spacer"></div><button class="ag-side-settings '+(page==='settings'?'is-active':'')+'" data-go="settings">'+I('settings',18)+' Cài đặt & dữ liệu</button><div class="ag-sidebar-foot"><span class="ag-live-mark"></span><span><strong>Vườn của bạn, theo cách của bạn.</strong><small>'+ (cloudSession?'Dữ liệu thuộc tài khoản đang đăng nhập.':'Dữ liệu được giữ trên trình duyệt này.')+'</small></span></div><button class="ag-back-start" data-action="start">'+I('arrow',16)+' Về trang giới thiệu</button></aside><div class="ag-side-overlay '+(menuOpen?'is-open':'')+'" data-menu></div>';
   }
-  function mobileNav(){return '<nav class="ag-mobile-nav" aria-label="Điều hướng điện thoại">'+[['overview','Tổng quan','grid'],['fields','Cánh đồng','field'],['tasks','Công việc','clipboard'],['observations','Quan sát','camera'],['settings','Thêm','menu']].map(([p,label,ico])=>'<button data-go="'+p+'" class="'+(page===p?'is-active':'')+'">'+I(ico,20)+'<span>'+label+'</span></button>').join('')+'</nav>';}
+  function mobileNav(){return '<nav class="ag-mobile-nav" aria-label="Điều hướng điện thoại">'+[['overview','Tổng quan','grid'],['fields','Cánh đồng','field'],['intelligence','AI','sun'],['observations','Quan sát','camera'],['settings','Thêm','menu']].map(([p,label,ico])=>'<button data-go="'+p+'" class="'+(page===p?'is-active':'')+'">'+I(ico,20)+'<span>'+label+'</span></button>').join('')+'</nav>';}
   function pageHead(kicker,heading,description,kind,btn='Thêm mới'){
     return '<div class="ag-page-heading"><div><span class="ag-eyebrow">'+esc(kicker)+'</span><h1>'+heading+'</h1><p>'+esc(description)+'</p></div>'+(kind?'<button class="ag-btn ag-btn-primary" data-new="'+kind+'">'+I('plus',18)+' '+esc(btn)+'</button>':'')+'</div>';
   }
@@ -160,13 +162,15 @@ const app = document.querySelector('#app');
         :'<p>Tài khoản sử dụng email và mật khẩu. Mỗi người chỉ thấy bản ghi của mình nhờ chính sách phân quyền trên máy chủ.</p><form class="ag-login-form" id="ag-login-form"><label class="ag-form-field"><span>Email</span><input name="email" type="email" autocomplete="email" required></label><label class="ag-form-field"><span>Mật khẩu</span><input name="password" type="password" autocomplete="'+(loginMode==='register'?'new-password':'current-password')+'" required minlength="8"></label><button class="ag-btn ag-btn-primary" type="submit">'+(loginMode==='register'?'Đăng ký':'Đăng nhập')+'</button><button class="ag-link" type="button" data-action="switch-auth">'+(loginMode==='register'?'Đã có tài khoản? Đăng nhập':'Chưa có tài khoản? Đăng ký')+'</button></form>'+(authError?'<p class="ag-error">'+esc(authError)+'</p>':'')
         :'<div class="ag-sync-status ag-sync-unavailable">'+I('shield',25)+'<div><strong>Chưa kết nối máy chủ</strong><small>Hiện tại dữ liệu được lưu trên thiết bị. Không có tài khoản giả.</small></div></div><p>Giao diện đăng nhập và cơ chế phân quyền đã chuẩn bị sẵn; cần cấu hình một Supabase riêng cho AGRIDELTA để kích hoạt đồng bộ liên thiết bị.</p>')+'</section></div>';
   }
-  function content(){return ({overview:dashboard,fields:fieldsPage,seasons:seasonsPage,tasks:tasksPage,observations:observationsPage,orders:ordersPage,settings:settingsPage})[page]?.() || dashboard();}
+  function content(){return ({overview:dashboard,fields:fieldsPage,seasons:seasonsPage,tasks:tasksPage,observations:observationsPage,intelligence:()=>'<div id="ag-ai-root"></div>',orders:ordersPage,settings:settingsPage})[page]?.() || dashboard();}
   function render(){
     if(!app)return;
     const focusSearch=document.activeElement?.id==='ag-search';const caret=focusSearch?document.activeElement.selectionStart:null;
     app.innerHTML='<div class="ag-app">'+sidebar()+'<div class="ag-shell">'+header()+'<main id="ag-main" class="ag-main" tabindex="-1">'+content()+'</main><footer class="ag-footer"><span>© 2026 AGRIDELTA</span><span>Gieo điều tốt đẹp, quản lý bằng dữ liệu thật.</span></footer></div>'+mobileNav()+'</div>'+modalView()+'<div id="ag-toast" class="ag-toast" role="status" '+(notice?'':'hidden')+'>'+esc(notice)+'</div>';
     if(focusSearch){const x=app.querySelector('#ag-search');x?.focus();try{x?.setSelectionRange(caret,caret);}catch{}}
     showImages();
+    if(page==='intelligence')intelligence.mount(app.querySelector('#ag-ai-root'));
+    else intelligence.detach();
   }
   async function showImages(){
     const nodes=[...app.querySelectorAll('[data-image-id]')], token=++hydrationToken;
