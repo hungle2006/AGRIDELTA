@@ -45,3 +45,16 @@ test('observatory viewport never vertically scrolls but horizontal swipes remain
   assert.match(css,/overflow-y: hidden/);
   assert.match(css,/@media\(max-width:600px\)/);
 });
+
+
+test('touching any inner card content expands that card without disabling swipe',()=>{
+  const js=readFileSync(new URL('../observatory-carousel.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../workspace-v2.css',import.meta.url),'utf8');
+  assert.match(js,/slide\.addEventListener\('pointerdown'/);
+  assert.match(js,/slide\.classList\.add\('is-touching'\)/);
+  assert.match(js,/clearTouch\(slide, 320\)/);
+  assert.match(css,/\.ag-carousel-slide:is\(\.is-touching,\.is-spotlit\) \.ag-photo-card/);
+  assert.match(css,/\.ag-carousel-slide:hover \.ag-photo-caption \.ag-tool-title/);
+  assert.match(css,/\.ag-carousel-slide:hover \.ag-tool-photo/);
+  assert.match(css,/touch-action: pan-x/);
+});

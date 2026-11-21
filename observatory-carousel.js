@@ -15,6 +15,17 @@ export function mountObservatory(observatory, initial, onChange = () => {}) {
   let spotlight = null;
   let drag = null;
   let suppressClick = false;
+  const touchTimers = new Map();
+  function clearTouch(slide, delay = 0) {
+    clearTimeout(touchTimers.get(slide));
+    touchTimers.delete(slide);
+    if (delay) {
+      touchTimers.set(slide, setTimeout(() => {
+        slide.classList.remove('is-touching');
+        touchTimers.delete(slide);
+      }, delay));
+    } else slide.classList.remove('is-touching');
+  }
 
   function geometry() {
     const bounds = rail.getBoundingClientRect();
@@ -83,6 +94,19 @@ export function mountObservatory(observatory, initial, onChange = () => {}) {
     if (target !== current || Math.abs(geometry()[target].distance) > 3) move(target);
   }
   slides.forEach(slide => {
+    // Touching any child (image, caption, title or arrow) makes the whole card swell.
+    // A short tap still retains normal navigation and horizontal swiping.
+    slide.addEventListener('pointerdown', event => {
+      if (event.pointerType !== 'touch' || event.button !== 0) return;
+      clearTouch(slide);
+      slide.classList.add('is-touching');
+    }, {signal});
+    slide.addEventListener('pointerup', event => {
+      if (event.pointerType === 'touch') clearTouch(slide, 320);
+    }, {signal});
+    slide.addEventListener('pointercancel', event => {
+      if (event.pointerType === 'touch') clearTouch(slide);
+    }, {signal});
     slide.addEventListener('pointerenter', event => {
       if (event.pointerType !== 'mouse' && event.pointerType !== 'pen') return;
       if (drag?.moving) return;
@@ -97,7 +121,10 @@ export function mountObservatory(observatory, initial, onChange = () => {}) {
       if (!slide.contains(event.relatedTarget)) cancelHover();
     }, {signal});
   });
-  rail.addEventListener('pointerleave', () => cancelHover(), {signal});
+  rail.addEventListener('pointerleave', event => {
+    // Touch browsers emit pointerleave after pointerup; keep a tapped card's preview.
+    if (event.pointerType !== 'touch') cancelHover();
+  }, {signal});
   rail.addEventListener('scroll', schedule, {passive:true, signal});
   observatory.addEventListener('click', event => {
     const arrow = event.target.closest('[data-carousel-step]');
@@ -149,7 +176,7 @@ export function mountObservatory(observatory, initial, onChange = () => {}) {
     if (suppressClick || (event.detail && index !== -1 && index !== closest(geometry()))) {
       event.preventDefault();
       event.stopPropagation();
-      if (!suppressClick && index !== -1) move(index);
+      if (!suppressClick && index !== -1) preview(slides[index]);
     }
     suppressClick = false;
   }, {capture: true, signal});
@@ -158,6 +185,9 @@ export function mountObservatory(observatory, initial, onChange = () => {}) {
   move(current, false);
   return () => {
     cancelHover();
+    touchTimers.forEach(timer => clearTimeout(timer));
+    slides.forEach(slide => slide.classList.remove('is-touching'));
+    touchTimers.clear();
     controller.abort();
     resize.disconnect();
     cancelAnimationFrame(frame);
