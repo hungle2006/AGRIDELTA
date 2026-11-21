@@ -61,3 +61,5 @@ body.rg-app-mode:has(#ag-auth) #app{min-height:100dvh;display:block}
 @media(max-width:740px){.ag-auth{display:block;min-height:100dvh}.ag-auth-visual{display:none}.ag-auth-content{padding:40px 23px 50px;min-height:100dvh}.ag-auth-form-wrap{max-width:460px}.ag-auth-mobile-brand{display:flex;margin:0 auto 28px;justify-content:center}.ag-auth-mobile-brand img{width:152px;height:63px;object-fit:contain}.ag-auth h1{font-size:33px}.ag-auth-sub{font-size:12px}.ag-auth-social button{min-height:51px}}
 @media(max-width:390px){.ag-auth-content{padding:24px 18px 35px}.ag-auth h1{font-size:29px}.ag-auth-divider{font-size:9px;gap:9px}.ag-auth-social button{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.ag-auth *{animation:none!important;transition:none!important}}
+
+.ag-auth-recover{margin-top:5px;text-align:right}.ag-auth-recover button{border:0;background:transparent;color:#28764b;font-size:11px;font-weight:750;padding:8px 0;cursor:pointer}.ag-auth-recover button:hover{text-decoration:underline}

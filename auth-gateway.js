@@ -24,7 +24,7 @@ export function authScreen({mode='login',error='',info='',configured=false,pendi
       '<div class="ag-auth-form-body">'+
        (error?'<div class="ag-auth-error" role="alert">'+e(error)+'</div>':'')+
        (info?'<div class="ag-auth-info" role="status">'+e(info)+'</div>':'')+
-       (!configured?'<div class="ag-auth-config" role="status"><strong>Chưa kích hoạt đăng nhập</strong><span>AGRIDELTA cần được kết nối với dự án Supabase riêng trước khi sử dụng các tài khoản thật. Không có chế độ demo hoặc tài khoản giả.</span></div>':'')+
+       (!configured?'<div class="ag-auth-config" role="status"><strong>Chưa kích hoạt đăng nhập</strong><span>AGRIDELTA cần được kết nối với dự án Firebase riêng trước khi sử dụng các tài khoản thật. Không có chế độ demo hoặc tài khoản giả.</span></div>':'')+
        '<div class="ag-auth-social">'+
         '<button type="button" data-auth-email><span class="ag-auth-provider ag-auth-gmail" aria-hidden="true">✉</span>Tiếp tục bằng Gmail / Email</button>'+
         '<button type="button" data-auth-provider="google"><span class="ag-auth-provider ag-auth-google" aria-hidden="true">G</span>Tiếp tục với Google <small>(Gmail)</small></button>'+
@@ -38,32 +38,10 @@ export function authScreen({mode='login',error='',info='',configured=false,pendi
         '<input id="ag-auth-password" type="password" name="password" placeholder="Nhập mật khẩu" minlength="8" maxlength="128" autocomplete="'+(signup?'new-password':'current-password')+'" required />'+
         '<button class="ag-auth-submit" type="submit">'+(signup?'Tạo tài khoản':'Đăng nhập')+' <span aria-hidden="true">→</span></button>'+
        '</form>'+
+       (!signup?'<div class="ag-auth-recover"><button type="button" data-auth-recover>Quên mật khẩu?</button></div>':'')+
        '<div class="ag-auth-switch">'+(signup?'Đã có tài khoản?':'Chưa có tài khoản?')+' <button type="button" data-auth-switch>'+(signup?'Đăng nhập':'Đăng ký ngay')+'</button></div>'+
-       '<p class="ag-auth-assurance">Thông tin cá nhân được lưu riêng theo tài khoản. Các nhà cung cấp chỉ được sử dụng khi kết nối OAuth hợp lệ.</p>'+
+       '<p class="ag-auth-assurance">Xác thực bằng Firebase. Bản ghi canh tác hiện lưu theo tài khoản trên thiết bị này; chưa đồng bộ liên thiết bị.</p>'+
       '</div>')+
      '</div></section>'+
    '</main>';
-}
-export const OAUTH_VERIFIER_KEY='agridelta_pkce_verifier_v1';
-export const base64url=bytes=>btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-export async function beginOAuth({endpoint,provider,callback=window.location.origin+'/auth/callback'}){
- if(!['google','facebook','github'].includes(provider))throw Error('Nhà cung cấp không được hỗ trợ');
- if(!endpoint)throw Error('AGRIDELTA chưa kết nối dịch vụ xác thực.');
- if(!window.crypto?.subtle)throw Error('Trình duyệt cần kết nối HTTPS để đăng nhập an toàn.');
- const verifier=base64url(crypto.getRandomValues(new Uint8Array(48)));
- const hash=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier)));
- sessionStorage.setItem(OAUTH_VERIFIER_KEY,JSON.stringify({value:verifier,created:Date.now()}));
- const url=new URL(endpoint+'/auth/v1/authorize');
- url.searchParams.set('provider',provider);
- url.searchParams.set('redirect_to',callback);
- url.searchParams.set('code_challenge',base64url(hash));
- url.searchParams.set('code_challenge_method','s256');
- window.location.assign(url.toString());
-}
-export function consumePKCEVerifier(){
- const raw=sessionStorage.getItem(OAUTH_VERIFIER_KEY);
- sessionStorage.removeItem(OAUTH_VERIFIER_KEY);
- if(!raw)return null;
- try{const item=JSON.parse(raw);if(typeof item.value==='string'&&Date.now()-item.created<10*60*1000)return item.value;}catch{}
- return null;
 }

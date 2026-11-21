@@ -1,12 +1,11 @@
 import {createFarmIntelligence} from './farm-intelligence.js';
-import {authScreen,beginOAuth,consumePKCEVerifier} from './auth-gateway.js';
+import {authScreen} from './auth-gateway.js';
+import {firebaseConfigured,watchFirebaseUser,loginWithEmail,registerWithEmail,loginWithProvider,logoutFirebase,getFirebaseToken,sendPasswordRecovery,friendlyFirebaseError} from './firebase-auth.js';
 const app = document.querySelector('#app');
   const TYPES = ['fields','seasons','tasks','observations','orders'];
   const KEY = 'agridelta_workspace_v2';
-  const CLOUD_SESSION = 'agridelta_cloud_session';
-  const ENDPOINT = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\/+$/,'');
-  const PUBLIC_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-  const cloudAvailable = Boolean(ENDPOINT && PUBLIC_KEY);
+  const firebaseUserStorageKey = uid=>'agridelta_workspace_v2_firebase_'+uid;
+  const cloudAvailable = false; // No Firestore database is provisioned yet.
   const IMG_DB = 'agridelta_plant_photos';
   const iconPaths = {
     grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
@@ -49,13 +48,13 @@ const app = document.querySelector('#app');
     TYPES.forEach(k=>{ if(Array.isArray(value?.[k])) d[k]=value[k].filter(x=>x&&typeof x==='object'&&typeof x.id==='string').slice(0,5000); });
     return d;
   };
-  let local=normalize(read(KEY,blank()));
+  let local=blank();
   let records=local;
-  const intelligence=createFarmIntelligence({getFields:()=>records.fields,getSeasons:()=>records.seasons,getAccessToken:()=>authVerified?cloudSession?.access_token||'':''});
-  let page='overview', query='', filter='all', modal=null, editing=null, notice='', noticeTimer=0, menuOpen=false, loginMode='login', cloudSession=read(CLOUD_SESSION,null);
-  let syncState='local', working=false, authError='', selectedPhoto=null, hydrationToken=0;
-  let authVerified=false, authInfo='', authPending=cloudAvailable&&(Boolean(cloudSession)||new URLSearchParams(location.search).has('code'));
-  const oauthCallbackPath='/auth/callback';
+  let authUser=null,authVerified=false,authInfo='',authPending=true;
+  const intelligence=createFarmIntelligence({getFields:()=>records.fields,getSeasons:()=>records.seasons,getAccessToken:()=>authVerified?getFirebaseToken():''});
+  let page='overview',query='',filter='all',modal=null,editing=null,notice='',noticeTimer=0,menuOpen=false,loginMode='login';
+  let working=false,authError='',selectedPhoto=null,hydrationToken=0;
+  const scopedPhotoKey=id=>(authUser?.uid||'unauthenticated')+':'+id;
   const NAV=[
     ['overview','Tổng quan','grid'],['fields','Cánh đồng','field'],['seasons','Mùa vụ','calendar'],['tasks','Công việc','clipboard'],
     ['observations','Quan sát','camera'],['intelligence','AI nông nghiệp','sun'],['orders','Đơn hàng','box']
@@ -70,14 +69,14 @@ const app = document.querySelector('#app');
   const sumOrders = () => records.orders.reduce((s,o)=>s+Math.max(0,Number(o.quantity)||0)*Math.max(0,Number(o.price)||0),0);
   const missing = (heading,description,kind) =>
     '<div class="ag-empty"><span class="ag-empty-mark">'+I('leaf',29)+'</span><h3>'+heading+'</h3><p>'+description+'</p><button class="ag-btn ag-btn-primary" data-new="'+kind+'">'+I('plus',17)+' Tạo mới</button></div>';
-  function persist(){try{localStorage.setItem(KEY,JSON.stringify(local));}catch{toast('Bộ nhớ đầy. Hãy xuất dữ liệu hoặc xóa ảnh không cần thiết.');}}
+  function persist(){try{if(authUser?.uid)localStorage.setItem(firebaseUserStorageKey(authUser.uid),JSON.stringify(local));}catch{toast('Bộ nhớ đầy. Hãy xuất dữ liệu hoặc xóa ảnh không cần thiết.');}}
   function toast(text){notice=text;renderToast();clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>{notice='';renderToast();},3700);}
   function renderToast(){let node=document.querySelector('#ag-toast'); if(node){node.textContent=notice;node.hidden=!notice;}}
   function header(){
-    return '<header class="ag-header"><div class="ag-mobile-header"><button class="ag-icon-btn" data-menu aria-controls="ag-app-sidebar" aria-expanded="false" aria-label="Mở điều hướng">'+I('menu')+'</button><span>AGRIDELTA</span></div><div class="ag-breadcrumb">KHÔNG GIAN CANH TÁC <span>/</span> '+esc(titleOf[page]||'Tổng quan')+'</div><div class="ag-head-actions"><span class="ag-storage '+(cloudSession?'is-cloud':'')+'">'+I(cloudSession?'wifi':'shield',15)+' '+(cloudSession?'Tài khoản đồng bộ':cloudAvailable?'Chế độ thiết bị':'Lưu trên thiết bị')+'</span><button class="ag-icon-btn" data-go="settings" aria-label="Tài khoản và dữ liệu">'+I('user')+'</button></div></header>';
+    return '<header class="ag-header"><div class="ag-mobile-header"><button class="ag-icon-btn" data-menu aria-controls="ag-app-sidebar" aria-expanded="false" aria-label="Mở điều hướng">'+I('menu')+'</button><span>AGRIDELTA</span></div><div class="ag-breadcrumb">KHÔNG GIAN CANH TÁC <span>/</span> '+esc(titleOf[page]||'Tổng quan')+'</div><div class="ag-head-actions"><span class="ag-storage '+''+'">'+I('shield',15)+' Firebase · Dữ liệu trên thiết bị'+'</span><button class="ag-icon-btn" data-go="settings" aria-label="Tài khoản và dữ liệu">'+I('user')+'</button></div></header>';
   }
   function sidebar(){
-    return '<aside id="ag-app-sidebar" class="ag-sidebar '+(menuOpen?'is-open':'')+'"><div class="ag-brand"><img class="ag-eco-wordmark" src="/assets/agridelta-eco-logo.svg" alt="AGRIDELTA" width="2172" height="724" decoding="async"/><button class="ag-sidebar-close" data-menu aria-label="Đóng điều hướng">'+I('close',18)+'</button></div><div class="ag-nav-kicker">KHÔNG GIAN LÀM VIỆC</div><nav class="ag-nav" aria-label="Quản lý canh tác">'+NAV.map(([p,label,ico])=>'<button type="button" class="'+(page===p?'is-active':'')+'" data-go="'+p+'">'+I(ico,19)+' <span>'+label+'</span>'+(p==='tasks'&&records.tasks.filter(t=>!t.done).length?'<small>'+records.tasks.filter(t=>!t.done).length+'</small>':'')+'</button>').join('')+'</nav><div class="ag-nav-spacer"></div><button class="ag-side-settings '+(page==='settings'?'is-active':'')+'" data-go="settings">'+I('settings',18)+' Cài đặt & dữ liệu</button><div class="ag-sidebar-foot"><span class="ag-live-mark"></span><span><strong>Vườn của bạn, theo cách của bạn.</strong><small>'+ (cloudSession?'Dữ liệu thuộc tài khoản đang đăng nhập.':'Dữ liệu được giữ trên trình duyệt này.')+'</small></span></div><button class="ag-back-start" data-action="start">'+I('arrow',16)+' Về trang giới thiệu</button></aside><div class="ag-side-overlay '+(menuOpen?'is-open':'')+'" data-menu></div>';
+    return '<aside id="ag-app-sidebar" class="ag-sidebar '+(menuOpen?'is-open':'')+'"><div class="ag-brand"><img class="ag-eco-wordmark" src="/assets/agridelta-eco-logo.svg" alt="AGRIDELTA" width="2172" height="724" decoding="async"/><button class="ag-sidebar-close" data-menu aria-label="Đóng điều hướng">'+I('close',18)+'</button></div><div class="ag-nav-kicker">KHÔNG GIAN LÀM VIỆC</div><nav class="ag-nav" aria-label="Quản lý canh tác">'+NAV.map(([p,label,ico])=>'<button type="button" class="'+(page===p?'is-active':'')+'" data-go="'+p+'">'+I(ico,19)+' <span>'+label+'</span>'+(p==='tasks'&&records.tasks.filter(t=>!t.done).length?'<small>'+records.tasks.filter(t=>!t.done).length+'</small>':'')+'</button>').join('')+'</nav><div class="ag-nav-spacer"></div><button class="ag-side-settings '+(page==='settings'?'is-active':'')+'" data-go="settings">'+I('settings',18)+' Cài đặt & dữ liệu</button><div class="ag-sidebar-foot"><span class="ag-live-mark"></span><span><strong>Vườn của bạn, theo cách của bạn.</strong><small>'+ 'Bản ghi riêng cho tài khoản trên thiết bị này.'+'</small></span></div><button class="ag-back-start" data-action="start">'+I('arrow',16)+' Về trang giới thiệu</button></aside><div class="ag-side-overlay '+(menuOpen?'is-open':'')+'" data-menu></div>';
   }
   function mobileNav(){return '<nav class="ag-mobile-nav" aria-label="Điều hướng điện thoại">'+[['overview','Tổng quan','grid'],['fields','Cánh đồng','field'],['intelligence','AI','sun'],['observations','Quan sát','camera'],['settings','Thêm','menu']].map(([p,label,ico])=>'<button data-go="'+p+'" class="'+(page===p?'is-active':'')+'">'+I(ico,20)+'<span>'+label+'</span></button>').join('')+'</nav>';}
   function pageHead(kicker,heading,description,kind,btn='Thêm mới'){
@@ -158,19 +157,24 @@ const app = document.querySelector('#app');
     return '<div class="ag-dialog-backdrop" data-dismiss><section class="ag-dialog" role="dialog" aria-modal="true" aria-labelledby="ag-dialog-title"><div class="ag-dialog-header"><div><span class="ag-eyebrow">AGRIDELTA / BẢN GHI</span><h2 id="ag-dialog-title">'+(existing?'Chỉnh sửa ':'Tạo ')+labels[modal]+'</h2></div><button class="ag-icon-btn" data-dismiss aria-label="Đóng">'+I('close')+'</button></div><form id="ag-record-form" class="ag-record-form" data-type="'+modal+'"><div class="ag-form-grid">'+formFields(modal,existing||{})+'</div><div class="ag-dialog-footer"><button type="button" class="ag-btn ag-btn-secondary" data-dismiss>Huỷ</button><button type="submit" class="ag-btn ag-btn-primary">'+I('check',17)+' Lưu thông tin</button></div></form></section></div>';
   }
   function settingsPage(){
-    return pageHead('06 / TÀI KHOẢN & DỮ LIỆU','Dữ liệu <em>của bạn.</em>','Làm chủ dữ liệu: sao lưu, nhập lại và quản lý đồng bộ.')
-      +'<div class="ag-settings-grid"><section class="ag-surface ag-settings-card">'+surfaceHeading('Dữ liệu trên thiết bị','SAO LƯU AN TOÀN')+'<p>Xuất bản sao JSON của cánh đồng, mùa vụ, công việc, ghi chú và đơn hàng. Ảnh quan sát được lưu riêng trong thiết bị và chưa nằm trong bản sao JSON.</p><div class="ag-settings-actions"><button class="ag-btn ag-btn-primary" data-action="export">'+I('download',17)+' Xuất bản sao</button><label class="ag-btn ag-btn-secondary">'+I('upload',17)+' Nhập bản sao<input type="file" id="ag-import" accept=".json,application/json" hidden></label><button class="ag-btn ag-btn-secondary" data-action="migrate">Nhập dữ liệu bản cũ</button></div><p class="ag-settings-help">Khi đổi trình duyệt hoặc xoá dữ liệu trang, các bản ghi chỉ lưu trên thiết bị có thể bị mất.</p></section>'
-      +'<section class="ag-surface ag-settings-card">'+surfaceHeading('Tài khoản và đồng bộ','BẢO MẬT')+(cloudAvailable?cloudSession
-        ?'<div class="ag-sync-status">'+I('shield',25)+'<div><strong>'+esc(cloudSession.user?.email||'Đã đăng nhập')+'</strong><small>Đã kết nối tài khoản riêng</small></div></div><div class="ag-settings-actions"><button class="ag-btn ag-btn-primary" data-action="sync">'+I('refresh',17)+' Đồng bộ ngay</button><button class="ag-btn ag-btn-secondary" data-action="signout">Đăng xuất</button></div><p class="ag-settings-help">Tải dữ liệu về trước khi đăng xuất nếu bạn cần sử dụng ngoại tuyến.</p>'
-        :'<p>Tài khoản sử dụng email và mật khẩu. Mỗi người chỉ thấy bản ghi của mình nhờ chính sách phân quyền trên máy chủ.</p><form class="ag-login-form" id="ag-login-form"><label class="ag-form-field"><span>Email</span><input name="email" type="email" autocomplete="email" required></label><label class="ag-form-field"><span>Mật khẩu</span><input name="password" type="password" autocomplete="'+(loginMode==='register'?'new-password':'current-password')+'" required minlength="8"></label><button class="ag-btn ag-btn-primary" type="submit">'+(loginMode==='register'?'Đăng ký':'Đăng nhập')+'</button><button class="ag-link" type="button" data-action="switch-auth">'+(loginMode==='register'?'Đã có tài khoản? Đăng nhập':'Chưa có tài khoản? Đăng ký')+'</button></form>'+(authError?'<p class="ag-error">'+esc(authError)+'</p>':'')
-        :'<div class="ag-sync-status ag-sync-unavailable">'+I('shield',25)+'<div><strong>Chưa kết nối máy chủ</strong><small>Hiện tại dữ liệu được lưu trên thiết bị. Không có tài khoản giả.</small></div></div><p>Giao diện đăng nhập và cơ chế phân quyền đã chuẩn bị sẵn; cần cấu hình một Supabase riêng cho AGRIDELTA để kích hoạt đồng bộ liên thiết bị.</p>')+'</section></div>';
+    return pageHead('06 / TÀI KHOẢN & DỮ LIỆU','Dữ liệu <em>của bạn.</em>','Sao lưu dữ liệu, nhập bản ghi cũ và quản lý tài khoản Firebase.')
+      +'<div class="ag-settings-grid"><section class="ag-surface ag-settings-card">'+surfaceHeading('Dữ liệu trên thiết bị','SAO LƯU AN TOÀN')+
+      '<p>Bản ghi canh tác được lưu trong trình duyệt này, tách theo mã tài khoản Firebase. Ảnh cũng lưu cục bộ, chưa tự đồng bộ lên cloud hoặc thiết bị khác.</p>'+
+      '<div class="ag-settings-actions"><button class="ag-btn ag-btn-primary" data-action="export">'+I('download',17)+' Xuất bản sao</button>'+
+      '<label class="ag-btn ag-btn-secondary">'+I('upload',17)+' Nhập bản sao<input type="file" id="ag-import" accept=".json,application/json" hidden></label>'+
+      '<button class="ag-btn ag-btn-secondary" data-action="migrate">'+I('refresh',17)+' Nhập dữ liệu cũ trên máy</button></div>'+
+      '<p class="ag-settings-help">Hãy xuất bản sao trước khi xóa dữ liệu trình duyệt hoặc đổi thiết bị. Bản sao JSON chưa gồm nội dung ảnh.</p></section>'+
+      '<section class="ag-surface ag-settings-card">'+surfaceHeading('Tài khoản Firebase','ĐÃ XÁC THỰC')+
+      '<div class="ag-sync-status">'+I('shield',25)+'<div><strong>'+esc(authUser?.email||authUser?.displayName||'Tài khoản Firebase')+'</strong><small>UID: '+esc(authUser?.uid||'')+'</small></div></div>'+
+      '<div class="ag-settings-actions"><button class="ag-btn ag-btn-secondary" data-action="signout">'+I('logout',17)+' Đăng xuất</button></div>'+
+      '<p class="ag-settings-help">Các phương thức xác thực: Google, Facebook, GitHub hoặc Email/Mật khẩu. Dữ liệu quản lý chưa lưu vào Firestore, nên sẽ không tự xuất hiện trên thiết bị khác.</p></section></div>';
   }
   function content(){return ({overview:dashboard,fields:fieldsPage,seasons:seasonsPage,tasks:tasksPage,observations:observationsPage,intelligence:()=>'<div id="ag-ai-root"></div>',orders:ordersPage,settings:settingsPage})[page]?.() || dashboard();}
   function render(){
     if(!app)return;
     if(!authVerified){
       intelligence.detach();
-      app.innerHTML=authScreen({mode:loginMode,error:authError,info:authInfo,configured:cloudAvailable,pending:authPending});
+      app.innerHTML=authScreen({mode:loginMode,error:authError,info:authInfo,configured:firebaseConfigured,pending:authPending});
       document.body.classList.remove('ag-modal-open');
       return;
     }
@@ -204,15 +208,15 @@ const app = document.querySelector('#app');
   }
   async function imagePut(id,blob){
     const db=await imageDB();if(!db)return false;
-    return new Promise(resolve=>{const tx=db.transaction('images','readwrite');tx.objectStore('images').put(blob,id);tx.oncomplete=()=>{db.close();resolve(true);};tx.onerror=()=>{db.close();resolve(false);};});
+    return new Promise(resolve=>{const tx=db.transaction('images','readwrite');tx.objectStore('images').put(blob,scopedPhotoKey(id));tx.oncomplete=()=>{db.close();resolve(true);};tx.onerror=()=>{db.close();resolve(false);};});
   }
   async function imageGet(id){
     const db=await imageDB();if(!db)return null;
-    return new Promise(resolve=>{const tx=db.transaction('images','readonly');const rq=tx.objectStore('images').get(id);rq.onsuccess=()=>resolve(rq.result||null);rq.onerror=()=>resolve(null);tx.oncomplete=()=>db.close();});
+    return new Promise(resolve=>{const tx=db.transaction('images','readonly');const rq=tx.objectStore('images').get(scopedPhotoKey(id));rq.onsuccess=()=>resolve(rq.result||null);rq.onerror=()=>resolve(null);tx.oncomplete=()=>db.close();});
   }
   async function imageDelete(id){
     const db=await imageDB();if(!db)return;
-    return new Promise(resolve=>{const tx=db.transaction('images','readwrite');tx.objectStore('images').delete(id);tx.oncomplete=()=>{db.close();resolve();};tx.onerror=()=>{db.close();resolve();};});
+    return new Promise(resolve=>{const tx=db.transaction('images','readwrite');tx.objectStore('images').delete(scopedPhotoKey(id));tx.oncomplete=()=>{db.close();resolve();};tx.onerror=()=>{db.close();resolve();};});
   }
   let modalCloseTimer=null;
   function openModal(kind,id=null){
@@ -261,24 +265,22 @@ const app = document.querySelector('#app');
     const row={...previous,...data,id,createdAt:previous?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
     if((kind==='observations'||kind==='fields')&&photo instanceof File&&photo.size){if(photo.size>8*1024*1024){toast('Ảnh không được vượt quá 8MB.');return;}if(!(await imagePut(id,photo))){toast('Không thể lưu ảnh trên thiết bị này.');return;}}
     const rows=[...records[kind]],at=rows.findIndex(x=>x.id===id);if(at<0)rows.unshift(row);else rows[at]=row;records[kind]=rows;
-    if(!cloudSession){local=records;persist();}
+    local=records;persist();
     modal=null;editing=null;document.body.classList.remove('ag-modal-open');render();toast('Đã lưu '+(kind==='observations'?'quan sát':'thông tin')+'.');
-    if(cloudSession)remoteSave(kind,row).catch(()=>{syncState='error';toast('Mất kết nối. Thay đổi chưa đồng bộ lên máy chủ.');});
   }
   async function removeRecord(kind,id){
     const row=records[kind]?.find(r=>r.id===id);if(!row)return;
     if(!confirm('Xóa bản ghi "'+(row.name||row.title||row.product||row.note?.slice(0,32)||'này')+'"?'))return;
     if(kind==='fields'&&(records.seasons.some(x=>x.fieldId===id)||records.tasks.some(x=>x.fieldId===id))&&!confirm('Khu vực đang được dùng trong mùa vụ hoặc công việc. Vẫn xóa khu vực?'))return;
     records[kind]=records[kind].filter(x=>x.id!==id);if(kind==='observations'||kind==='fields')await imageDelete(id);
-    if(!cloudSession){local=records;persist();}
+    local=records;persist();
     render();toast('Đã xóa bản ghi.');
-    if(cloudSession)remoteRemove(kind,id).catch(()=>toast('Không thể đồng bộ thao tác xóa. Hãy kiểm tra kết nối.'));
   }
   function toggleTask(id){
     const t=records.tasks.find(x=>x.id===id);if(!t)return;
     t.done=!t.done;t.updatedAt=new Date().toISOString();
-    if(!cloudSession){local=records;persist();}
-    render();if(cloudSession)remoteSave('tasks',t).catch(()=>toast('Không thể cập nhật lên máy chủ.'));
+    local=records;persist();
+    render();
   }
   function exportJSON(){
     const blob=new Blob([JSON.stringify({app:'AGRIDELTA',version:2,exportedAt:new Date().toISOString(),records},null,2)],{type:'application/json'});
@@ -291,12 +293,37 @@ const app = document.querySelector('#app');
       const incoming=normalize(parsed.records);
       if(!confirm('Nhập dữ liệu từ bản sao? Các bản ghi trùng mã sẽ được cập nhật.'))return;
       TYPES.forEach(k=>{const byId=new Map(records[k].map(r=>[r.id,r]));incoming[k].forEach(r=>byId.set(r.id,r));records[k]=[...byId.values()];});
-      if(!cloudSession){local=records;persist();}else await syncAll();
+      local=records;persist();
       render();toast('Đã nhập dữ liệu thành công.');
     }catch(e){toast(e.message||'Không thể đọc bản sao.');}
   }
-  function legacyImport(){
-    if(!confirm('Nhập dữ liệu đã lưu từ bản dùng thử trước đây? Hệ thống sẽ giữ các bản ghi đang có.'))return;
+  async function legacyImport(){
+    if(!authUser?.uid)return;
+    if(!confirm('Nhập dữ liệu AGRI cũ trên thiết bị này vào tài khoản Firebase hiện tại? Hệ thống sẽ giữ bản gốc và các bản ghi đang có.'))return;
+    const previous=normalize(read(KEY,blank()));
+    let oldCount=0;
+    TYPES.forEach(k=>{
+      const table=new Map(records[k].map(x=>[x.id,x]));
+      previous[k].forEach(row=>{if(!table.has(row.id)){table.set(row.id,row);oldCount++;}});
+      records[k]=[...table.values()];
+    });
+    // Copy old photo blobs only when the owner explicitly imports legacy records.
+    try{
+      const db=await imageDB();
+      if(db){
+        const ids=[...previous.fields,...previous.observations].map(x=>x.id);
+        for(const id of ids){
+          await new Promise(resolve=>{
+            const tx=db.transaction('images','readwrite'),store=tx.objectStore('images');
+            const req=store.get(id);
+            req.onsuccess=()=>{if(req.result)store.put(req.result,scopedPhotoKey(id));};
+            tx.oncomplete=resolve;tx.onerror=resolve;tx.onabort=resolve;
+          });
+        }
+        db.close();
+      }
+    }catch{}
+
     const mapping={fields:'fields',season:'seasons',tasks:'tasks',orders:'orders'};
     let count=0;
     Object.entries(mapping).forEach(([old,k])=>{
@@ -314,157 +341,74 @@ const app = document.querySelector('#app');
       });
       records[k]=[...table.values()];
     });
-    if(!cloudSession){local=records;persist();}else syncAll();
-    render();toast('Đã nhập '+count+' bản ghi cũ. Hãy kiểm tra lại dữ liệu mẫu nếu có.');
+    local=records;persist();
+    render();toast('Đã nhập '+(count+oldCount)+' bản ghi từ dữ liệu cũ của trình duyệt.');
   }
-  function cloudHeaders(token){
-    return {'apikey':PUBLIC_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json'};
-  }
-  async function cloudRequest(path,options={},session=cloudSession){
-    if(!ENDPOINT||!PUBLIC_KEY)throw Error('Máy chủ chưa được cấu hình.');
-    if(!session?.access_token)throw Error('Vui lòng đăng nhập.');
-    let result=await fetch(ENDPOINT+path,{...options,headers:{...cloudHeaders(session.access_token),...(options.headers||{})}});
-    if(result.status===401&&session.refresh_token){await refreshSession();result=await fetch(ENDPOINT+path,{...options,headers:{...cloudHeaders(cloudSession.access_token),...(options.headers||{})}});}
-    if(!result.ok){const x=await result.text();throw Error(x.slice(0,250)||'Lỗi đồng bộ '+result.status);}
-    return result.status===204?null:result.text().then(x=>x?JSON.parse(x):null);
-  }
-  async function refreshSession(){
-    const response=await fetch(ENDPOINT+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':PUBLIC_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:cloudSession.refresh_token})});
-    if(!response.ok)throw Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
-    cloudSession=await response.json();localStorage.setItem(CLOUD_SESSION,JSON.stringify(cloudSession));
-    return cloudSession;
-  }
-  async function remoteSave(kind,row){
-    await cloudRequest('/rest/v1/agridelta_records?on_conflict=user_id,kind,record_id',{
-      method:'POST',
-      headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
-      body:JSON.stringify([{user_id:cloudSession.user.id,kind,record_id:row.id,payload:row}])
-    });
-    syncState='ok';
-  }
-  async function remoteRemove(kind,id){
-    await cloudRequest('/rest/v1/agridelta_records?kind=eq.'+encodeURIComponent(kind)+'&record_id=eq.'+encodeURIComponent(id),{method:'DELETE'});
-  }
-  async function loadCloudRecords(){
-    const data=await cloudRequest('/rest/v1/agridelta_records?select=kind,record_id,payload&limit=10000');
-    const out=blank();
-    (data||[]).forEach(x=>{if(TYPES.includes(x.kind)&&x.payload&&typeof x.payload==='object')out[x.kind].push({...x.payload,id:x.record_id});});
-    records=normalize(out);syncState='ok';render();
-  }
-  async function syncAll(){
-    if(!cloudSession)return;
-    const entries=TYPES.flatMap(kind=>records[kind].map(row=>({user_id:cloudSession.user.id,kind,record_id:row.id,payload:row})));
-    for(let i=0;i<entries.length;i+=100){
-      await cloudRequest('/rest/v1/agridelta_records?on_conflict=user_id,kind,record_id',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(entries.slice(i,i+100))});
+  function adoptFirebaseUser(user){
+    const previousUid=authUser?.uid;
+    if(!user){
+      authUser=null;authVerified=false;authPending=false;local=blank();records=local;
+      page='overview';modal=null;editing=null;query='';filter='all';
+      intelligence.detach();render();return;
     }
-    syncState='ok';toast('Đã gửi '+entries.length+' bản ghi lên tài khoản.');
-  }
-  async function authValidate(session){
-    if(!session?.access_token)throw Error('Không có phiên đăng nhập hợp lệ.');
-    const response=await fetch(ENDPOINT+'/auth/v1/user',{
-      headers:{'apikey':PUBLIC_KEY,'Authorization':'Bearer '+session.access_token}
-    });
-    if(!response.ok)throw Error('Phiên đăng nhập chưa được xác thực.');
-    const user=await response.json();
-    if(!user?.id)throw Error('Tài khoản chưa được xác thực.');
-    return {...session,user};
-  }
-  async function acceptAuth(session){
-    const valid=await authValidate(session);
-    cloudSession=valid;
-    localStorage.setItem(CLOUD_SESSION,JSON.stringify(valid));
-    authVerified=true;authPending=false;authError='';authInfo='';page='overview';
-    try{await loadCloudRecords();}
-    catch(e){render();toast('Đăng nhập thành công, nhưng chưa tải được dữ liệu nông trại: '+(e.message||'Lỗi mạng'));}
+    if(previousUid===user.uid&&authVerified){authPending=false;return;}
+    authUser=user;authVerified=true;authPending=false;authError='';authInfo='';
+    local=normalize(read(firebaseUserStorageKey(user.uid),blank()));records=local;
+    page='overview';modal=null;editing=null;query='';filter='all';render();
   }
   async function authenticate(form){
-    if(!cloudAvailable){
-      authError='AGRIDELTA chưa cấu hình dịch vụ tài khoản. Cần một dự án Supabase riêng cho ứng dụng.';
-      render();return;
-    }
-    const email=form.elements.email.value.trim(),password=form.elements.password.value;
-    if(!email||!password)return;
-    authError='';authInfo='';working=true;authPending=true;render();
+    const email=String(form.elements.email?.value||'').trim();
+    const password=String(form.elements.password?.value||'');
+    if(!email||!password||working)return;
+    working=true;authError='';authInfo='';
     try{
-      const isNew=loginMode==='register';
-      const result=await fetch(ENDPOINT+(isNew?'/auth/v1/signup':'/auth/v1/token?grant_type=password'),{
-        method:'POST',headers:{'apikey':PUBLIC_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password})
-      });
-      const j=await result.json();
-      if(!result.ok)throw Error(j.msg||j.error_description||j.message||'Không thể đăng nhập');
-      if(!j.access_token){
-        authInfo='Kiểm tra hộp thư để xác nhận tài khoản, sau đó quay lại đăng nhập.';
-        loginMode='login';return;
+      if(loginMode==='register'){
+        await registerWithEmail(email,password);
+        authInfo='Đăng ký thành công. Bạn đã đăng nhập bằng Firebase.';
+      }else{
+        await loginWithEmail(email,password);
       }
-      await acceptAuth(j);
-    }catch(e){authError=e.message||'Không thể kết nối tài khoản';}
-    finally{working=false;authPending=false;render();}
+    }catch(err){authError=friendlyFirebaseError(err);}
+    finally{working=false;render();}
   }
   async function startSocial(provider){
-    if(!cloudAvailable){
-      authError='Đăng nhập Google, Facebook và GitHub chưa được kích hoạt vì AGRIDELTA chưa có dự án xác thực riêng.';
-      authInfo='';render();return;
-    }
-    authError='';authInfo='';
-    try{await beginOAuth({endpoint:ENDPOINT,provider,callback:location.origin+oauthCallbackPath});}
-    catch(e){authError=e.message||'Không thể bắt đầu đăng nhập OAuth';render();}
-  }
-  async function finishOAuthRedirect(){
-    const params=new URLSearchParams(location.search);
-    if(location.pathname!==oauthCallbackPath&&!params.has('code')&&!params.has('error'))return false;
-    const reason=params.get('error_description')||params.get('error');
-    history.replaceState({},'', '/');
-    if(reason){authError='Đăng nhập nhà cung cấp không thành công: '+reason;authPending=false;render();return true;}
-    const code=params.get('code');
-    if(!code){authPending=false;render();return true;}
-    const verifier=consumePKCEVerifier();
-    if(!verifier){authPending=false;authError='Phiên OAuth không hợp lệ hoặc đã hết hạn. Vui lòng thử đăng nhập lại.';render();return true;}
-    if(!cloudAvailable){authPending=false;authError='AGRIDELTA chưa kết nối dịch vụ xác thực.';render();return true;}
-    authPending=true;render();
+    if(working)return;
+    working=true;authError='';authInfo='';
     try{
-      const response=await fetch(ENDPOINT+'/auth/v1/token?grant_type=pkce',{
-        method:'POST',headers:{'apikey':PUBLIC_KEY,'Content-Type':'application/json'},
-        body:JSON.stringify({auth_code:code,code_verifier:verifier})
-      });
-      const data=await response.json();
-      if(!response.ok)throw Error(data.msg||data.error_description||data.message||'Không thể hoàn tất xác thực OAuth');
-      await acceptAuth(data);
-    }catch(e){
-      authVerified=false;authError=e.message||'Đăng nhập OAuth thất bại.';
-    }finally{authPending=false;render();}
-    return true;
+      await loginWithProvider(provider);
+    }catch(err){
+      if(err?.code!=='auth/popup-closed-by-user'&&err?.code!=='auth/cancelled-popup-request')
+        authError=friendlyFirebaseError(err);
+    }finally{working=false;render();}
+  }
+  async function recoverPassword(){
+    const email=app.querySelector('#ag-auth-email')?.value?.trim();
+    if(!email){authError='Nhập địa chỉ email ở ô bên trên trước khi yêu cầu đặt lại mật khẩu.';render();return;}
+    if(working)return;
+    working=true;authError='';authInfo='';
+    try{
+      await sendPasswordRecovery(email);
+      authInfo='Nếu email đã đăng ký, Firebase sẽ gửi hướng dẫn đặt lại mật khẩu. Hãy kiểm tra hộp thư.';
+    }catch(err){authError=friendlyFirebaseError(err);}
+    finally{working=false;render();}
   }
   async function signOut(){
-    if(!confirm('Đăng xuất khỏi AGRIDELTA?'))return;
-    const oldSession=cloudSession;
-    cloudSession=null;authVerified=false;page='overview';records=blank();
-    localStorage.removeItem(CLOUD_SESSION);
+    if(!confirm('Đăng xuất khỏi tài khoản Firebase trên AGRIDELTA?'))return;
     try{
-      if(oldSession?.access_token&&ENDPOINT){
-        await fetch(ENDPOINT+'/auth/v1/logout',{method:'POST',headers:cloudHeaders(oldSession.access_token)});
-      }
-    }catch{}
-    authError='';authInfo='Bạn đã đăng xuất.';render();
+      await logoutFirebase();
+      authInfo='Bạn đã đăng xuất.';
+    }catch(err){toast(friendlyFirebaseError(err));}
   }
   async function restoreSession(){
-    if(await finishOAuthRedirect())return;
-    if(!cloudAvailable||!cloudSession){authVerified=false;authPending=false;render();return;}
     authPending=true;render();
     try{
-      let valid;
-      try{valid=await authValidate(cloudSession);}
-      catch{
-        await refreshSession();
-        valid=await authValidate(cloudSession);
-      }
-      cloudSession=valid;
-      localStorage.setItem(CLOUD_SESSION,JSON.stringify(valid));
-      authVerified=true;authError='';authPending=false;
-      await loadCloudRecords();
-    }catch(e){
-      cloudSession=null;authVerified=false;authPending=false;records=blank();
-      localStorage.removeItem(CLOUD_SESSION);
-      authError='Phiên đăng nhập không còn hợp lệ hoặc không thể kết nối máy chủ. Hãy đăng nhập lại.';
+      await watchFirebaseUser(
+        user=>adoptFirebaseUser(user),
+        err=>{authVerified=false;authPending=false;authError=friendlyFirebaseError(err);render();}
+      );
+    }catch(err){
+      authVerified=false;authPending=false;
+      authError='Không tải được Firebase Authentication. Kiểm tra Internet hoặc tải lại trang. '+friendlyFirebaseError(err);
       render();
     }
   }
@@ -475,11 +419,12 @@ const app = document.querySelector('#app');
     }
   },true);
   app.addEventListener('click',async event=>{
-    const target=event.target.closest('[data-go],[data-new],[data-edit],[data-remove],[data-toggle],[data-action],[data-menu],[data-dismiss],[data-auth-provider],[data-auth-switch],[data-auth-email]');
+    const target=event.target.closest('[data-go],[data-new],[data-edit],[data-remove],[data-toggle],[data-action],[data-menu],[data-dismiss],[data-auth-provider],[data-auth-switch],[data-auth-email],[data-auth-recover]');
     if(!target)return;
     if(!authVerified){
       if(target.dataset.authProvider){await startSocial(target.dataset.authProvider);return;}
       if(target.hasAttribute('data-auth-email')){app.querySelector('#ag-auth-email')?.focus({preventScroll:false});return;}
+      if(target.hasAttribute('data-auth-recover')){await recoverPassword();return;}
       if(target.hasAttribute('data-auth-switch')){
         loginMode=loginMode==='register'?'login':'register';authError='';authInfo='';render();return;
       }
@@ -501,8 +446,7 @@ const app = document.querySelector('#app');
     const action=target.dataset.action;
     if(action==='start')window.AGRIDELTARootGuide?.open();
     if(action==='export')exportJSON();
-    if(action==='migrate')legacyImport();
-    if(action==='sync'){try{await syncAll();}catch(e){toast('Lỗi đồng bộ: '+e.message);}}
+    if(action==='migrate')await legacyImport();
     if(action==='signout')await signOut();
     if(action==='switch-auth'){loginMode=loginMode==='register'?'login':'register';authError='';render();}
   });
@@ -539,6 +483,6 @@ const app = document.querySelector('#app');
     navigate(target);
   };
   window.AGRIDELTAOpenAuth = ()=>authVerified?navigate('settings'):render();
-  window.AGRIDELTAWorkspace = {open:navigate,version:'3.1',cloudAvailable,get authenticated(){return authVerified;}};
+  window.AGRIDELTAWorkspace = {open:navigate,version:'4.0',authProvider:'firebase',get authenticated(){return authVerified;}};
   render();
   restoreSession();

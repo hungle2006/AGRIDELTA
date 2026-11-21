@@ -15,18 +15,29 @@ export default async function handler(req,res){
     res.setHeader("Allow","POST");
     return output(res,405,{error:"Chỉ hỗ trợ POST"});
   }
-  // The workspace is auth-only; the API must independently verify the caller.
-  const supabaseUrl=(process.env.VITE_SUPABASE_URL||'').replace(/\/+$/,'');
-  const pubKey=process.env.VITE_SUPABASE_PUBLISHABLE_KEY||process.env.VITE_SUPABASE_ANON_KEY||'';
-  if(!supabaseUrl||!pubKey)return output(res,503,{error:"AUTH_NOT_CONFIGURED",message:"Dịch vụ xác thực AGRIDELTA chưa được cấu hình."});
-  const bearer=String(req.headers.authorization||'').match(/^Bearer ([A-Za-z0-9._~-]+)$/i);
+  // Independently validate the Firebase ID token with Firebase Auth backend.
+  // The Web API key identifies this Firebase project; it is not a secret.
+  const firebaseApiKey=process.env.FIREBASE_WEB_API_KEY||"AIzaSyBHCj_9n9CPXOx-fftNmxSdYFjm0xUFTk8";
+  const authorization=String(req.headers.authorization||"");
+  const bearer=authorization.match(/^Bearer ([A-Za-z0-9._~-]+)$/i);
   if(!bearer)return output(res,401,{error:"LOGIN_REQUIRED"});
   try{
-    const auth=await fetch(supabaseUrl+'/auth/v1/user',{
-      method:"GET",headers:{"apikey":pubKey,"Authorization":"Bearer "+bearer[1]}
-    });
-    const user=auth.ok?await auth.json():null;
-    if(!user?.id)return output(res,401,{error:"INVALID_SESSION"});
+    const ctrl=new AbortController();
+    const timeout=setTimeout(()=>ctrl.abort(),9000);
+    let verified;
+    try{
+      verified=await fetch("https://identitytoolkit.googleapis.com/v1/accounts:lookup?key="+encodeURIComponent(firebaseApiKey),{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({idToken:bearer[1]}),
+        signal:ctrl.signal
+      });
+    }finally{clearTimeout(timeout);}
+    if(verified.status===400||verified.status===401||verified.status===403)
+      return output(res,401,{error:"INVALID_FIREBASE_SESSION"});
+    if(!verified.ok) return output(res,503,{error:"AUTH_TEMPORARILY_UNAVAILABLE"});
+    const data=await verified.json();
+    if(!data?.users?.[0]?.localId)return output(res,401,{error:"INVALID_FIREBASE_SESSION"});
   }catch{return output(res,503,{error:"AUTH_TEMPORARILY_UNAVAILABLE"});}
   if(!process.env.GEMINI_API_KEY) return output(res,503,{error:"AI_NOT_CONFIGURED",message:"Cần GEMINI_API_KEY trong Vercel Environment Variables"});
   let body=req.body||{};

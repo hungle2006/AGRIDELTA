@@ -268,7 +268,7 @@ export function createFarmIntelligence({getFields=()=>[],getSeasons=()=>[],getAc
     if(!photo||doctorBusy)return;
     doctorBusy=true;doctorError="";doctorResult=null;render();
     try{
-      const token=getAccessToken();
+      const token=await getAccessToken();
       if(!token)throw new Error("Bạn cần đăng nhập để phân tích ảnh.");
       const data=await requestJSON("/api/plant-diagnose",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({image:photo,mimeType:"image/jpeg",crop:doctorCrop})});
       if(!data||!data.condition)throw new Error("Phản hồi AI không hợp lệ");
