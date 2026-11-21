@@ -46,13 +46,15 @@ const workflow = [
 const rootPoints = [[8.8,51.3],[25.9,67.9],[52.4,78.2],[72.6,70.9],[91.4,47.8]];
 const beanDivider = (index,kind='secondary') =>
   '<div id="bean-transition-'+index+'" class="bean-transition bean-transition--'+kind+'" data-bean-divider="'+index+'" aria-hidden="true">'+
-  '<span class="bean-transition-line"></span><div class="bean-pod-target"></div></div>';
+  '<span class="bean-transition-line"></span></div>';
 const brand = `<img class="ag-eco-wordmark" src="/assets/agridelta-eco-logo.svg" alt="" width="2172" height="724" decoding="async">`;
 const site = document.createElement('div');
 site.id = 'rg-site';
 site.className = 'earth-site';
 site.innerHTML = `
   <a class="earth-skip" href="#rg-main">Bỏ qua điều hướng</a>
+  <div class="site-field-backdrop" aria-hidden="true"></div>
+  <div class="bean-fall-overlay" id="bean-fall-overlay" aria-hidden="true"></div>
   <span id="rg-top" class="start-page-top" aria-hidden="true"></span>
   <header class="earth-header">
     <div class="earth-container earth-header-inner">
@@ -500,7 +502,7 @@ site.addEventListener('keydown', event => {
 
 window.AGRIDELTARootGuide = {open, close: () => enter(), go: enter};
 initAgrideltaMotion(site);
-initBeanTransitions(site);
+initBeanTransitions(site, find('#bean-fall-overlay'));
 window.AGRIDELTAStory = {replay: () => { open(); harvestTriggered = false; plant.replay(); }};
  
 // Shareable, reload-safe entrance to the operational workspace.

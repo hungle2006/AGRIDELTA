@@ -9,7 +9,7 @@ import {
   DirectionalLight, DoubleSide
 } from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
-import {BEAN_DROP_MS, beanDropPose} from './bean-drop-state.js';
+import {BEAN_DROP_MS, beanDropPose, beanDropPosition} from './bean-drop-state.js';
 
 const SELECTOR='[data-bean-divider]';
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
@@ -83,9 +83,14 @@ function fromBlender(gltf){
   return model;
 }
 
-export function initBeanTransitions(site){
+/**
+ * One GPU surface is shared by all four dividers. It is absolutely positioned
+ * against the entire Start page (not an overflow-hidden divider).
+ */
+export function initBeanTransitions(site,overlay){
   const dividers=[...site.querySelectorAll(SELECTOR)];
-  if(!dividers.length)return {destroy(){}};
+  if(!overlay||!dividers.length)return {destroy(){}};
+
   const reduce=matchMedia('(prefers-reduced-motion: reduce)');
   const scene=new Scene();
   const camera=new OrthographicCamera(-1.5,1.5,1.5,-1.5,.1,30);
@@ -93,113 +98,161 @@ export function initBeanTransitions(site){
   camera.lookAt(0,0,0);
   scene.add(new AmbientLight(0xffffff,1.35));
   const sunlight=new DirectionalLight(0xfff5ca,2.4);
-  sunlight.position.set(-2,4,6);scene.add(sunlight);
+  sunlight.position.set(-2,4,6);
+  scene.add(sunlight);
   const fill=new DirectionalLight(0x86b984,1.1);
-  fill.position.set(3,-1,3);scene.add(fill);
+  fill.position.set(3,-1,3);
+  scene.add(fill);
   const pod=new Group();
   scene.add(pod);
   let sourceBean=fallbackBean();
   pod.add(sourceBean);
-  let nativeBean=null,renderer=null,active=null,frame=0,started=0,cssTimeout=0;
-  const lastCross=new WeakMap();
-  const supportsWebGL=(()=>{try{
-    const canvas=document.createElement('canvas');
-    return !!(canvas.getContext('webgl2')||canvas.getContext('webgl'));
-  }catch{return false;}})();
 
-  // Reuse the same Blender fruit mesh already shipped for the growing plant.
-  if(supportsWebGL){
-    const loader=new GLTFLoader();
-    loader.load('/assets/start-lifecycle-live.glb',gltf=>{
+  let nativeBean=null,renderer=null;
+  let active=null,frame=0,started=0,item=null;
+  let startX=0,startY=0,endY=0,halfSize=105;
+  const lastCross=new WeakMap();
+  const reduceListener=()=>{
+    if(reduce.matches)stop();
+  };
+
+  const webglAvailable=(()=>{
+    try{
+      const probe=document.createElement('canvas');
+      const context=probe.getContext('webgl2')||probe.getContext('webgl');
+      if(!context)return false;
+      context.getExtension('WEBGL_lose_context')?.loseContext();
+      return true;
+    }catch{return false;}
+  })();
+
+  // Use the actual Blender bean-pod geometry from the existing GLB asset.
+  if(webglAvailable){
+    new GLTFLoader().load('/assets/start-lifecycle-live.glb',gltf=>{
       nativeBean=fromBlender(gltf);
-      if(nativeBean && !active){
-        pod.remove(sourceBean);sourceBean=nativeBean;pod.add(sourceBean);
+      if(nativeBean&&sourceBean!==nativeBean){
+        pod.remove(sourceBean);
+        sourceBean=nativeBean;
+        pod.add(sourceBean);
       }
-    },undefined,()=>{/* fallback pod is already a real 3D mesh */});
+    },undefined,()=>{/* 3D fallback geometry remains available */});
   }
-  function makeRenderer(){
+
+  function ensureItem(){
+    if(!item){
+      item=document.createElement('div');
+      item.className='bean-fall-item';
+      item.setAttribute('aria-hidden','true');
+      overlay.appendChild(item);
+    }
+    return item;
+  }
+  function ensureRenderer(){
     if(renderer)return renderer;
     renderer=new WebGLRenderer({alpha:true,antialias:true,powerPreference:'low-power'});
     renderer.setClearColor(0x000000,0);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.65));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6));
+    renderer.domElement.style.cssText='width:100%;height:100%;display:block;pointer-events:none';
     renderer.domElement.setAttribute('aria-hidden','true');
-    renderer.domElement.style.cssText='display:block;width:100%;height:100%;pointer-events:none';
     return renderer;
   }
-  function stop(clear=true){
-    cancelAnimationFrame(frame);frame=0;
-    if(active){
-      active.classList.remove('bean-is-dropping');
-      if(clear)active.querySelector('.bean-pod-target')?.replaceChildren();
-      active=null;
+  function clearDisplay(){
+    if(item){
+      item.style.opacity='0';
+      item.style.transform='translate3d(-9999px,-9999px,0)';
+      item.replaceChildren();
     }
   }
-  function cssFall(divider){
-    const host=divider.querySelector('.bean-pod-target');
-    host.replaceChildren();
-    const shape=document.createElement('span');
-    shape.className='bean-fallback-pod';
-    host.appendChild(shape);
-    divider.classList.remove('bean-is-dropping');
-    void host.offsetWidth;
-    divider.classList.add('bean-is-dropping');
-    clearTimeout(cssTimeout);
-    cssTimeout=setTimeout(()=>{divider.classList.remove('bean-is-dropping');host.replaceChildren();},BEAN_DROP_MS);
+  function stop(){
+    if(frame)cancelAnimationFrame(frame);
+    frame=0;
+    active=null;
+    clearDisplay();
   }
-  function tick(now){
-    if(!active || document.hidden || site.hidden){stop();return;}
-    const pose=beanDropPose(now-started);
+  function mountVisual(){
+    const holder=ensureItem();
+    halfSize=Math.max(75,holder.getBoundingClientRect().width/2||105);
+    holder.replaceChildren();
+    if(webglAvailable){
+      try{
+        const gl=ensureRenderer();
+        const width=Math.round(halfSize*2);
+        gl.setSize(width,width,false);
+        gl.domElement.setAttribute('aria-hidden','true');
+        holder.appendChild(gl.domElement);
+        return;
+      }catch{
+        renderer?.dispose();
+        renderer=null;
+      }
+    }
+    const fallback=document.createElement('span');
+    fallback.className='bean-fallback-pod';
+    fallback.setAttribute('aria-hidden','true');
+    holder.appendChild(fallback);
+  }
+  function tick(time){
+    if(!active||site.hidden||document.hidden||reduce.matches){stop();return;}
+    const elapsed=time-started;
+    const pose=beanDropPose(elapsed);
     if(!pose.visible){stop();return;}
-    pod.position.set(pose.x,pose.y,0);
-    pod.rotation.set(.07,pose.tilt*.39,pose.tilt);
-    pod.scale.setScalar(pose.scale);
-    pod.traverse(child=>{
-      if(child.isMesh && child.material)child.material.opacity=pose.opacity;
-    });
-    renderer.render(scene,camera);
+    const y=beanDropPosition(elapsed,startY,endY);
+    const holder=ensureItem();
+    // Absolute page coordinates: the 3D fruit crosses every section until
+    // it reaches the actual bottom of the Start page, always at the same X.
+    holder.style.transform='translate3d('+(startX-halfSize).toFixed(1)+'px,'+(y-halfSize).toFixed(1)+'px,0)';
+    holder.style.opacity=String(pose.opacity);
+    if(renderer){
+      pod.position.set(0,0,0);
+      pod.rotation.set(.04,pose.tilt*.27,pose.tilt);
+      pod.scale.setScalar(pose.scale);
+      pod.traverse(node=>{if(node.isMesh&&node.material)node.material.opacity=pose.opacity;});
+      renderer.render(scene,camera);
+    }else{
+      holder.style.setProperty('--bean-scale',String(pose.scale));
+      holder.style.setProperty('--bean-tilt',pose.tilt+'rad');
+    }
     frame=requestAnimationFrame(tick);
   }
   function trigger(divider){
-    if(site.hidden || document.hidden || reduce.matches)return;
+    if(site.hidden||document.hidden||reduce.matches)return;
     const now=performance.now();
-    if(now-(lastCross.get(divider)||-10000)<BEAN_DROP_MS+120)return;
+    if(now-(lastCross.get(divider)||-10000)<BEAN_DROP_MS+200)return;
+    const line=divider.querySelector('.bean-transition-line');
+    if(!line)return;
+    const lineRect=line.getBoundingClientRect();
+    const siteRect=site.getBoundingClientRect();
+    // Fixed to the line's midpoint, rather than the divider's mini canvas.
+    startX=lineRect.left+lineRect.width/2-siteRect.left;
+    startY=lineRect.top+lineRect.height/2-siteRect.top;
+    // Use the entire document-height Start, not the current viewport height.
+    endY=Math.max(startY,site.scrollHeight-38);
     lastCross.set(divider,now);
     stop();
-    if(!supportsWebGL){cssFall(divider);return;}
-    try{
-      const host=divider.querySelector('.bean-pod-target');
-      const {width,height}=host.getBoundingClientRect();
-      if(width<20 || height<20)return;
-      makeRenderer();
-      host.replaceChildren(renderer.domElement);
-      renderer.setSize(Math.round(width),Math.round(height),false);
-      camera.left=-1.5*width/Math.max(height,1);
-      camera.right=1.5*width/Math.max(height,1);
-      camera.updateProjectionMatrix();
-      if(nativeBean && sourceBean!==nativeBean){
-        pod.remove(sourceBean);sourceBean=nativeBean;pod.add(sourceBean);
-      }
-      active=divider;
-      divider.classList.add('bean-is-dropping');
-      started=performance.now();
-      frame=requestAnimationFrame(tick);
-    }catch{
-      // Low-memory mobile WebGL failure should not break the Start page.
-      stop();renderer?.dispose();renderer=null;cssFall(divider);
-    }
+    mountVisual();
+    active=divider;
+    started=performance.now();
+    frame=requestAnimationFrame(tick);
   }
+
   const observer=new IntersectionObserver(entries=>{
     entries.forEach(entry=>{if(entry.isIntersecting)trigger(entry.target);});
   },{rootMargin:'-24% 0px -24% 0px',threshold:.13});
   dividers.forEach(el=>observer.observe(el));
-  // Direct links to a divider also move the camera there once the Start
-  // markup has been mounted dynamically, allowing the same 2-second drop.
   if(/^#bean-transition-0[1-4]$/.test(window.location.hash)){
     requestAnimationFrame(()=>{
-      const selected=site.querySelector(window.location.hash);
-      selected?.scrollIntoView({block:'center',behavior:'instant'});
+      site.querySelector(window.location.hash)?.scrollIntoView({block:'center',behavior:'instant'});
     });
   }
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
-  return {destroy(){observer.disconnect();stop();renderer?.dispose();clearTimeout(cssTimeout);}};
+  const onVisibility=()=>{if(document.hidden)stop();};
+  document.addEventListener('visibilitychange',onVisibility);
+  reduce.addEventListener?.('change',reduceListener);
+  return {destroy(){
+    observer.disconnect();
+    stop();
+    document.removeEventListener('visibilitychange',onVisibility);
+    reduce.removeEventListener?.('change',reduceListener);
+    renderer?.dispose();
+    item?.remove();
+  }};
 }
