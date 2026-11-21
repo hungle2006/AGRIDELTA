@@ -64,12 +64,13 @@ body.rg-app-mode #app { display: block !important; min-height: 100dvh; }
   justify-content: space-between;
   align-items: start;
   gap: var(--ag-gap);
+  position: relative;
   padding-block: 18px;
-  border-top: 1px solid var(--ag-rule);
   color: var(--ag-muted);
   font-size: 12px;
   line-height: 1.65;
 }
+.ag-bottom-footer::before { content: ''; position: absolute; inset: 0 var(--ag-gutter) auto; border-top: 1px solid var(--ag-rule); }
 .ag-photo-credits summary { cursor: pointer; min-height: 28px; }
 .ag-photo-credits ul { padding-inline-start: 16px; }
 .ag-photo-credits p { margin-block: 5px 0; }
@@ -79,26 +80,31 @@ body.rg-app-mode #app { display: block !important; min-height: 100dvh; }
 .ag-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 14px 20px; max-width: calc(100vw - 32px); background: var(--ag-ink); color: #fff; border-radius: 8px; z-index: 100; }
 .ag-toast[hidden] { display: none; }
 
-/* The scroll slots stay fixed while the photo inside each slot changes depth. */
+/* The scroll slots stay fixed while each photo changes depth. */
+.ag-observatory {
+  --ag-observatory-gap: clamp(16px,2vw,25px);
+  display: grid;
+  gap: var(--ag-observatory-gap);
+}
 .ag-tool-heading {
   display: flex;
   align-items: end;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px var(--ag-gap);
-  padding-block: clamp(14px,2vw,22px) 14px;
+  padding-block-start: var(--ag-observatory-gap);
   border-top: 1px solid var(--ag-rule);
 }
-.ag-tool-heading h1 { margin: 0; font: 500 clamp(44px,7vw,100px)/1 var(--ag-display); letter-spacing: -.053em; }
+.ag-tool-heading h1 { margin: 0; font: 500 clamp(44px,6.2vw,88px)/1 var(--ag-display); letter-spacing: -.053em; }
 .ag-tool-heading p { margin: 0; padding-block-end: 3px; color: var(--ag-muted); font-size: 13px; }
 .ag-carousel-track {
   --ag-slot: clamp(224px,56vw,690px);
   position: relative;
   display: flex;
-  gap: clamp(10px,1.8vw,28px);
+  gap: var(--ag-observatory-gap);
   width: 100%;
   margin: 0;
-  padding: 12px max(0px,calc((100% - var(--ag-slot)) / 2)) 14px;
+  padding: 0 max(0px,calc((100% - var(--ag-slot)) / 2));
   overflow: auto hidden;
   list-style: none;
   scroll-snap-type: x mandatory;
@@ -121,7 +127,7 @@ body.rg-app-mode #app { display: block !important; min-height: 100dvh; }
   position: relative;
   isolation: isolate;
   width: 100%;
-  height: clamp(240px,32vw,405px);
+  height: clamp(240px,min(33vw,50vh),392px);
   overflow: hidden;
   padding: 0;
   text-align: start;
@@ -132,6 +138,7 @@ body.rg-app-mode #app { display: block !important; min-height: 100dvh; }
   opacity: var(--ag-card-opacity,.74);
   transform: perspective(1000px) rotateY(var(--ag-card-angle,0deg)) scale(var(--ag-card-scale,.87));
 }
+.ag-carousel-slide[data-carousel-copy] .ag-photo-card { cursor: pointer; }
 .ag-photo-card:focus-visible { outline-color: #fffaf1; outline-offset: -5px; }
 .ag-tool-photo {
   position: absolute;
@@ -161,6 +168,7 @@ body.rg-app-mode #app { display: block !important; min-height: 100dvh; }
   align-items: end;
   gap: 5px 10px;
   padding: clamp(14px,2.5vw,33px);
+  opacity: var(--ag-caption-opacity,0);
 }
 .ag-photo-caption :is(.ag-tool-layer,.ag-tool-title,.ag-tool-copy) { grid-column: 1; }
 .ag-tool-layer { color: #f2dbad; font-size: 12px; font-weight: 700; }
@@ -192,7 +200,7 @@ body.rg-app-mode #app { display: block !important; min-height: 100dvh; }
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 14px;
+  gap: var(--ag-observatory-gap);
 }
 .ag-app .ag-carousel-arrow {
   width: 44px;
@@ -204,8 +212,7 @@ body.rg-app-mode #app { display: block !important; min-height: 100dvh; }
   font-size: 19px;
   transition: color .18s, background-color .18s, border-color .18s;
 }
-.ag-carousel-arrow:not([aria-disabled="true"]):hover { background: #2b4032; border-color: #2b4032; color: #fffaf1; }
-.ag-carousel-arrow[aria-disabled="true"] { opacity: .44; cursor: default; }
+.ag-carousel-arrow:hover { background: #2b4032; border-color: #2b4032; color: #fffaf1; }
 .ag-carousel-positions { display: flex; }
 .ag-carousel-positions button { width: 28px; height: 44px; display: grid; place-items: center; background: transparent; border: 0; padding: 0; }
 .ag-carousel-positions span { width: 7px; height: 7px; border-radius: 8px; background: #827a66; transition: width .18s, background-color .18s; }
@@ -228,7 +235,7 @@ body.rg-app-mode #app { display: block !important; min-height: 100dvh; }
   .ag-header-row { gap: 4px; }
   .ag-account { gap: 1px; }
   .ag-account-name { display: none; }
-  .ag-carousel-track { --ag-slot: clamp(214px,69vw,414px); gap: 8px; }
+  .ag-carousel-track { --ag-slot: clamp(205px,65vw,390px); gap: 9px; }
   .ag-app .ag-photo-card { height: clamp(248px,75vw,355px); }
   .ag-tool-nav { gap: 6px; }
 }

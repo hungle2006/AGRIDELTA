@@ -5,8 +5,9 @@ import {firebaseConfigured,watchFirebaseUser,loginWithEmail,registerWithEmail,lo
 const app=document.querySelector('#app');
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let authUser=null,authVerified=false,authPending=true,authError='',authInfo='',loginMode='login',working=false;
-let requestedTab=null,showLogin=true;
-let lastObserved='doctor',unmountObservatory=null;
+const PRIORITY_TOOL='forecast';
+let requestedTab=null,showLogin=true,prioritizeOnRestore=false;
+let lastObserved=PRIORITY_TOOL,unmountObservatory=null;
 const createIntelligence=()=>createFarmIntelligence({getAccessToken:()=>authVerified?getFirebaseToken():''});
 let intelligence=createIntelligence();
 function toast(message){const node=app.querySelector('#ag-toast');if(node){node.textContent=message;node.hidden=false;}}
@@ -16,7 +17,7 @@ function render(){
   unmountObservatory=null;
   intelligence.detach();
   if(!authVerified&&(showLogin||requestedTab)){
-    app.innerHTML=authScreen({mode:loginMode,error:authError,info:authInfo,configured:firebaseConfigured,pending:authPending,feature:farmToolName(requestedTab)});
+    app.innerHTML=authScreen({mode:loginMode,error:authError,info:authInfo,configured:firebaseConfigured,pending:authPending,feature:farmToolName(PRIORITY_TOOL)});
     return;
   }
   const account=authUser?.displayName||authUser?.email||'Tài khoản';
@@ -43,12 +44,25 @@ function focusView(){
   heading?.setAttribute?.('tabindex','-1');
   heading?.focus?.({preventScroll:true});
 }
+function rememberObservatory(){
+  if(!document.body?.classList.contains('rg-app-mode'))return;
+  const url=new URL(window.location.href);
+  url.pathname='/start';
+  url.searchParams.set('view','observatory');
+  for(const name of ['app','login','intro'])url.searchParams.delete(name);
+  url.hash='';
+  if(url.href!==window.location.href)window.history.replaceState(window.history.state,'',url);
+}
 function navigate(target='home'){
+  const reload=target==='observatory-reload';
+  prioritizeOnRestore=reload&&authPending&&!authVerified;
   showLogin=target==='settings'&&!authVerified;
-  const next=farmToolName(target)?target:null;
+  const next=reload&&authVerified?PRIORITY_TOOL:farmToolName(target)?target:null;
   const alreadyInTool=authVerified&&requestedTab&&next;
   requestedTab=next;
-  if(next)lastObserved=next;
+  if(reload)lastObserved=PRIORITY_TOOL;
+  else if(next)lastObserved=next;
+  if(!showLogin)rememberObservatory();
   if(alreadyInTool)intelligence.openTab(requestedTab);
   else render();
   focusView();
@@ -61,7 +75,14 @@ function adoptFirebaseUser(user){
   intelligence.detach();
   intelligence=createIntelligence();
   authUser=user;authVerified=Boolean(user);authError='';authInfo='';
-  if(wasSignedIn&&!user){requestedTab=null;showLogin=true;}
+  if(user&&!wasSignedIn&&(showLogin||requestedTab||prioritizeOnRestore)){
+    requestedTab=PRIORITY_TOOL;
+    lastObserved=PRIORITY_TOOL;
+    showLogin=false;
+    rememberObservatory();
+  }
+  if(wasSignedIn&&!user){requestedTab=null;showLogin=true;lastObserved=PRIORITY_TOOL;}
+  prioritizeOnRestore=false;
   render();
   if(user&&document.body?.classList.contains('rg-app-mode'))focusView();
 }

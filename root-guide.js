@@ -464,6 +464,11 @@ function enter(page = 'home', auth = false) {
 }
 
 function open() {
+  const url = new URL(window.location.href);
+  if (url.searchParams.has('view')) {
+    url.searchParams.delete('view');
+    window.history.replaceState(window.history.state, '', url);
+  }
   site.hidden = false;
   document.body.classList.add('rg-experience-mode');
   document.body.classList.remove('rg-app-mode');
@@ -506,7 +511,7 @@ initBeanTransitions(site, find('#bean-fall-overlay'));
 window.AGRIDELTAStory = {replay: () => { open(); harvestTriggered = false; plant.replay(); }};
  
 // Keep the immersive Start as the normal public entry point.
-// Only explicit workspace/login routes and OAuth callbacks go directly to authentication.
+// A dedicated query restores the observatory on reload. Login callbacks still enter authentication.
 // Workspace access still requires a verified session in workspace-v2.js.
 const appRoute = new URLSearchParams(window.location.search);
 const authEntry = appRoute.get('app') === '1'
@@ -515,5 +520,6 @@ const authEntry = appRoute.get('app') === '1'
   || appRoute.has('error')
   || window.location.pathname === '/login'
   || window.location.pathname.startsWith('/auth/');
-if (authEntry && appRoute.get('intro') !== '1') enter('home', true);
+if (appRoute.get('view') === 'observatory' && appRoute.get('intro') !== '1') enter('observatory-reload');
+else if (authEntry && appRoute.get('intro') !== '1') enter('home', true);
 else open();

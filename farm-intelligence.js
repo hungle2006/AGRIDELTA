@@ -101,7 +101,7 @@ export function farmTools(active=null){
     <div class="ag-carousel-controls">
       <button type="button" class="ag-carousel-arrow" data-carousel-step="-1" aria-label="Công cụ trước">←</button>
       <div class="ag-carousel-positions" role="group" aria-label="Chọn vị trí">
-        ${tools.map(({title},index)=>`<button type="button" data-carousel-index="${index}" aria-label="Đưa ${title} vào giữa"><span></span></button>`).join('')}
+        ${tools.map(({title},index)=>`<button type="button" data-carousel-index="${index}"${index===0?' aria-current="true"':''} aria-label="Đưa ${title} vào giữa"><span></span></button>`).join('')}
       </div>
       <button type="button" class="ag-carousel-arrow" data-carousel-step="1" aria-label="Công cụ kế tiếp">→</button>
     </div>
