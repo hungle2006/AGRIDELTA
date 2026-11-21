@@ -17,11 +17,13 @@ AGRIDELTA là ứng dụng tổ chức dữ liệu canh tác gồm cánh đồng
 
 Mặc định **không có dữ liệu mẫu hoặc tài khoản giả**. Dữ liệu ở chế độ chưa kết nối máy chủ được lưu trong trình duyệt (`localStorage`) và ảnh trong IndexedDB. Chúng không được đồng bộ qua các thiết bị.
 
-## Kết nối dữ liệu thực bằng Supabase
+## Tài khoản Firebase và dữ liệu
 
-Mã nguồn đã có lớp đăng ký/đăng nhập Supabase và bảng bản ghi theo chủ sở hữu với RLS, nhưng **chưa bật trên Production** vì dự án AGRIDELTA chưa được kết nối với một Supabase riêng.
+AGRIDELTA đã chuyển **xác thực tài khoản** sang Firebase Authentication của dự án `agridelta-a40b7`. Các tùy chọn Google/Gmail, Facebook, GitHub và Email/Mật khẩu được tích hợp trong `firebase-auth.js`. Website vẫn mở **Start 3D** trước khi đăng nhập.
 
-Quy trình triển khai, migration SQL, biến môi trường và những hạn chế hiện tại được ghi tại [FIELD_OS_V2.md](FIELD_OS_V2.md). Không sử dụng project Supabase của ứng dụng khác khi chưa được xác nhận.
+**Lưu trữ:** bản ghi quản lý hiện ở trình duyệt, chia theo UID Firebase; **chưa đồng bộ giữa các thiết bị** và chưa cấu hình Firestore Security Rules. Bản ghi cũ vẫn được giữ để người dùng chủ động nhập vào tài khoản hiện tại.
+
+Tài liệu `FIELD_OS_V2.md` và `supabase/agridelta_records.sql` là thông tin của kiến trúc Supabase **trước đây**, không còn là luồng xác thực đang chạy.
 
 
 ## AGRIDELTA Intelligence (thử nghiệm)
