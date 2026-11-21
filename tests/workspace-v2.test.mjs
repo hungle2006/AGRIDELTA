@@ -7,7 +7,7 @@ const source=readFileSync(new URL('../workspace-v2.js',import.meta.url),'utf8').
 function setup(){
   let userChanged;const calls=[],events={};
   const app={innerHTML:'',querySelector:()=>({}),addEventListener:(type,fn)=>events[type]=fn};
-  const context={farmTools,photoCredits,farmToolName,document:{querySelector:()=>app},window:{scrollTo(){}},authScreen:()=>'<main>Login</main>',firebaseConfigured:true,createFarmIntelligence:()=>({detach:()=>calls.push('detach'),mount:(_,tab)=>calls.push(['mount',tab]),openTab:tab=>calls.push(['tab',tab])}),watchFirebaseUser:async fn=>{userChanged=fn;},getFirebaseToken:async()=>'token'};
+  const context={mountObservatory:()=>()=>{},farmTools,photoCredits,farmToolName,document:{querySelector:()=>app},window:{scrollTo(){}},authScreen:()=>'<main>Login</main>',firebaseConfigured:true,createFarmIntelligence:()=>({detach:()=>calls.push('detach'),mount:(_,tab)=>calls.push(['mount',tab]),openTab:tab=>calls.push(['tab',tab])}),watchFirebaseUser:async fn=>{userChanged=fn;},getFirebaseToken:async()=>'token'};
   vm.runInNewContext(source,context);
   return {context,app,calls,login:user=>userChanged(user)};
 }

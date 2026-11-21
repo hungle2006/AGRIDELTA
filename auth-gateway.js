@@ -1,47 +1,47 @@
-/* Dedicated AGRIDELTA authentication screen; never displays fake accounts. */
-const e = value=>String(value==null?'':value).replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
+/* Dedicated AGRIDELTA authentication screen. */
+const e = value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const providers=[['google','Google'],['facebook','Facebook'],['github','GitHub']];
+
 export function authScreen({mode='login',error='',info='',configured=false,pending=false,feature=''}={}){
   const signup=mode==='register';
   const heading=signup?'Tạo tài khoản':'Đăng nhập';
-  return '<main class="ag-auth" id="ag-auth" aria-labelledby="ag-auth-heading">'+
-   '<section class="ag-auth-visual" aria-label="AGRIDELTA nông nghiệp thông minh">'+
-    '<div class="ag-auth-visual-image"></div>'+
-    '<div class="ag-auth-visual-inner">'+
-      '<a class="ag-auth-logo" href="/" aria-label="AGRIDELTA — Trang Start"><img src="/assets/agridelta-eco-logo.svg" alt="AGRIDELTA" /></a>'+
-      '<span class="ag-auth-eyebrow">NỀN TẢNG NÔNG NGHIỆP THÔNG MINH</span>'+
-      '<h2>Mỗi mùa xanh,<br><em>một hành trình mới.</em></h2>'+
-      '<p>Kết nối dữ liệu nông trại, quan sát cây trồng và dự báo môi trường trong một không gian riêng của bạn.</p>'+
-      '<div class="ag-auth-chips"><span>AI Plant Doctor</span><span>Infrared Forecast</span><span>Digital Twin 3D</span></div>'+
-    '</div>'+
-    '<div class="ag-auth-visual-bottom"><span>AGRIDELTA / FIELD INTELLIGENCE</span><span>© 2026</span></div>'+
-   '</section>'+
-   '<section class="ag-auth-content"><div class="ag-auth-form-wrap">'+
-    '<div class="ag-auth-mobile-brand"><img src="/assets/agridelta-eco-logo.svg" alt="AGRIDELTA"></div>'+
-    '<button type="button" class="ag-auth-back" data-action="workspace">← Phòng quan sát</button>'+
-    '<h1 id="ag-auth-heading">'+heading+'</h1>'+
-    '<p class="ag-auth-sub">'+(signup?'Tạo tài khoản để sử dụng ba hệ thống nông nghiệp thông minh.':feature?'Đăng nhập để mở '+e(feature)+'.':'Đăng nhập để mở Phòng quan sát.')+'</p>'+
-    (pending?'<div class="ag-auth-wait" role="status"><span class="ag-auth-spinner"></span> Đang xác minh tài khoản…</div>':
-      '<div class="ag-auth-form-body">'+
-       (error?'<div class="ag-auth-error" role="alert">'+e(error)+'</div>':'')+
-       (info?'<div class="ag-auth-info" role="status">'+e(info)+'</div>':'')+
-       (!configured?'<div class="ag-auth-config" role="status"><strong>Chưa kích hoạt đăng nhập</strong><span>AGRIDELTA cần được kết nối với dự án Firebase riêng trước khi sử dụng các tài khoản thật. Không có chế độ demo hoặc tài khoản giả.</span></div>':'')+
-       '<div class="ag-auth-social">'+
-        '<button type="button" data-auth-email><span class="ag-auth-provider ag-auth-gmail" aria-hidden="true">✉</span>Tiếp tục bằng Gmail / Email</button>'+
-        '<button type="button" data-auth-provider="google"><span class="ag-auth-provider ag-auth-google" aria-hidden="true">G</span>Tiếp tục với Google <small>(Gmail)</small></button>'+
-        '<button type="button" data-auth-provider="facebook"><span class="ag-auth-provider ag-auth-facebook" aria-hidden="true">f</span>Tiếp tục với Facebook</button>'+
-        '<button type="button" data-auth-provider="github"><span class="ag-auth-provider ag-auth-github" aria-hidden="true">GH</span>Tiếp tục với GitHub</button>'+
-       '</div>'+
-       '<div class="ag-auth-divider"><span>Đăng nhập bằng email và mật khẩu</span></div>'+
-       '<form id="ag-login-form" class="ag-auth-form"><label for="ag-auth-email">Email (có thể dùng Gmail)</label>'+
-        '<input id="ag-auth-email" type="email" name="email" placeholder="tenban@gmail.com" autocomplete="email" maxlength="254" required />'+
-        '<label for="ag-auth-password">Mật khẩu</label>'+
-        '<input id="ag-auth-password" type="password" name="password" placeholder="Nhập mật khẩu" minlength="8" maxlength="128" autocomplete="'+(signup?'new-password':'current-password')+'" required />'+
-        '<button class="ag-auth-submit" type="submit">'+(signup?'Tạo tài khoản':'Đăng nhập')+' <span aria-hidden="true">→</span></button>'+
-       '</form>'+
-       (!signup?'<div class="ag-auth-recover"><button type="button" data-auth-recover>Quên mật khẩu?</button></div>':'')+
-       '<div class="ag-auth-switch">'+(signup?'Đã có tài khoản?':'Chưa có tài khoản?')+' <button type="button" data-auth-switch>'+(signup?'Đăng nhập':'Đăng ký ngay')+'</button></div>'+
-       '<p class="ag-auth-assurance">Đăng nhập an toàn để sử dụng AGRIDELTA. Ảnh cây chỉ gửi phân tích khi bạn yêu cầu.</p>'+
-      '</div>')+
-     '</div></section>'+
-   '</main>';
+  const description=signup?'Tạo tài khoản để sử dụng các công cụ canh tác.':feature?'Đăng nhập để mở '+e(feature)+'.':'Đăng nhập để tiếp tục vào Phòng quan sát.';
+  return `<main class="ag-auth" id="ag-auth" aria-labelledby="ag-auth-heading">
+    <div class="ag-auth-visual">
+      <img class="ag-auth-visual-image" src="/assets/observatory-forecast.webp" width="1080" height="720" alt="">
+      <div class="ag-auth-visual-copy">
+        <p>Đọc dấu hiệu<br>từ đồng ruộng.</p>
+        <a href="https://commons.wikimedia.org/wiki/File:Water_reflection_of_mountains,_hut,_green_rice_sheaves_scattered_in_a_paddy_field_and_clouds_with_blue_sky_in_Vang_Vieng,_Laos.jpg">Ảnh Basile Morin</a>
+        <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>
+      </div>
+    </div>
+    <div class="ag-auth-content">
+      <header class="ag-auth-header">
+        <a class="ag-auth-logo" href="/start" aria-label="AGRIDELTA · Start 3D"><img src="/assets/agridelta-eco-logo.svg" width="2172" height="724" alt="AGRIDELTA"></a>
+        <button type="button" class="ag-auth-back" data-action="workspace"><span aria-hidden="true">←</span> Phòng quan sát</button>
+      </header>
+      <section class="ag-auth-form-wrap">
+        <header class="ag-auth-intro">
+          <h1 id="ag-auth-heading">${heading}</h1>
+          <p class="ag-auth-sub">${description}</p>
+        </header>
+        ${pending?`<div class="ag-auth-wait" role="status"><span class="ag-auth-spinner"></span> Đang xác minh tài khoản…</div>`:`
+          ${error?`<p class="ag-auth-error" role="alert">${e(error)}</p>`:''}
+          ${info?`<p class="ag-auth-info" role="status">${e(info)}</p>`:''}
+          ${configured?'':'<p class="ag-auth-config" role="status">Chưa kích hoạt đăng nhập cho AGRIDELTA.</p>'}
+          <form id="ag-login-form" class="ag-auth-form">
+            <label for="ag-auth-email" data-auth-email>Email</label>
+            <input id="ag-auth-email" type="email" name="email" placeholder="tenban@gmail.com" autocomplete="email" maxlength="254" required>
+            <div class="ag-auth-label-row"><label for="ag-auth-password">Mật khẩu</label>${signup?'':'<button class="ag-auth-text-button" type="button" data-auth-recover>Quên mật khẩu?</button>'}</div>
+            <input id="ag-auth-password" type="password" name="password" placeholder="Nhập mật khẩu" minlength="8" maxlength="128" autocomplete="${signup?'new-password':'current-password'}" required>
+            <button class="ag-auth-submit" type="submit">${heading}<span aria-hidden="true">→</span></button>
+          </form>
+          <div class="ag-auth-divider">Hoặc tiếp tục với</div>
+          <div class="ag-auth-social" aria-label="Đăng nhập bằng tài khoản liên kết">
+            ${providers.map(([key,name])=>`<button type="button" data-auth-provider="${key}"><span class="ag-auth-provider" aria-hidden="true"></span>${name}</button>`).join('')}
+          </div>
+          <p class="ag-auth-switch">${signup?'Đã có tài khoản?':'Chưa có tài khoản?'} <button type="button" class="ag-auth-text-button" data-auth-switch>${signup?'Đăng nhập':'Đăng ký'}</button></p>`}
+      </section>
+    </div>
+  </main>`;
 }

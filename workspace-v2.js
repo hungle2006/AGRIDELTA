@@ -1,3 +1,4 @@
+import {mountObservatory} from './observatory-carousel.js';
 import {createFarmIntelligence, farmTools, photoCredits, farmToolName} from './farm-intelligence.js';
 import {authScreen} from './auth-gateway.js';
 import {firebaseConfigured,watchFirebaseUser,loginWithEmail,registerWithEmail,loginWithProvider,logoutFirebase,getFirebaseToken,sendPasswordRecovery,friendlyFirebaseError} from './firebase-auth.js';
@@ -5,11 +6,14 @@ const app=document.querySelector('#app');
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let authUser=null,authVerified=false,authPending=true,authError='',authInfo='',loginMode='login',working=false;
 let requestedTab=null,showLogin=true;
+let lastObserved='doctor',unmountObservatory=null;
 const createIntelligence=()=>createFarmIntelligence({getAccessToken:()=>authVerified?getFirebaseToken():''});
 let intelligence=createIntelligence();
 function toast(message){const node=app.querySelector('#ag-toast');if(node){node.textContent=message;node.hidden=false;}}
 function render(){
   if(!app)return;
+  unmountObservatory?.();
+  unmountObservatory=null;
   intelligence.detach();
   if(!authVerified&&(showLogin||requestedTab)){
     app.innerHTML=authScreen({mode:loginMode,error:authError,info:authInfo,configured:firebaseConfigured,pending:authPending,feature:farmToolName(requestedTab)});
@@ -31,6 +35,8 @@ function render(){
     <div id="ag-toast" class="ag-toast" role="status" hidden></div>
   </div>`;
   if(authVerified&&requestedTab)intelligence.mount(app.querySelector('#ag-ai-root'),requestedTab);
+  const observatory=app.querySelector('[data-observatory]');
+  if(observatory)unmountObservatory=mountObservatory(observatory,lastObserved,key=>{lastObserved=key;});
 }
 function focusView(){
   const heading=app.querySelector('#ag-auth-heading, #ag-ai-root h1, #ag-ai-root h2');
@@ -42,6 +48,7 @@ function navigate(target='home'){
   const next=farmToolName(target)?target:null;
   const alreadyInTool=authVerified&&requestedTab&&next;
   requestedTab=next;
+  if(next)lastObserved=next;
   if(alreadyInTool)intelligence.openTab(requestedTab);
   else render();
   focusView();
