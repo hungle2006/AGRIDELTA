@@ -15,14 +15,14 @@ test('Start enters a redesigned, actual CRUD workspace, not the mock main.js',()
 test('Workspace does not auto-seed fake data or fake authentication',()=>{
  assert.match(app,/const blank = \(\) => Object\.fromEntries/);
  assert.doesNotMatch(app,/defaultFields|startingTasks|demo-note|tài khoản demo/i);
- assert.match(app,/cloudAvailable = Boolean/);
- assert.match(app,/if\(!cloudSession\)/);
+ assert.match(app,/firebaseUserStorageKey/);
+ assert.match(app,/watchFirebaseUser/);
  assert.match(app,/indexedDB\.open/);
 });
 test('UI responds to screens and respects reduced motion',()=>{
  for(const v of ['930px','680px','365px','prefers-reduced-motion','ag-mobile-nav','ag-field-grid','ag-task-columns','ag-dialog'])assert.ok(css.includes(v),v);
 });
-test('Supabase data policies are owner-restricted and avoid client secrets',()=>{
+test('Historical Supabase policies remain available for backup but workspace now uses Firebase auth',()=>{
  const sql=get('supabase/agridelta_records.sql');
  assert.match(sql,/enable row level security/);
  assert.match(sql,/for select to authenticated/);
@@ -30,7 +30,8 @@ test('Supabase data policies are owner-restricted and avoid client secrets',()=>
  assert.match(sql,/for update to authenticated/);
  assert.match(sql,/for delete to authenticated/);
  assert.match(sql,/auth\.uid\(\)\) = user_id/);
- assert.doesNotMatch(app,/service_role/);
+ assert.doesNotMatch(app,/service_role|VITE_SUPABASE_URL|supabase\.co/);
+ assert.match(app,/firebaseUserStorageKey/);
 });
 
 test('Field photos come from the user and persist in IndexedDB without repeated fake imagery',()=>{
