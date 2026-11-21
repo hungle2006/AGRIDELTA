@@ -18,3 +18,11 @@ test('Root story controls use consistent hierarchy and equal mobile touch target
   assert.match(root,/data-root-point/);
   assert.match(root,/earth\.setScrollRoots\(progress\)/);
 });
+
+test('Vietnamese heading keeps safe spacing between Một and bắt on all screens',()=>{
+  assert.match(root,/Một mùa vụ<br> bắt đầu từ rễ\./);
+  const desktop=layout.match(/\.earth-site \.root-story-title\s*\{[^}]*line-height:([\d.]+)/);
+  assert.ok(desktop && Number(desktop[1])>=1.28,'Desktop line-height should clear Vietnamese diacritics');
+  const mobile=layout.match(/@media \(max-width:760px\)[\s\S]*?\.earth-site \.root-story-title\s*\{[^}]*line-height:([\d.]+)/);
+  assert.ok(mobile && Number(mobile[1])>=1.3,'Mobile line-height should clear Vietnamese diacritics');
+});

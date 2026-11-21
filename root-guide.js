@@ -144,7 +144,7 @@ site.innerHTML = `
         <div class="earth-container root-spread">
           <div class="root-discovery">
             <p class="earth-eyebrow">${icon('plant')} Bên dưới mặt đất</p>
-            <h2 id="root-title" class="root-story-title">Một mùa vụ<br>bắt đầu từ rễ.</h2>
+            <h2 id="root-title" class="root-story-title">Một mùa vụ<br> bắt đầu từ rễ.</h2>
             <p class="root-story-desc">Cuộn xuống để xem rễ chính vươn sâu và các rễ bên tỏa ra. Chạm vào một điểm trên rễ để mở hướng dẫn tương ứng.</p>
             <div class="root-progress" aria-label="Số nhánh rễ đã hiện">
               <span id="root-progress-text" role="status">01 / 05 nhánh rễ</span>
