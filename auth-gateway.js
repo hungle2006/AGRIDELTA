@@ -7,7 +7,7 @@ export function authScreen({mode='login',error='',info='',configured=false,pendi
    '<section class="ag-auth-visual" aria-label="AGRIDELTA nông nghiệp thông minh">'+
     '<div class="ag-auth-visual-image"></div>'+
     '<div class="ag-auth-visual-inner">'+
-      '<a class="ag-auth-logo" href="/?intro=1" aria-label="AGRIDELTA — Trang giới thiệu"><img src="/assets/agridelta-eco-logo.svg" alt="AGRIDELTA" /></a>'+
+      '<a class="ag-auth-logo" href="/" aria-label="AGRIDELTA — Trang Start"><img src="/assets/agridelta-eco-logo.svg" alt="AGRIDELTA" /></a>'+
       '<span class="ag-auth-eyebrow">NỀN TẢNG NÔNG NGHIỆP THÔNG MINH</span>'+
       '<h2>Mỗi mùa xanh,<br><em>một hành trình mới.</em></h2>'+
       '<p>Kết nối dữ liệu nông trại, quan sát cây trồng và dự báo môi trường trong một không gian riêng của bạn.</p>'+

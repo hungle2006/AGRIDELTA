@@ -45,12 +45,12 @@ npm run build
 
 ## Đăng nhập bắt buộc — Google/Gmail, Facebook, GitHub và email
 
-AGRIDELTA mở **trang đăng nhập trước khi cho vào workspace**. Không còn quyền vào hệ thống qua `AGRIDELTAOpenDemo`, đường dẫn `?app=1` hay API điều hướng frontend mà chưa xác minh phiên.
+AGRIDELTA mặc định mở **trang Start 3D**; khi nhấn **Bắt đầu/Vào ứng dụng**, người chưa xác thực sẽ chuyển đến trang đăng nhập trước khi cho vào workspace. Không còn quyền vào hệ thống qua `AGRIDELTAOpenDemo`, đường dẫn `?app=1` hay API điều hướng frontend mà chưa xác minh phiên.
 
 - Nút **Google** là đăng nhập OAuth qua tài khoản Google, bao gồm Gmail.
 - Form **Gmail/email** là **đăng ký và đăng nhập bằng email + mật khẩu**, không dùng mật khẩu tài khoản Google nếu bạn chưa đặt mật khẩu AGRIDELTA.
 - **Facebook** và **GitHub** đăng nhập qua OAuth. Luồng PKCE dùng mã verifier trong sessionStorage, callback tại `https://agridelta.vercel.app/auth/callback`, sau đó gọi Supabase `/auth/v1/user` để xác minh token trước khi hiển thị workspace.
-- Trang giới thiệu có thể mở chủ động bằng `/?intro=1`, song các nút Bắt đầu vẫn yêu cầu xác thực trước.
+- Trang Start hiển thị mặc định tại `/` hoặc `/start`; `/?intro=1` vẫn hoạt động. Các đường dẫn `?app=1`, `?login=1`, `/login` và `/auth/callback` vào trang xác thực; nút Bắt đầu luôn yêu cầu xác thực trước khi vào workspace.
 
 **Cấu hình còn thiếu trên production (không có đăng nhập giả):**
 

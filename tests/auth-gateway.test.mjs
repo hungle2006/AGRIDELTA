@@ -35,11 +35,17 @@ test('plant doctor API requires authenticated Supabase account before analysis',
  assert.match(frontend,/getAccessToken/);
  assert.match(frontend,/Authorization/);
 });
-test('root redirects entry routes to auth, with explicit optional intro',()=>{
+test('Start is public default; explicit app and OAuth callback routes still require auth',()=>{
  const root=file('root-guide.js');
- assert.match(root,/else enter\('home', true\)/);
- assert.match(root,/appRoute\.get\('intro'\) === '1'/);
+ assert.match(root,/else open\(\)/);
+ assert.match(root,/appRoute\.get\('app'\) === '1'/);
+ assert.match(root,/appRoute\.get\('login'\) === '1'/);
+ assert.match(root,/window\.location\.pathname\.startsWith\('\/auth\/'\)/);
+ assert.match(root,/if \(authEntry && appRoute\.get\('intro'\) !== '1'\) enter\('home', true\)/);
+ assert.match(root,/window\.AGRIDELTAEnter\?\./);
  assert.doesNotMatch(root,/AGRIDELTAOpenDemo/);
+ const auth=file('auth-gateway.js');
+ assert.match(auth,/href="\/" aria-label="AGRIDELTA — Trang Start"/);
 });
 test('PKCE URL-safe encoding and browser responsive styles exist',()=>{
  assert.equal(base64url(Uint8Array.from([255,238,170])),'_-6q');
