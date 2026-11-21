@@ -60,7 +60,7 @@ AGRIDELTA mở **trang đăng nhập trước khi cho vào workspace**. Không c
 4. Trong **Authentication > Sign In / Providers**, bật Google, Facebook, GitHub. Mỗi provider yêu cầu OAuth app riêng và Client ID/Secret cấu hình **ở Supabase**, không nhúng secret vào Vite hay mã nguồn. Callback đăng ký trên bảng điều khiển Google/Meta/GitHub phải trỏ đến `https://<project-ref>.supabase.co/auth/v1/callback` (URL cụ thể hiển thị trong Supabase), không trỏ trực tiếp vào Vercel.
 5. Thử OAuth cho cả ba nhà cung cấp bằng tài khoản thật; kiểm tra email signup, refresh session, logout, truy cập thẳng `/?app=1` chưa đăng nhập, và xác nhận mỗi tài khoản không thấy bản ghi của tài khoản khác.
 
-**Quan trọng:** Frontend có route guard, nhưng bảo vệ dữ liệu thực tế phụ thuộc vào Supabase RLS và việc xác thực request trên server. OAuth hiện chỉ có giao diện và luồng mã nguồn; nếu chưa cấu hình Supabase/provider, các nút sẽ thông báo chưa hoạt động, không hiển thị đăng nhập giả.
+**Quan trọng:** Frontend có route guard; `/api/plant-diagnose` cũng xác minh token Supabase trước khi cho phép gọi Gemini. Bảo vệ dữ liệu thực tế phụ thuộc vào Supabase RLS và việc xác thực request trên server. OAuth hiện chỉ có giao diện và luồng mã nguồn; nếu chưa cấu hình Supabase/provider, các nút sẽ thông báo chưa hoạt động, không hiển thị đăng nhập giả.
 
 ## Phát triển
 
