@@ -172,7 +172,8 @@ export function createFarmIntelligence({getFields=()=>[],getSeasons=()=>[] }={})
       }));
       root.querySelector("#afi-radius")?.addEventListener("change",e=>{radius=Number(e.target.value);forecast=null;index=0;render();if(area)load();});
       root.querySelector("#afi-hours")?.addEventListener("change",e=>{hours=Number(e.target.value);index=0;render();if(area&&!forecast)load();});
-      root.querySelector("#afi-time-slider")?.addEventListener("input",e=>{index=Number(e.target.value);render();});
+      root.querySelector("#afi-time-slider")?.addEventListener("input",e=>{const t=available()[Number(e.target.value)];const label=root.querySelector(".afi-range label strong");if(t&&label)label.textContent=dateLabel(t.time);});
+      root.querySelector("#afi-time-slider")?.addEventListener("change",e=>{index=Number(e.target.value);render();});
       root.querySelector('[data-afi-action="forecast"]')?.addEventListener("click",()=>load());
     }
     if(tab==="doctor"){
@@ -187,7 +188,8 @@ export function createFarmIntelligence({getFields=()=>[],getSeasons=()=>[] }={})
       root.querySelector('[data-afi-action="diagnose"]')?.addEventListener("click",diagnose);
     }
     if(tab==="twin"){
-      root.querySelector("#afi-stage")?.addEventListener("input",e=>{stage=Number(e.target.value);seekModel(); const el=root.querySelector(".afi-stage-heading strong");if(el)el.textContent=stages[stage];root.querySelectorAll("[data-afi-stage]").forEach(b=>b.classList.toggle("is-active",Number(b.dataset.afiStage)===stage));});
+      root.querySelector("#afi-stage")?.addEventListener("input",e=>{stage=Number(e.target.value);seekModel();const el=root.querySelector(".afi-stage-heading strong");if(el)el.textContent=stages[stage];root.querySelectorAll("[data-afi-stage]").forEach(b=>b.classList.toggle("is-active",Number(b.dataset.afiStage)===stage));});
+      root.querySelector("#afi-stage")?.addEventListener("change",()=>render());
       root.querySelectorAll("[data-afi-stage]").forEach(b=>b.addEventListener("click",()=>{stage=Number(b.dataset.afiStage);render();}));
     }
   }
