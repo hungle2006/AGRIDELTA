@@ -45,7 +45,7 @@ const workflow = [
 ];
 const rootPoints = [[8.8,51.3],[25.9,67.9],[52.4,78.2],[72.6,70.9],[91.4,47.8]];
 const beanDivider = (index,kind='secondary') =>
-  '<div class="bean-transition bean-transition--'+kind+'" data-bean-divider="'+index+'" aria-hidden="true">'+
+  '<div id="bean-transition-'+index+'" class="bean-transition bean-transition--'+kind+'" data-bean-divider="'+index+'" aria-hidden="true">'+
   '<span class="bean-transition-line"></span><div class="bean-pod-target"></div></div>';
 const brand = `<img class="ag-eco-wordmark" src="/assets/agridelta-eco-logo.svg" alt="" width="2172" height="724" decoding="async">`;
 const site = document.createElement('div');
