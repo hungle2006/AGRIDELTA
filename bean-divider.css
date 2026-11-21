@@ -1,0 +1,88 @@
+/* Eco cinematic bean-pod transitions. Real rice-field photography is
+   intentionally soft-focus; one GLB fruit mesh is reused across all dividers.
+   Source: Etienne Girardet, Unsplash /photos/BYBZQplXrig, free license. */
+.earth-site .bean-transition{
+  --rice-photo:url("https://images.unsplash.com/photo-1707235163527-c52a4d19e389?auto=format&fit=crop&w=1800&q=80");
+  position:relative;isolation:isolate;
+  display:block;overflow:hidden;
+  min-height:clamp(162px,18vw,235px);
+  border-block:1px solid #cadcc7;
+  background:#dce9d3;
+}
+.earth-site .bean-transition--secondary{
+  min-height:clamp(140px,12.6vw,178px);
+}
+.earth-site .bean-transition--secondary[data-bean-divider="02"]{
+  --rice-photo:url("https://images.unsplash.com/photo-1508550536558-5e8d33eb9a82?auto=format&fit=crop&w=1700&q=78");
+}
+.earth-site .bean-transition--secondary[data-bean-divider="03"]{
+  --rice-photo:url("https://images.unsplash.com/photo-1770130870572-39e74c05b998?auto=format&fit=crop&w=1700&q=78");
+}
+.earth-site .bean-transition--secondary[data-bean-divider="04"]{
+  --rice-photo:url("/assets/start-landscape-clear.webp");
+}
+.earth-site .bean-transition::before{
+  content:"";position:absolute;inset:-22px;z-index:-2;
+  background-image:linear-gradient(90deg,#e1eee0a9,#f1f7ed6a,#dcebd397),
+    var(--rice-photo),url("/assets/start-field-sunrise.webp");
+  background-size:cover; background-position:center;
+  filter:blur(8px) saturate(.85);
+  opacity:.9;transform:scale(1.06);
+  pointer-events:none;
+}
+.earth-site .bean-transition::after{
+  content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(180deg,#f8fbf5b5,transparent 28%,#d4e5c74d 70%,#eef5e9b5);
+  pointer-events:none;
+}
+.earth-site .bean-transition-line{
+  position:absolute;top:31%;left:max(19px,5vw);right:max(19px,5vw);
+  border-top:1px solid #f9fff0c9;
+  box-shadow:0 1px 0 #3f71402e;
+  z-index:1;pointer-events:none;
+}
+.earth-site .bean-transition-line::before,
+.earth-site .bean-transition-line::after{
+  content:"";position:absolute;top:-3px;
+  width:5px;height:5px;border-radius:50%;
+  border:1px solid #d8efd0;
+  background:#86b989;
+}
+.earth-site .bean-transition-line::before{left:0}
+.earth-site .bean-transition-line::after{right:0}
+.earth-site .bean-pod-target{
+  position:absolute;left:50%;top:0;bottom:0;
+  transform:translateX(-50%);
+  width:clamp(180px,24vw,305px);
+  z-index:2;pointer-events:none;
+  display:block;
+}
+.earth-site .bean-pod-target canvas{display:block;width:100%;height:100%}
+.earth-site .bean-transition:not(.bean-is-dropping) .bean-pod-target canvas{opacity:0}
+.earth-site .bean-fallback-pod{
+  position:absolute;left:calc(50% - 12px);top:20%;
+  height:74px;width:26px;border-radius:70% 42% 65% 45%;
+  transform:rotate(15deg);
+  background:linear-gradient(90deg,#276c32,#80bb46 45%,#c1d777 68%,#317f36);
+  box-shadow:inset -4px 2px 7px #265a3080,0 8px 18px #123c3029;
+  opacity:0;
+}
+.earth-site .bean-is-dropping .bean-fallback-pod{
+  animation:bean-fallback-fall 2000ms cubic-bezier(.21,.6,.16,1) both;
+}
+@keyframes bean-fallback-fall{
+  0%{opacity:0;transform:translateY(-9px) rotate(4deg) scale(.25)}
+  18%{opacity:1;transform:translateY(0) rotate(12deg) scale(1)}
+  77%{opacity:1;transform:translateY(88px) rotate(80deg) scale(1)}
+  100%{opacity:0;transform:translateY(109px) rotate(115deg) scale(.95)}
+}
+@media(max-width:760px){
+ .earth-site .bean-transition{min-height:clamp(145px,35vw,205px)}
+ .earth-site .bean-transition--secondary{min-height:clamp(123px,27vw,155px)}
+ .earth-site .bean-transition::before{filter:blur(7px) saturate(.83)}
+ .earth-site .bean-pod-target{width:min(65vw,250px)}
+ .earth-site .bean-transition-line{left:17px;right:17px}
+}
+@media(prefers-reduced-motion:reduce){
+ .earth-site .bean-is-dropping .bean-fallback-pod{animation:none!important;opacity:0!important}
+}

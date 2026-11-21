@@ -1,5 +1,6 @@
 import {createLiveEarth, createRootEarth} from './live-earth.js';
 import {initAgrideltaMotion} from './interaction-motion.js';
+import {initBeanTransitions} from './bean-drop-scene.js';
 import {storyProgress, rootCountAt, rootRevealAt, rootScrollTarget} from './scroll-story-state.js';
 import {FEATURES, guideIndex, searchGuides} from './root-guide-data.js';
 import {START_IMAGES, startPhoto} from './start-photography.js';
@@ -43,6 +44,9 @@ const workflow = [
   {title: 'Ghi việc chăm sóc', detail: 'Theo dõi ngày tưới, bón phân và các việc đã làm.'},
 ];
 const rootPoints = [[8.8,51.3],[25.9,67.9],[52.4,78.2],[72.6,70.9],[91.4,47.8]];
+const beanDivider = (index,kind='secondary') =>
+  '<div class="bean-transition bean-transition--'+kind+'" data-bean-divider="'+index+'" aria-hidden="true">'+
+  '<span class="bean-transition-line"></span><div class="bean-pod-target"></div></div>';
 const brand = `<img class="ag-eco-wordmark" src="/assets/agridelta-eco-logo.svg" alt="" width="2172" height="724" decoding="async">`;
 const site = document.createElement('div');
 site.id = 'rg-site';
@@ -115,6 +119,7 @@ site.innerHTML = `
       </div>
     </section>
 
+    ${beanDivider('01','hero')}
     <section class="start-workflow earth-container" aria-labelledby="workflow-title">
       <div class="start-workflow-head">
         <div><p class="earth-eyebrow">01 / KHỞI ĐẦU</p><h2 id="workflow-title">Bắt đầu một mùa vụ.</h2></div>
@@ -136,6 +141,7 @@ site.innerHTML = `
       </ol>
     </section>
 
+    ${beanDivider('02','secondary')}
     <section class="root-features" id="rg-roots" aria-labelledby="root-title">
       <div class="root-scroll-track">
         <div class="earth-container root-spread">
@@ -170,6 +176,7 @@ site.innerHTML = `
       </div>
     </section>
 
+    ${beanDivider('03','secondary')}
     <section class="earth-container start-guides" id="rg-guides" aria-labelledby="start-guides-title">
       <div class="guide-intro">
         <div><p class="earth-eyebrow">${icon('leaf')} Hệ sinh thái AgriDelta</p><h2 id="start-guides-title">Chăm trọn một mùa vụ.</h2></div>
@@ -186,6 +193,7 @@ site.innerHTML = `
         </button>`).join('')}
       </div>
     </section>
+    ${beanDivider('04','secondary')}
     <section class="earth-container start-close" aria-labelledby="start-close-title">
       <div class="start-close-frame">
         ${startPhoto(START_IMAGES.closing,"start-closing-photo","(max-width:760px) 100vw, 90vw")}
@@ -492,6 +500,7 @@ site.addEventListener('keydown', event => {
 
 window.AGRIDELTARootGuide = {open, close: () => enter(), go: enter};
 initAgrideltaMotion(site);
+initBeanTransitions(site);
 window.AGRIDELTAStory = {replay: () => { open(); harvestTriggered = false; plant.replay(); }};
  
 // Shareable, reload-safe entrance to the operational workspace.

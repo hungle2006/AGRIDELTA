@@ -1,0 +1,40 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {BEAN_DROP_MS,BEAN_DIVIDER_COUNT,beanDropPose} from '../bean-drop-state.js';
+const get=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+test('Bean drops for exactly two seconds and disappears',()=>{
+ assert.equal(BEAN_DROP_MS,2000);
+ assert.equal(BEAN_DIVIDER_COUNT,4);
+ assert.ok(beanDropPose(0).visible);
+ assert.ok(beanDropPose(330).opacity>.9);
+ assert.ok(beanDropPose(1200).y<beanDropPose(360).y);
+ assert.ok(beanDropPose(1700).opacity<1);
+ assert.equal(beanDropPose(2000).opacity,0);
+ assert.equal(beanDropPose(2000).visible,false);
+ assert.equal(beanDropPose(3500).visible,false);
+});
+test('Page has four visible section-transition scenes and keeps Blender tree',()=>{
+ const html=get('root-guide.js');
+ assert.match(html,/beanDivider\('01','hero'\)/);
+ assert.match(html,/beanDivider\('02','secondary'\)/);
+ assert.match(html,/beanDivider\('03','secondary'\)/);
+ assert.match(html,/beanDivider\('04','secondary'\)/);
+ assert.match(html,/id="live-earth"/);
+ assert.match(html,/initBeanTransitions\(site\)/);
+ const index=get('index.html');
+ assert.match(index,/bean-divider\.css/);
+});
+test('Falling pods use existing Blender fruit GLB, not GIF or permanent animations',()=>{
+ const src=get('bean-drop-scene.js'),css=get('bean-divider.css');
+ assert.match(src,/start-lifecycle-live\.glb/);
+ assert.match(src,/fruit\.\*bean\.\*pod/i);
+ assert.match(src,/IntersectionObserver/);
+ assert.match(src,/BEAN_DROP_MS/);
+ assert.match(src,/renderer\.render\(scene,camera\)/);
+ assert.match(src,/if\(!pose\.visible\)\{stop\(\);return;\}/);
+ assert.match(src,/reduce\.matches/);
+ assert.doesNotMatch(src,/\.gif/);
+ assert.match(css,/filter:blur\(8px\)/);
+ assert.match(css,/prefers-reduced-motion:reduce/);
+});
