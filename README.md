@@ -23,6 +23,26 @@ Mã nguồn đã có lớp đăng ký/đăng nhập Supabase và bảng bản gh
 
 Quy trình triển khai, migration SQL, biến môi trường và những hạn chế hiện tại được ghi tại [FIELD_OS_V2.md](FIELD_OS_V2.md). Không sử dụng project Supabase của ứng dụng khác khi chưa được xác nhận.
 
+
+## AGRIDELTA Intelligence (thử nghiệm)
+
+Trong ứng dụng quản lý, chọn **AI nông nghiệp** ở menu bên trái hoặc thanh điều hướng điện thoại:
+
+- **Dự báo hồng ngoại nhiệt theo khu vực**: tìm địa danh hoặc nhập tọa độ, chọn bán kính 5/20/50 km và khoảng 24/72 giờ hoặc 7 ngày. Dùng dự báo nhiệt độ, độ ẩm và độ che phủ mây từ [Open-Meteo](https://open-meteo.com/en/docs) tại 9 điểm; áp dụng công thức độ phát xạ trời quang Brutsaert và hiệu chỉnh mây đơn giản để **ước tính** longwave xuống mặt đất (W/m²). Không phải phép đo vệ tinh, sản phẩm ECMWF \`strd\` hay một ML model đã được hiệu chuẩn. Nếu dịch vụ khí tượng không khả dụng, hiển thị lỗi chứ không tạo dữ liệu mẫu.
+- **Bác sĩ cây trồng**: tải/chụp JPEG, PNG, WebP; trình duyệt tự nén JPEG. Chỉ gửi ảnh khi người dùng bấm phân tích. Vercel Function \`api/plant-diagnose.js\` gọi Gemini để sàng lọc bất thường và trả kết quả có độ bất định. **Chỉ hoạt động khi cấu hình** \`GEMINI_API_KEY\` trong Vercel (để trống sẽ trả 503 \`AI_NOT_CONFIGURED\`); tùy chọn \`GEMINI_MODEL\`, mặc định \`gemini-2.5-flash\`. Không đưa khóa vào \`VITE_\` hay frontend. Trước khi bật cho người dùng thật, cần bổ sung giới hạn truy cập/chi phí phía máy chủ.
+- **Digital Twin 3D**: xem và điều khiển các giai đoạn sinh trưởng bằng GLB Blender gốc và các ghi chú môi trường khi đã chọn khu vực. Đây là mô phỏng; không phải phép đo tình trạng thực của cây.
+
+Tìm địa danh dựa trên Open-Meteo Geocoding. Bản đồ nhiệt 3×3 sử dụng Leaflet và OpenStreetMap làm nền; khi không tải được bản đồ, phần số liệu (nếu đã nhận được từ API khí tượng) vẫn được hiển thị. Độ phân giải các mô hình thời tiết **không tương đương với độ phân giải của một mảnh vườn**.
+
+Phương trình bức xạ là ước tính bán thực nghiệm; chưa chứng minh sai số MAE/RMSE trên các điểm quan trắc tại Việt Nam. Vì vậy **không dùng nó để tự động quyết định tưới/phun thuốc hoặc khẳng định bức xạ là nguyên nhân gây bệnh**.
+
+### Kiểm thử tính năng
+
+\`\`\`bash
+node --test tests/*.test.mjs
+npm run build
+\`\`\`
+
 ## Phát triển
 
 ```bash
