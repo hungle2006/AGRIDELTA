@@ -11,9 +11,9 @@ test('Motion on touch is delegated, passive, and respects reduced motion',()=>{
  assert.match(root,/initAgrideltaMotion\(site\)/);
 });
 test('Workspace menu and pages animate without rerendering on every tap',()=>{
- assert.match(app,/\\.ag-sidebar'\)\?\\.classList\\.toggle\('is-open',menuOpen\)/);
+ assert.ok(app.includes("app.querySelector('.ag-sidebar')?.classList.toggle('is-open',menuOpen)"));
  assert.match(app,/previousPage!==page/);
  assert.match(app,/ag-page-enter/);
  assert.match(app,/modalCloseTimer/);
- assert.match(css,/\\.ag-side-overlay\.is-open/);
+ assert.ok(css.includes(".ag-side-overlay.is-open"));
 });
