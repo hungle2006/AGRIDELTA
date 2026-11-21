@@ -221,7 +221,8 @@ site.innerHTML = `
   </dialog>
 `;
 document.body.insertBefore(site, document.querySelector('#app'));
-document.body.classList.add('rg-experience-mode');
+site.hidden = true;
+document.body.classList.add('rg-app-mode');
 // Capture non-bubbling <img> error events and switch to the offline project asset.
 site.addEventListener('error', event => {
   const img = event.target;
@@ -455,8 +456,7 @@ function enter(page = 'home', auth = false) {
   site.hidden = true;
   document.body.classList.remove('rg-experience-mode', 'earth-modal-open');
   document.body.classList.add('rg-app-mode');
-  if (auth) window.AGRIDELTAOpenAuth?.();
-  else window.AGRIDELTAOpenDemo?.(page);
+  window.AGRIDELTAEnter?.(auth ? 'settings' : page);
   window.scrollTo({top: 0, behavior: 'instant'});
   const title = document.querySelector('#app h1, #app h2');
   title?.setAttribute('tabindex', '-1');
@@ -505,10 +505,7 @@ initAgrideltaMotion(site);
 initBeanTransitions(site, find('#bean-fall-overlay'));
 window.AGRIDELTAStory = {replay: () => { open(); harvestTriggered = false; plant.replay(); }};
  
-// Shareable, reload-safe entrance to the operational workspace.
-// Example: /start?app=1&view=fields. No mock login is used.
+// Authentication first for every entry path. Intro is only available when explicitly requested.
 const appRoute = new URLSearchParams(window.location.search);
-if (appRoute.get('app') === '1') {
-  const destination = appRoute.get('view') || 'home';
-  enter(destination);
-}
+if (appRoute.get('intro') === '1') open();
+else enter('home', true);
