@@ -7,6 +7,7 @@ const file=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 test('login-first screen contains Gmail email and real OAuth provider actions',()=>{
  const html=authScreen({configured:false});
  assert.match(html,/data-auth-provider="google"/);
+ assert.match(html,/data-auth-email/);
  assert.match(html,/data-auth-provider="facebook"/);
  assert.match(html,/data-auth-provider="github"/);
  assert.match(html,/tenban@gmail.com/);
