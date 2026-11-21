@@ -1,5 +1,5 @@
 import {mountObservatory} from './observatory-carousel.js';
-import {createFarmIntelligence, farmTools, photoCredits, farmToolName} from './farm-intelligence.js';
+import {createFarmIntelligence, farmTools, farmToolName} from './farm-intelligence.js';
 import {authScreen} from './auth-gateway.js';
 import {firebaseConfigured,watchFirebaseUser,loginWithEmail,registerWithEmail,loginWithProvider,logoutFirebase,getFirebaseToken,sendPasswordRecovery,friendlyFirebaseError} from './firebase-auth.js';
 const app=document.querySelector('#app');
@@ -32,7 +32,7 @@ function render(){
       </div>
     </div></header>
     <main class="ag-frame ag-content" id="ag-ai-root" tabindex="-1">${requestedTab?'':farmTools()}</main>
-    <footer class="ag-frame ag-bottom-footer"><span>© 2026 AGRIDELTA</span>${photoCredits()}</footer>
+    <footer class="ag-frame ag-bottom-footer"><a class="ag-legal-link" href="/photo-credits.html" aria-label="Bản quyền AGRIDELTA và giấy phép hình ảnh">© 2026 AGRIDELTA</a></footer>
     <div id="ag-toast" class="ag-toast" role="status" hidden></div>
   </div>`;
   if(authVerified&&requestedTab)intelligence.mount(app.querySelector('#ag-ai-root'),requestedTab);

@@ -96,15 +96,9 @@ export function farmTools(active=null){
     </button>
   </li>`).join('');
   return `<section class="ag-observatory" aria-labelledby="ag-observatory-title" data-observatory>
-    <header class="ag-tool-heading"><h1 id="ag-observatory-title">Phòng quan sát</h1><p>Lướt để khám phá ba công cụ.</p></header>
+    <header class="ag-tool-heading"><h1 id="ag-observatory-title">Phòng quan sát</h1><p>Ba công cụ canh tác · Chọn để khám phá.</p></header>
     <ul class="ag-carousel-track" aria-label="Ba công cụ canh tác">${slides}</ul>
-    <div class="ag-carousel-controls">
-      <button type="button" class="ag-carousel-arrow" data-carousel-step="-1" aria-label="Công cụ trước">←</button>
-      <div class="ag-carousel-positions" role="group" aria-label="Chọn vị trí">
-        ${tools.map(({title},index)=>`<button type="button" data-carousel-index="${index}"${index===0?' aria-current="true"':''} aria-label="Đưa ${title} vào giữa"><span></span></button>`).join('')}
-      </div>
-      <button type="button" class="ag-carousel-arrow" data-carousel-step="1" aria-label="Công cụ kế tiếp">→</button>
-    </div>
+
   </section>`;
 }
 export function createFarmIntelligence({getAccessToken=()=>''}={}) {
