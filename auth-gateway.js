@@ -39,7 +39,7 @@ export function authScreen({mode='login',error='',info='',configured=false,pendi
         '<button class="ag-auth-submit" type="submit">'+(signup?'Tạo tài khoản':'Đăng nhập')+' <span aria-hidden="true">→</span></button>'+
        '</form>'+
        (!signup?'<div class="ag-auth-recover"><button type="button" data-auth-recover>Quên mật khẩu?</button></div>':'')+
-       ''<div class="ag-auth-switch">'++(signup?'Đã có tài khoản?':'Chưa có tài khoản?')+' <button type="button" data-auth-switch>'+(signup?'Đăng nhập':'Đăng ký ngay')+'</button></div>'+
+       '<div class="ag-auth-switch">'+(signup?'Đã có tài khoản?':'Chưa có tài khoản?')+' <button type="button" data-auth-switch>'+(signup?'Đăng nhập':'Đăng ký ngay')+'</button></div>'+
        '<p class="ag-auth-assurance">Xác thực bằng Firebase. Bản ghi canh tác hiện lưu theo tài khoản trên thiết bị này; chưa đồng bộ liên thiết bị.</p>'+
       '</div>')+
      '</div></section>'+
