@@ -51,7 +51,7 @@ const app = document.querySelector('#app');
   };
   let local=normalize(read(KEY,blank()));
   let records=local;
-  const intelligence=createFarmIntelligence({getFields:()=>records.fields,getSeasons:()=>records.seasons});
+  const intelligence=createFarmIntelligence({getFields:()=>records.fields,getSeasons:()=>records.seasons,getAccessToken:()=>authVerified?cloudSession?.access_token||'':''});
   let page='overview', query='', filter='all', modal=null, editing=null, notice='', noticeTimer=0, menuOpen=false, loginMode='login', cloudSession=read(CLOUD_SESSION,null);
   let syncState='local', working=false, authError='', selectedPhoto=null, hydrationToken=0;
   let authVerified=false, authInfo='', authPending=cloudAvailable&&(Boolean(cloudSession)||new URLSearchParams(location.search).has('code'));
