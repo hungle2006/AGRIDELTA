@@ -475,10 +475,11 @@ const app = document.querySelector('#app');
     }
   },true);
   app.addEventListener('click',async event=>{
-    const target=event.target.closest('[data-go],[data-new],[data-edit],[data-remove],[data-toggle],[data-action],[data-menu],[data-dismiss],[data-auth-provider],[data-auth-switch]');
+    const target=event.target.closest('[data-go],[data-new],[data-edit],[data-remove],[data-toggle],[data-action],[data-menu],[data-dismiss],[data-auth-provider],[data-auth-switch],[data-auth-email]');
     if(!target)return;
     if(!authVerified){
       if(target.dataset.authProvider){await startSocial(target.dataset.authProvider);return;}
+      if(target.hasAttribute('data-auth-email')){app.querySelector('#ag-auth-email')?.focus({preventScroll:false});return;}
       if(target.hasAttribute('data-auth-switch')){
         loginMode=loginMode==='register'?'login':'register';authError='';authInfo='';render();return;
       }
