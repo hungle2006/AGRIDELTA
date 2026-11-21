@@ -1,8 +1,8 @@
 /* Dedicated AGRIDELTA authentication screen; never displays fake accounts. */
 const e = value=>String(value==null?'':value).replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
-export function authScreen({mode='login',error='',info='',configured=false,pending=false}={}){
+export function authScreen({mode='login',error='',info='',configured=false,pending=false,feature=''}={}){
   const signup=mode==='register';
-  const heading=signup?'Bắt đầu mùa vụ mới.':'Chào mừng trở lại.';
+  const heading=signup?'Tạo tài khoản':'Đăng nhập';
   return '<main class="ag-auth" id="ag-auth" aria-labelledby="ag-auth-heading">'+
    '<section class="ag-auth-visual" aria-label="AGRIDELTA nông nghiệp thông minh">'+
     '<div class="ag-auth-visual-image"></div>'+
@@ -17,9 +17,9 @@ export function authScreen({mode='login',error='',info='',configured=false,pendi
    '</section>'+
    '<section class="ag-auth-content"><div class="ag-auth-form-wrap">'+
     '<div class="ag-auth-mobile-brand"><img src="/assets/agridelta-eco-logo.svg" alt="AGRIDELTA"></div>'+
-    '<span class="ag-auth-kicker">TÀI KHOẢN AGRIDELTA</span>'+
+    '<button type="button" class="ag-auth-back" data-action="workspace">← Phòng quan sát</button>'+
     '<h1 id="ag-auth-heading">'+heading+'</h1>'+
-    '<p class="ag-auth-sub">'+(signup?'Tạo tài khoản để sử dụng ba hệ thống nông nghiệp thông minh.':'Đăng nhập để xem dự báo, phân tích ảnh cây và khám phá Digital Twin 3D.')+'</p>'+
+    '<p class="ag-auth-sub">'+(signup?'Tạo tài khoản để sử dụng ba hệ thống nông nghiệp thông minh.':feature?'Đăng nhập để mở '+e(feature)+'.':'Đăng nhập để mở Phòng quan sát.')+'</p>'+
     (pending?'<div class="ag-auth-wait" role="status"><span class="ag-auth-spinner"></span> Đang xác minh tài khoản…</div>':
       '<div class="ag-auth-form-body">'+
        (error?'<div class="ag-auth-error" role="alert">'+e(error)+'</div>':'')+

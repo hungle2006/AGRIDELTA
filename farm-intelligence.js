@@ -57,6 +57,42 @@ function leafletLoader() {
   }).catch(e=>{leafletPromise=null;throw e;});
   return leafletPromise;
 }
+const tools = [
+  {
+    key:'forecast', width:1080, height:720, layer:'Khí quyển', title:'Dự báo hồng ngoại',
+    description:'Ước tính bức xạ nhiệt theo khu vực.',
+    author:'Basile Morin', license:'CC BY-SA 4.0', licenseUrl:'https://creativecommons.org/licenses/by-sa/4.0/',
+    source:'https://commons.wikimedia.org/wiki/File:Water_reflection_of_mountains,_hut,_green_rice_sheaves_scattered_in_a_paddy_field_and_clouds_with_blue_sky_in_Vang_Vieng,_Laos.jpg'
+  },
+  {
+    key:'doctor', width:1080, height:1012, layer:'Tán lá', title:'Bác sĩ cây trồng',
+    description:'Xem dấu hiệu bất thường qua ảnh.',
+    author:'Eiku', license:'CC BY-SA 4.0', licenseUrl:'https://creativecommons.org/licenses/by-sa/4.0/',
+    source:'https://commons.wikimedia.org/wiki/File:Phaseolus_vulgaris,_dessous_de_la_feuille.jpg'
+  },
+  {
+    key:'twin', width:799, height:570, layer:'Vòng đời', title:'Digital Twin 3D',
+    description:'Quan sát từng giai đoạn sinh trưởng.',
+    author:'Doronenko', license:'CC BY-SA 3.0', licenseUrl:'https://creativecommons.org/licenses/by-sa/3.0/',
+    source:'https://commons.wikimedia.org/wiki/File:Bean_germination.jpg'
+  }
+];
+export const farmToolName = key => tools.find(tool=>tool.key===key)?.title;
+export function photoCredits(){
+  return `<details class="ag-photo-credits"><summary>Nguồn ảnh</summary><ul>${tools.map(({title,author,license,licenseUrl,source}) =>
+    `<li>${title} · <a href="${source}">${author}</a> · <a href="${licenseUrl}">${license}</a></li>`).join('')}</ul><p>Ảnh được thu nhỏ, chuyển sang WebP và cắt khung khi hiển thị.</p></details>`;
+}
+export function farmTools(active=null){
+  const links=tools.map(({key,width,height,layer,title,description})=>`<button type="button" class="ag-tool-card ag-tool-${key}" data-afi-tab="${key}"${active===key?' aria-current="page"':''}>
+    ${active?'':`<img class="ag-tool-photo" src="/assets/observatory-${key}.webp" alt="" width="${width}" height="${height}"><span class="ag-tool-layer">${layer}</span>`}
+    <span class="ag-tool-title">${title}</span>
+    ${active?'':`<span class="ag-tool-copy">${description}</span><span class="ag-tool-arrow" aria-hidden="true">→</span>`}
+  </button>`).join('');
+  return `<section class="ag-observatory${active?' has-tool':''}">
+    ${active?'':'<header class="ag-tool-heading"><h1>Phòng quan sát</h1><p>Từ khí quyển đến từng chiếc lá và vòng đời cây trồng.</p></header>'}
+    <nav class="ag-tool-nav" aria-label="Ba công cụ canh tác">${links}</nav>
+  </section>`;
+}
 export function createFarmIntelligence({getAccessToken=()=>''}={}) {
   let root=null,tab="forecast",hours=72,radius=20,area=restoreArea(),places=[],forecast=null,slots=[],index=0,loading=false,error="",lookupBusy=false,lookupError="";
   let map=null,sequence=0,photo=null,photoPreview="",doctorResult=null,doctorError="",doctorBusy=false,doctorCrop="đậu",stage=1,modelLoaded=false;
@@ -76,13 +112,6 @@ export function createFarmIntelligence({getAccessToken=()=>''}={}) {
     if(p.rain>=3)return "Có mưa dự báo. Kiểm tra khả năng thoát nước; không kết luận cây cần tưới chỉ từ mức bức xạ hồng ngoại.";
     if(p.rh<45&&p.temperature>=31)return "Không khí nóng và khô: cần quan sát lá, kiểm tra độ ẩm đất và đối chiếu nhật ký tưới.";
     return "Bức xạ hồng ngoại nhiệt là một yếu tố của cân bằng năng lượng. Hãy xem thêm nhiệt độ, độ ẩm, ánh sáng và tình trạng thực tế trước khi xử lý cây.";
-  }
-  const icon=name=>'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+({forecast:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l2 2m10 10 2 2M19 5l-2 2M7 17l-2 2"/>',doctor:'<path d="M20 4C10 3 4 9 4 16a5 5 0 0 0 5 5c8 0 12-8 11-17Z"/><path d="m5 20 9-10m-2 0v6m-3-3h6"/>',twin:'<path d="m12 3 9 5-9 5-9-5 9-5Zm-9 5v9l9 5 9-5V8M12 13v9"/>'}[name]||'')+'</svg>';
-  function headline(){
-    return '<section class="afi-hero"><div><span class="afi-kicker">AGRIDELTA / FARM INTELLIGENCE</span><h1>Hiểu môi trường.<br><em>Nuôi dưỡng mùa xanh.</em></h1><p>Dự báo hồng ngoại khu vực, chẩn đoán ảnh cây bằng AI và khám phá vòng đời cây 3D.</p></div><div class="afi-hero-symbol" aria-hidden="true">✳</div></section>'+
-      '<nav class="afi-tabs" aria-label="Các hệ thống AI">'+[
-      ["forecast","Dự báo hồng ngoại"],["doctor","AI Plant Doctor"],["twin","Digital Twin 3D"]]
-      .map(a=>'<button type="button" data-afi-tab="'+a[0]+'" class="'+(tab===a[0]?'is-active':'')+'" aria-current="'+(tab===a[0]?'page':'false')+'"><span aria-hidden="true">'+icon(a[0])+'</span>'+a[1]+'</button>').join("")+'</nav>';
   }
   function forecastView(){
     const point=current(),entries=available(),high=entries.length?Math.max(...entries.map(p=>p.lw)):null;
@@ -151,13 +180,12 @@ export function createFarmIntelligence({getAccessToken=()=>''}={}) {
     if(!root||!root.isConnected)return;
     if(map){map.remove();map=null;}
     mapGeneration++;
-    root.innerHTML='<div class="afi-workspace">'+headline()+(tab==="forecast"?forecastView():tab==="doctor"?doctorView():twinView())+'</div>';
+    root.innerHTML='<div class="afi-workspace">'+farmTools(tab)+(tab==="forecast"?forecastView():tab==="doctor"?doctorView():twinView())+'</div>';
     wire();
     if(tab==="forecast"&&area)initMap(mapGeneration);
     if(tab==="twin")initModel();
   }
   function wire(){
-    root.querySelectorAll("[data-afi-tab]").forEach(b=>b.addEventListener("click",()=>{tab=b.dataset.afiTab;render();}));
     if(tab==="forecast"){
       root.querySelector("#afi-place-form")?.addEventListener("submit",async e=>{e.preventDefault();await lookup(e.target.place.value);});
       root.querySelector("#afi-coordinate-form")?.addEventListener("submit",e=>{

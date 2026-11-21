@@ -63,3 +63,32 @@ body.rg-app-mode:has(#ag-auth) #app{min-height:100dvh;display:block}
 @media(prefers-reduced-motion:reduce){.ag-auth *{animation:none!important;transition:none!important}}
 
 .ag-auth-recover{margin-top:5px;text-align:right}.ag-auth-recover button{border:0;background:transparent;color:#28764b;font-size:11px;font-weight:750;padding:8px 0;cursor:pointer}.ag-auth-recover button:hover{text-decoration:underline}
+
+.ag-auth { background: var(--ag-paper); }
+.ag-auth-content { padding-inline: var(--ag-gutter); }
+.ag-auth-form-wrap { display: grid; gap: 12px; }
+.ag-auth h1 { margin: 0; font: 500 clamp(37px, 4.5vw, 65px)/1.05 var(--ag-display); letter-spacing: -.035em; }
+.ag-auth h1:focus { outline: none; }
+.ag-auth-sub { margin: 0; color: var(--ag-muted); font-size: 14px; line-height: 1.6; }
+.ag-auth-back {
+  justify-self: start;
+  min-height: var(--ag-control);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ag-accent);
+  text-align: start;
+  font-size: 13px;
+  font-weight: 700;
+}
+.ag-auth-back:hover { text-decoration: underline; text-underline-offset: 4px; }
+.ag-auth-social, .ag-auth-form { gap: 8px; }
+.ag-auth :is(.ag-auth-social button,.ag-auth-form input,.ag-auth-submit) { min-height: var(--ag-control); border-radius: 5px; font-size: 14px; }
+.ag-auth form label { font-size: 13px; }
+.ag-auth :is(.ag-auth-switch,.ag-auth-recover) button { min-height: var(--ag-control); }
+.ag-auth :is(.ag-auth-divider,.ag-auth-switch,.ag-auth-assurance) { color: var(--ag-muted); }
+.ag-auth-mobile-brand { margin: 0; }
+@media(max-width:600px) {
+  .ag-auth-content { padding-block: var(--ag-section); }
+  .ag-auth .ag-auth-form input { font-size: 16px; }
+}
