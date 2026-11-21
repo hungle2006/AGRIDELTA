@@ -57,7 +57,7 @@ function leafletLoader() {
   }).catch(e=>{leafletPromise=null;throw e;});
   return leafletPromise;
 }
-export function createFarmIntelligence({getFields=()=>[],getSeasons=()=>[],getAccessToken=()=>'' }={}) {
+export function createFarmIntelligence({getAccessToken=()=>''}={}) {
   let root=null,tab="forecast",hours=72,radius=20,area=restoreArea(),places=[],forecast=null,slots=[],index=0,loading=false,error="",lookupBusy=false,lookupError="";
   let map=null,sequence=0,photo=null,photoPreview="",doctorResult=null,doctorError="",doctorBusy=false,doctorCrop="đậu",stage=1,modelLoaded=false;
   let mapGeneration=0;
@@ -77,11 +77,11 @@ export function createFarmIntelligence({getFields=()=>[],getSeasons=()=>[],getAc
     if(p.rh<45&&p.temperature>=31)return "Không khí nóng và khô: cần quan sát lá, kiểm tra độ ẩm đất và đối chiếu nhật ký tưới.";
     return "Bức xạ hồng ngoại nhiệt là một yếu tố của cân bằng năng lượng. Hãy xem thêm nhiệt độ, độ ẩm, ánh sáng và tình trạng thực tế trước khi xử lý cây.";
   }
-  const icon=(name)=>({forecast:"☀",doctor:"✿",twin:"❀"}[name]||"✿");
+  const icon=name=>'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+({forecast:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l2 2m10 10 2 2M19 5l-2 2M7 17l-2 2"/>',doctor:'<path d="M20 4C10 3 4 9 4 16a5 5 0 0 0 5 5c8 0 12-8 11-17Z"/><path d="m5 20 9-10m-2 0v6m-3-3h6"/>',twin:'<path d="m12 3 9 5-9 5-9-5 9-5Zm-9 5v9l9 5 9-5V8M12 13v9"/>'}[name]||'')+'</svg>';
   function headline(){
-    return '<section class="afi-hero"><div><span class="afi-kicker">AGRIDELTA / FARM INTELLIGENCE</span><h1>Hiểu môi trường.<br><em>Nuôi dưỡng mùa xanh.</em></h1><p>Đưa dữ liệu khí tượng, quan sát cây và mô hình sinh trưởng vào cùng một không gian.</p></div><div class="afi-hero-symbol" aria-hidden="true">✳</div></section>'+
+    return '<section class="afi-hero"><div><span class="afi-kicker">AGRIDELTA / FARM INTELLIGENCE</span><h1>Hiểu môi trường.<br><em>Nuôi dưỡng mùa xanh.</em></h1><p>Dự báo hồng ngoại khu vực, chẩn đoán ảnh cây bằng AI và khám phá vòng đời cây 3D.</p></div><div class="afi-hero-symbol" aria-hidden="true">✳</div></section>'+
       '<nav class="afi-tabs" aria-label="Các hệ thống AI">'+[
-      ["forecast","Dự báo hồng ngoại"],["doctor","Bác sĩ cây trồng"],["twin","Digital Twin 3D"]]
+      ["forecast","Dự báo hồng ngoại"],["doctor","AI Plant Doctor"],["twin","Digital Twin 3D"]]
       .map(a=>'<button type="button" data-afi-tab="'+a[0]+'" class="'+(tab===a[0]?'is-active':'')+'" aria-current="'+(tab===a[0]?'page':'false')+'"><span aria-hidden="true">'+icon(a[0])+'</span>'+a[1]+'</button>').join("")+'</nav>';
   }
   function forecastView(){
@@ -121,33 +121,31 @@ export function createFarmIntelligence({getFields=()=>[],getSeasons=()=>[],getAc
     return '<div class="afi-chart" role="img" aria-label="Biểu đồ dự báo hồng ngoại nhiệt từ '+num(lo)+' đến '+num(hi)+' W/m²"><div class="afi-chart-caption"><span>W/m²</span><span>'+dateLabel(points[0].time)+' – '+dateLabel(points[points.length-1].time)+'</span></div><svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true"><path d="M12 12 H726 M12 78 H726 M12 144 H726" fill="none" stroke="#e3ebe2" stroke-width="1"/><polygon points="12,144 '+coords+' 726,144" fill="#b8d8c0" opacity=".28"/><polyline points="'+coords+'" fill="none" stroke="#2b7951" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+circles+'</svg></div>';
   }
   function doctorView(){
-    const fields=getFields();
+
     return '<section class="afi-topbar"><div><span class="afi-eyebrow">AI PLANT DOCTOR</span><h2>Bác sĩ cây trồng</h2><p>Chụp hoặc tải ảnh lá, thân, quả. AI đánh giá dấu hiệu có thể có — không thay cho kiểm tra thực địa.</p></div></section>'+
       '<div class="afi-doctor-grid"><section class="afi-panel"><h3>Gửi ảnh quan sát</h3><label class="afi-label" for="afi-doctor-crop">Loại cây</label><select id="afi-doctor-crop" class="afi-select"><option value="đậu">Cây đậu</option><option value="cà chua">Cà chua</option><option value="lúa">Lúa</option><option value="ớt">Ớt</option><option value="khác">Cây trồng khác</option></select>'+
-      (fields.length?'<p class="afi-micro">Các khu vườn đã khai báo: '+esc(fields.slice(0,3).map(f=>f.name).join(', '))+'</p>':'')+
       '<label class="afi-upload" for="afi-doctor-file">'+(photoPreview?'<img src="'+photoPreview+'" alt="Ảnh cây do người dùng chọn">':'<span class="afi-upload-symbol">⌾</span><strong>Chọn ảnh hoặc chụp ảnh cây</strong><small>JPG, PNG, WebP · Ảnh sẽ được nén trước khi gửi phân tích</small>')+'</label>'+
-      '<input id="afi-doctor-file" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden>'+
+      '<input id="afi-doctor-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><div class="afi-photo-actions"><button type="button" data-afi-action="camera">Chụp ảnh</button><button type="button" data-afi-action="choose-photo">Chọn ảnh có sẵn</button></div><input id="afi-doctor-camera" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden>'+
       '<button type="button" class="afi-primary afi-full" data-afi-action="diagnose" '+(!photo||doctorBusy?'disabled':'')+'>'+(doctorBusy?'Đang phân tích ảnh…':'Phân tích ảnh bằng AI')+'</button>'+
-      '<p class="afi-micro">Ảnh chỉ gửi đến dịch vụ AI khi bạn bấm Phân tích. Tính năng cần cấu hình GEMINI_API_KEY trên Vercel để thực hiện suy luận.</p></section>'+
+      '<p class="afi-micro">Ảnh chỉ gửi đến dịch vụ AI khi bạn bấm Phân tích. Phân tích AI hoạt động khi dịch vụ được kích hoạt.</p></section>'+
       '<section class="afi-panel"><h3>Kết quả chẩn đoán</h3>'+
       (doctorError?'<p class="afi-error">'+esc(doctorError)+'</p>':'')+
       (doctorResult?'<div class="afi-doctor-result"><span class="afi-source">ĐÁNH GIÁ ẢNH BẰNG AI · CẦN KIỂM TRA LẠI</span><h4>'+esc(doctorResult.condition||"Chưa xác định")+'</h4><p>'+esc(doctorResult.explanation||"Không có mô tả")+'</p><h5>Điều cần kiểm tra</h5><ul>'+(doctorResult.checks||[]).map(t=>'<li>'+esc(t)+'</li>').join("")+'</ul><h5>Hướng xử lý an toàn</h5><ul>'+(doctorResult.actions||[]).map(t=>'<li>'+esc(t)+'</li>').join("")+'</ul><small>'+esc(doctorResult.uncertainty||"Đây là ý kiến sàng lọc, không phải kết luận chắc chắn.")+'</small></div>':
-      '<div class="afi-empty-result"><span>✿</span><strong>Chưa có kết quả AI</strong><p>Chọn một ảnh rõ nét của bộ phận cây cần kiểm tra. Nếu chưa có API key, hệ thống sẽ thông báo cấu hình thay vì tạo kết quả giả.</p></div>')+
+      '<div class="afi-empty-result"><span>✿</span><strong>Chưa có kết quả AI</strong><p>Chọn một ảnh rõ nét của bộ phận cây cần kiểm tra. Kết quả phân tích và hướng chăm sóc sẽ xuất hiện tại đây.</p></div>')+
       '<div class="afi-advice"><strong>Mẹo chụp ảnh</strong><p>Chụp cả lá khỏe và lá bất thường trong ánh sáng tự nhiên; nếu nhiều bộ phận bị ảnh hưởng, chụp bổ sung và ghi thời điểm xuất hiện triệu chứng.</p></div></section></div>';
   }
   function twinView(){
-    const fields=getFields(),seasons=getSeasons(),point=current();
+    const point=current();
     const label=stages[stage], progressed=[2,20,45,72,97][stage];
-    return '<section class="afi-topbar"><div><span class="afi-eyebrow">LIVING DIGITAL TWIN</span><h2>Cây trồng song sinh 3D</h2><p>Tận dụng mô hình cây đậu Blender hiện tại và mô phỏng các giai đoạn sinh trưởng một cách trực quan.</p></div><span class="afi-source">MÔ PHỎNG · KHÔNG PHẢI ẢNH CÂY THẬT</span></section>'+
+    return '<section class="afi-topbar"><div><span class="afi-eyebrow">LIVING DIGITAL TWIN</span><h2>Cây trồng song sinh 3D</h2><p>Xoay mô hình cây đậu và khám phá từng giai đoạn từ hạt giống đến ra hoa, kết quả.</p></div><span class="afi-source">MÔ PHỎNG · KHÔNG PHẢI ẢNH CÂY THẬT</span></section>'+
       '<div class="afi-twin-layout"><section class="afi-panel afi-twin-scene"><div class="afi-panel-head"><h3>Vòng đời cây đậu</h3><span>BLENDER / GLB</span></div>'+
       '<model-viewer id="afi-twin-model" src="/assets/start-lifecycle-live.glb" poster="/assets/start-botanical-lifecycle-2.webp" alt="Cây đậu 3D với thân lá và bộ rễ" camera-controls interaction-prompt="none" loading="eager" shadow-intensity="1" exposure="1.06" camera-orbit="35deg 75deg 105%" field-of-view="28deg"></model-viewer>'+
       '<p class="afi-micro">Kéo xoay cây để xem từng góc. Dùng thanh giai đoạn để quan sát các mốc sinh trưởng từ mô hình hoạt ảnh. Không suy ra sức khỏe cây từ kết xuất này.</p></section>'+
       '<section class="afi-panel afi-twin-control"><h3>Quan sát sinh trưởng</h3><span class="afi-eyebrow">GIAI ĐOẠN HIỆN TẠI</span><div class="afi-stage-heading"><strong>'+label+'</strong><span>'+progressed+'% mốc mô phỏng</span></div>'+
       '<input id="afi-stage" aria-label="Chọn giai đoạn sinh trưởng" type="range" min="0" max="4" value="'+stage+'" step="1">'+
       '<div class="afi-stage-markers">'+stages.map((s,i)=>'<button type="button" data-afi-stage="'+i+'" class="'+(stage===i?'is-active':'')+'">'+esc(s)+'</button>').join("")+'</div>'+
-      '<div class="afi-twin-facts"><div><small>Cánh đồng đã khai báo</small><strong>'+fields.length+'</strong></div><div><small>Mùa vụ đã tạo</small><strong>'+seasons.length+'</strong></div></div>'+
       '<div class="afi-advice"><strong>Dữ liệu môi trường liên quan</strong><p>'+(point?'Dự báo hồng ngoại gần nhất cho '+esc(area?.name||'khu vực đã chọn')+': '+num(point.lw,0)+' W/m² ('+dateLabel(point.time)+'). Đây là dữ liệu khu vực, không phải số đo riêng của cây.':'Chọn khu vực trong tab Dự báo hồng ngoại để tham khảo thêm điều kiện môi trường cho cây mô phỏng.')+'</p></div>'+
-      '<p class="afi-micro">Digital Twin hiện ở chế độ trực quan hóa vòng đời. Để phản ánh sinh trưởng thực tế, cần nhật ký chăm sóc và dữ liệu đo liên tục theo từng mùa vụ.</p></section></div>';
+      '<p class="afi-micro">Mô hình minh họa vòng đời cây. Dữ liệu môi trường được tham chiếu từ khu vực bạn chọn trong tab Dự báo hồng ngoại.</p></section></div>';
   }
   function render() {
     if(!root||!root.isConnected)return;
@@ -155,7 +153,7 @@ export function createFarmIntelligence({getFields=()=>[],getSeasons=()=>[],getAc
     mapGeneration++;
     root.innerHTML='<div class="afi-workspace">'+headline()+(tab==="forecast"?forecastView():tab==="doctor"?doctorView():twinView())+'</div>';
     wire();
-    if(tab==="forecast"&&forecast&&area&&current())initMap(mapGeneration);
+    if(tab==="forecast"&&area)initMap(mapGeneration);
     if(tab==="twin")initModel();
   }
   function wire(){
@@ -178,13 +176,15 @@ export function createFarmIntelligence({getFields=()=>[],getSeasons=()=>[],getAc
     }
     if(tab==="doctor"){
       const crop=root.querySelector("#afi-doctor-crop");if(crop){crop.value=doctorCrop;crop.addEventListener("change",e=>{doctorCrop=e.target.value;});}
-      root.querySelector("#afi-doctor-file")?.addEventListener("change",async e=>{
+      root.querySelector('[data-afi-action="camera"]')?.addEventListener("click",()=>root.querySelector("#afi-doctor-camera")?.click());
+      root.querySelector('[data-afi-action="choose-photo"]')?.addEventListener("click",()=>root.querySelector("#afi-doctor-file")?.click());
+      root.querySelectorAll("#afi-doctor-file,#afi-doctor-camera").forEach(input=>input.addEventListener("change",async e=>{
         const file=e.target.files?.[0];if(!file)return;
-        doctorResult=null;doctorError="";photo=null;
+        doctorResult=null;doctorError="";photo=null;photoPreview="";
         try{const result=await compressImage(file);photo=result.split(",")[1];photoPreview=result;}
         catch(ex){doctorError=ex.message||"Không thể đọc ảnh";}
         render();
-      });
+      }));
       root.querySelector('[data-afi-action="diagnose"]')?.addEventListener("click",diagnose);
     }
     if(tab==="twin"){
@@ -227,13 +227,13 @@ export function createFarmIntelligence({getFields=()=>[],getSeasons=()=>[],getAc
     slot.innerHTML='<div class="afi-map-empty">Đang tải bản đồ nền…</div>';
     try{
       const L=await leafletLoader();
-      if(ticket!==mapGeneration||!slot.isConnected||!current())return;
+      if(ticket!==mapGeneration||!slot.isConnected)return;
       slot.replaceChildren();
       map=L.map(slot,{zoomControl:true,scrollWheelZoom:false});
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',maxZoom:18}).addTo(map);
-      const pts=slots, chosen=current(), sampleIndex=chosen.i;
+      const pts=slots, chosen=current(), sampleIndex=chosen?.i;
       let rects=[];
-      pts.forEach((p,j)=>{
+      if(chosen)pts.forEach((p,j)=>{
         const h=forecast[j].hourly||{};
         const val=estimateLongwave(h.temperature_2m?.[sampleIndex],h.relative_humidity_2m?.[sampleIndex],h.cloud_cover?.[sampleIndex]);
         if(!Number.isFinite(val))return;
@@ -288,5 +288,10 @@ export function createFarmIntelligence({getFields=()=>[],getSeasons=()=>[],getAc
     if(model.loaded)move();
     else model.addEventListener("load",move,{once:true});
   }
-  return {mount(el){root=el;render();},detach(){sequence++;if(map){map.remove();map=null;}root=null;},getTab(){return tab;}};
+  return {
+    mount(el,initialTab){root=el;if(['forecast','doctor','twin'].includes(initialTab))tab=initialTab;render();},
+    openTab(next){if(['forecast','doctor','twin'].includes(next)){tab=next;render();}},
+    detach(){sequence++;mapGeneration++;loading=false;if(map){map.remove();map=null;}root=null;},
+    getTab(){return tab;}
+  };
 }

@@ -1,3 +1,18 @@
+## Phiên bản hiện tại: ba hệ thống, không sidebar
+
+Ứng dụng sau đăng nhập chỉ gồm **Dự báo hồng ngoại khu vực**, **AI Plant Doctor**, **Digital Twin 3D**. Điều hướng bằng ba tab ngang, hỗ trợ laptop và điện thoại. Trang Start và mô hình Blender được giữ lại; các task quản lý cũ không còn trong ứng dụng.
+
+- Dự báo: tìm địa danh, nhập tọa độ, bản đồ, bán kính 5/20/50 km, thời hạn 24/72 giờ hoặc 7 ngày. Bức xạ hồng ngoại hướng xuống được ước tính từ khí tượng Open-Meteo, không phải số đo cảm biến tại cây.
+- AI Plant Doctor: chụp ảnh hoặc chọn ảnh, nén ảnh và gọi API có xác thực Firebase. Cần `GEMINI_API_KEY` phía server trên Vercel để kích hoạt phân tích thật.
+- Digital Twin: mô hình cây đậu Blender/GLB, năm giai đoạn sinh trưởng, tham chiếu dự báo khu vực đã chọn.
+- Giữ đăng nhập Firebase và đăng xuất. Không tải hoặc ghi các bản ghi quản lý cũ.
+
+Kiểm tra: `npm ci`, `npm run build`, `node --test tests/*.test.mjs`.
+
+Các phần bên dưới ghi lại các phiên bản trước.
+
+---
+
 # AGRIDELTA — Field OS 2.0
 
 **Website:** https://agridelta.vercel.app/start  

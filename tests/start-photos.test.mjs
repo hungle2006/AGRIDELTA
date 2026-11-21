@@ -20,7 +20,7 @@ test('cards render srcset, safe local fallback and retain 3D plant & root story'
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
  assert.match(startPhoto(START_IMAGES.features[0]),/srcset=/);
  assert.match(src,/startPhoto\(START_IMAGES\.workflow\[i\]/);
- assert.match(src,/startPhoto\(START_IMAGES\.features\[i\]/);
+ assert.match(src,/startPhoto\(START_IMAGES\.features\[/);
  assert.match(src,/startPhoto\(START_IMAGES\.closing/);
  assert.match(src,/dataset\.photoFallback/);
  assert.match(src,/createLiveEarth/);

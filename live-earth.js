@@ -228,7 +228,7 @@ function rootMaterial(material, growth) {
 }
 
 export function createRootEarth(host, buttons) {
-  const gains = buttons.map(() => ({value: 0}));
+  const gains = Array.from({length:5},()=>({value:0}));
   const rootNodes = [];
   const scene = createScene();
   const camera = orthographicCamera(4.64, -1.37, -1.12);
@@ -288,8 +288,9 @@ export function createRootEarth(host, buttons) {
           camera.updateMatrixWorld();
           const [x, y, z] = tip;
           const point = new THREE.Vector3(x, z, -y).project(camera);
-          buttons[rootIndex].style.setProperty('--root-x', `${(point.x+1)*50}%`);
-          buttons[rootIndex].style.setProperty('--root-y', `${(1-point.y)*50}%`);
+          const button=buttons.find(b=>Number(b.dataset.rootIndex)===rootIndex);
+          button?.style.setProperty('--root-x', `${(point.x+1)*50}%`);
+          button?.style.setProperty('--root-y', `${(1-point.y)*50}%`);
         });
         ready = true;
         draw();

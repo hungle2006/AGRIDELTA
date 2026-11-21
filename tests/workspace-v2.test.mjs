@@ -1,42 +1,32 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
-const get=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const app=get('workspace-v2.js'), css=get('workspace-v2.css'), html=get('index.html');
-test('Start enters a redesigned, actual CRUD workspace, not the mock main.js',()=>{
- assert.match(html,/src="\/workspace-v2\.js"/);
- assert.doesNotMatch(html,/src="\/main\.js"/);
- assert.match(html,/href="\/workspace-v2\.css"/);
- for(const name of ['dashboard','fieldsPage','seasonsPage','tasksPage','observationsPage','ordersPage','settingsPage','saveRecord','removeRecord','toggleTask']) assert.ok(app.includes(name),name);
- assert.match(app,/window\.AGRIDELTAEnter/);
- assert.doesNotMatch(app,/window\.AGRIDELTAOpenDemo/);
- assert.match(app,/window\.AGRIDELTAOpenAuth/);
+const source=readFileSync(new URL('../workspace-v2.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
+function setup(){
+  let userChanged;const calls=[],events={};
+  const app={innerHTML:'',querySelector:()=>({}),addEventListener:(type,fn)=>events[type]=fn};
+  const context={document:{querySelector:()=>app},window:{scrollTo(){}},authScreen:()=>'<main>Login</main>',firebaseConfigured:true,createFarmIntelligence:()=>({detach:()=>calls.push('detach'),mount:(_,tab)=>calls.push(['mount',tab]),openTab:tab=>calls.push(['tab',tab])}),watchFirebaseUser:async fn=>{userChanged=fn;},getFirebaseToken:async()=>'token'};
+  vm.runInNewContext(source,context);
+  return {context,app,calls,login:user=>userChanged(user)};
+}
+test('Unauthenticated routes remain behind real Firebase authentication',()=>{
+  const s=setup();assert.match(s.app.innerHTML,/Login/);
+  s.context.window.AGRIDELTAEnter('twin');assert.match(s.app.innerHTML,/Login/);
+  assert.equal(s.calls.filter(c=>Array.isArray(c)).length,0);
+  assert.equal(s.context.window.AGRIDELTAWorkspace.authenticated,false);
 });
-test('Workspace does not auto-seed fake data or fake authentication',()=>{
- assert.match(app,/const blank = \(\) => Object\.fromEntries/);
- assert.doesNotMatch(app,/defaultFields|startingTasks|demo-note|tài khoản demo/i);
- assert.match(app,/firebaseUserStorageKey/);
- assert.match(app,/watchFirebaseUser/);
- assert.match(app,/indexedDB\.open/);
+test('Login opens requested system and removes all former task navigation',()=>{
+  const s=setup();s.context.window.AGRIDELTAEnter('twin');
+  s.login({uid:'qa',email:'<script>@example.test'});
+  assert.deepEqual(s.calls.at(-1),['mount','twin']);
+  assert.match(s.app.innerHTML,/&lt;script&gt;/);
+  assert.doesNotMatch(s.app.innerHTML,/<aside|ag-sidebar|ag-mobile-nav|data-new|data-go|<script>/);
+  for(const tab of ['forecast','doctor','twin']){s.context.window.AGRIDELTAEnter(tab);assert.deepEqual(s.calls.at(-1),['tab',tab]);}
+  s.context.window.AGRIDELTAEnter('orders');assert.deepEqual(s.calls.at(-1),['tab','forecast']);
 });
-test('UI responds to screens and respects reduced motion',()=>{
- for(const v of ['930px','680px','365px','prefers-reduced-motion','ag-mobile-nav','ag-field-grid','ag-task-columns','ag-dialog'])assert.ok(css.includes(v),v);
-});
-test('Historical Supabase policies remain available for backup but workspace now uses Firebase auth',()=>{
- const sql=get('supabase/agridelta_records.sql');
- assert.match(sql,/enable row level security/);
- assert.match(sql,/for select to authenticated/);
- assert.match(sql,/for insert to authenticated/);
- assert.match(sql,/for update to authenticated/);
- assert.match(sql,/for delete to authenticated/);
- assert.match(sql,/auth\.uid\(\)\) = user_id/);
- assert.doesNotMatch(app,/service_role|VITE_SUPABASE_URL|supabase\.co/);
- assert.match(app,/firebaseUserStorageKey/);
-});
-
-test('Field photos come from the user and persist in IndexedDB without repeated fake imagery',()=>{
-  assert.match(app,/data-image-id/);
-  assert.match(app,/kind==='observations'\|\|kind==='fields'/);
-  assert.match(app,/node\.prepend\(img\)/);
-  assert.match(css,/\.ag-field-cover img/);
+test('Signout detaches active systems and returns to authentication',()=>{
+  const s=setup();s.login({uid:'qa'});s.login(null);
+  assert.match(s.app.innerHTML,/Login/);assert.equal(s.calls.at(-1),'detach');
+  assert.equal(s.context.window.AGRIDELTAWorkspace.authenticated,false);
 });

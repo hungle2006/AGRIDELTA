@@ -27,8 +27,8 @@ const icons = {
   seed: seedIcon, flower: flowerIcon,
 };
 const icon = name => `<span class="earth-icon" aria-hidden="true">${icons[name]}</span>`;
-const titles = ['Quản lý cánh đồng', 'Quản lý mùa vụ', 'Công việc hằng ngày', 'Quan sát cây trồng', 'Quản lý đơn hàng'];
-const symbols = ['farm', 'calendar', 'clipboard', 'plant', 'cube'];
+const titles = FEATURES.map(feature=>feature.label);
+const symbols = ['farm', 'plant', 'cube'];
 const stages = ['Hạt giống', 'Nảy mầm', 'Sinh trưởng', 'Ra hoa', 'Kết quả'];
 const stageIcons = ['seed', 'plant', 'leaf', 'flower', 'seed'];
 const stageNotes = [
@@ -39,11 +39,11 @@ const stageNotes = [
   'Quả đậu lớn dần từ cuống hoa.',
 ];
 const workflow = [
-  {title: 'Thêm cánh đồng', detail: 'Lưu vị trí, diện tích và cây đang trồng.'},
-  {title: 'Lên lịch mùa vụ', detail: 'Chọn ngày gieo, thời gian chăm sóc và thu hoạch.', image: '/assets/start-workflow-season.webp', width: 960, height: 540},
-  {title: 'Ghi việc chăm sóc', detail: 'Theo dõi ngày tưới, bón phân và các việc đã làm.'},
+  {title:'Chọn khu vực',detail:'Tìm địa danh hoặc nhập tọa độ để xem dự báo môi trường.'},
+  {title:'Kiểm tra ảnh cây',detail:'Chụp hoặc tải ảnh để nhận phân tích từ AI Plant Doctor.',image:'/assets/start-workflow-season.webp',width:960,height:540},
+  {title:'Khám phá cây 3D',detail:'Quan sát mô hình Blender theo từng giai đoạn sinh trưởng.'},
 ];
-const rootPoints = [[8.8,51.3],[25.9,67.9],[52.4,78.2],[72.6,70.9],[91.4,47.8]];
+const rootPoints = [[25.9,67.9],[52.4,78.2],[72.6,70.9]];
 const beanDivider = (index,kind='secondary') =>
   '<div id="bean-transition-'+index+'" class="bean-transition bean-transition--'+kind+'" data-bean-divider="'+index+'" aria-hidden="true">'+
   '<span class="bean-transition-line"></span></div>';
@@ -84,9 +84,9 @@ site.innerHTML = `
             <span class="hero-issue" aria-hidden="true">FIELD JOURNAL / 01</span>
           </div>
           <h1 id="start-title">Từ hạt giống<br>đến mùa vụ<br><em>bền vững.</em></h1>
-          <p class="earth-intro-copy">Chăm sóc từng mảnh đất, theo dõi cây trồng và hoạch định mùa vụ — tất cả trong một không gian xanh.</p>
+          <p class="earth-intro-copy">Dự báo môi trường, kiểm tra ảnh cây bằng AI và khám phá vòng đời cây đậu 3D — trong một không gian xanh.</p>
           <div class="earth-intro-actions">
-            <button type="button" class="earth-primary" data-enter-page="home">Bắt đầu quản lý ${icon('right')}</button>
+            <button type="button" class="earth-primary" data-enter-page="home">Khám phá ứng dụng ${icon('right')}</button>
             <a class="earth-secondary" href="#rg-roots">${icon('down')} Khám phá bộ rễ</a>
           </div>
           <div class="hero-editorial-note" aria-label="Bức ảnh nông nghiệp thực tế">
@@ -168,7 +168,7 @@ site.innerHTML = `
                 <img class="root-poster" src="/assets/start-botanical-root-2.webp" alt="" loading="lazy">
               </div>
               <div class="root-feature-track">${FEATURES.map((feature,i) => `
-                <button type="button" class="root-feature" hidden data-open-guide="${i}" data-root-point
+                <button type="button" class="root-feature" hidden data-open-guide="${i}" data-root-point data-root-index="${i+1}"
                   style="--root-x:${rootPoints[i][0]}%;--root-y:${rootPoints[i][1]}%"
                   aria-haspopup="dialog" aria-controls="earth-dialog" aria-label="Mở hướng dẫn ${feature.label}">${icon(symbols[i])}</button>`).join('')}
               </div>
@@ -181,12 +181,12 @@ site.innerHTML = `
     ${beanDivider('03','secondary')}
     <section class="earth-container start-guides" id="rg-guides" aria-labelledby="start-guides-title">
       <div class="guide-intro">
-        <div><p class="earth-eyebrow">${icon('leaf')} Hệ sinh thái AgriDelta</p><h2 id="start-guides-title">Chăm trọn một mùa vụ.</h2></div>
+        <div><p class="earth-eyebrow">${icon('leaf')} Hệ sinh thái AgriDelta</p><h2 id="start-guides-title">Ba hệ thống, một mùa xanh.</h2></div>
         <p>Chọn một tính năng để xem cách sử dụng và mở ngay trong ứng dụng.</p>
       </div>
       <div class="start-feature-dock">${FEATURES.map((feature,i) => `
-        <button type="button" class="start-dock-button" style="--lane: ${i-2}; --distance: ${Math.abs(i-2)}" data-open-guide="${i}" aria-haspopup="dialog" aria-controls="earth-dialog">
-          ${startPhoto(START_IMAGES.features[i],"dock-image","(max-width:760px) 38vw, (max-width:980px) 50vw, 32vw")}
+        <button type="button" class="start-dock-button" style="--lane: ${i-1}; --distance: ${Math.abs(i-1)}" data-open-guide="${i}" aria-haspopup="dialog" aria-controls="earth-dialog">
+          ${startPhoto(START_IMAGES.features[[0,3,1][i]],"dock-image","(max-width:760px) 38vw, (max-width:980px) 50vw, 32vw")}
           <span class="dock-content">
             <strong><span class="dock-icon">${icon(symbols[i])}</span>${feature.label}</strong>
             <span class="dock-summary">${feature.summary}</span>
@@ -309,7 +309,7 @@ function renderRoots(now) {
   rootSection.dataset.storyProgress = progress.toFixed(3);
 
   rootButtons.forEach((button,i) => {
-    const isExposed = rootRevealAt(progress,i) > .84;
+    const isExposed = rootRevealAt(progress,Number(button.dataset.rootIndex)) > .84;
     if (!isExposed && button === document.activeElement) growButton.focus({preventScroll: true});
     button.hidden = !isExposed;
   });
@@ -400,7 +400,7 @@ function openGuide(index, focusSelector) {
     <div class="guide-sheet-bottom">
       <div class="guide-paging">
         <button type="button" class="earth-icon-button" data-guide-previous aria-label="Hướng dẫn trước">${icon('left')}</button>
-        <span>0${activeGuide+1} / 05</span>
+        <span>0${activeGuide+1} / 0${FEATURES.length}</span>
         <button type="button" class="earth-icon-button" data-guide-next aria-label="Hướng dẫn tiếp theo">${icon('right')}</button>
       </div>
       <button class="earth-primary" type="button" data-enter-page="${feature.page}">Mở ${feature.label.toLowerCase()} ${icon('right')}</button>
@@ -423,7 +423,7 @@ function openSearch() {
     find('#earth-search-results').innerHTML = found.length ? found.map(({feature,index}) => `
       <button type="button" data-open-guide="${index}">${icon(symbols[index])}
         <span><strong>${titles[index]}</strong><small>${feature.summary}</small></span>${icon('right')}
-      </button>`).join('') : '<p>Chưa tìm thấy kết quả. Thử “mùa vụ”, “cánh đồng” hoặc “quan sát”.</p>';
+      </button>`).join('') : '<p>Chưa tìm thấy kết quả. Thử “hồng ngoại”, “AI” hoặc “3D”.</p>';
   }
   input.addEventListener('input', update);
   update();
@@ -434,9 +434,9 @@ function openKnowledge() {
     <p class="earth-eyebrow">${icon('book')} Kiến thức canh tác</p>
     <h2 id="earth-dialog-title">Chăm đúng từ gốc rễ.</h2>
     <div class="knowledge-list">
-      <article>${icon('farm')}<div><h3>Hiểu khu đất trước khi gieo</h3><p>Ghi lại diện tích, loại đất và cây đang trồng để lên kế hoạch.</p></div></article>
-      <article>${icon('calendar')}<div><h3>Theo dõi từng mốc mùa vụ</h3><p>Lưu ngày gieo và lịch chăm sóc phù hợp với từng loại cây.</p></div></article>
-      <article>${icon('plant')}<div><h3>Quan sát đều đặn</h3><p>Ghi nhận màu lá, độ ẩm và hình ảnh của cây theo thời gian.</p></div></article>
+      <article>${icon('farm')}<div><h3>Hiểu khu đất trước khi gieo</h3><p>Chọn vị trí và xem dự báo nhiệt độ, độ ẩm cùng bức xạ khu vực.</p></div></article>
+      <article>${icon('calendar')}<div><h3>Theo dõi từng mốc mùa vụ</h3><p>Quan sát mô hình cây đậu từ hạt giống đến ra hoa, kết quả.</p></div></article>
+      <article>${icon('plant')}<div><h3>Quan sát đều đặn</h3><p>Chụp ảnh rõ nét để AI hỗ trợ nhận diện dấu hiệu bất thường.</p></div></article>
     </div>
   `);
 }

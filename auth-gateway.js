@@ -19,7 +19,7 @@ export function authScreen({mode='login',error='',info='',configured=false,pendi
     '<div class="ag-auth-mobile-brand"><img src="/assets/agridelta-eco-logo.svg" alt="AGRIDELTA"></div>'+
     '<span class="ag-auth-kicker">TÀI KHOẢN AGRIDELTA</span>'+
     '<h1 id="ag-auth-heading">'+heading+'</h1>'+
-    '<p class="ag-auth-sub">'+(signup?'Tạo tài khoản cá nhân để quản lý trang trại và dữ liệu riêng.':'Đăng nhập để quản lý nông trại, dự báo và theo dõi cây trồng.')+'</p>'+
+    '<p class="ag-auth-sub">'+(signup?'Tạo tài khoản để sử dụng ba hệ thống nông nghiệp thông minh.':'Đăng nhập để xem dự báo, phân tích ảnh cây và khám phá Digital Twin 3D.')+'</p>'+
     (pending?'<div class="ag-auth-wait" role="status"><span class="ag-auth-spinner"></span> Đang xác minh tài khoản…</div>':
       '<div class="ag-auth-form-body">'+
        (error?'<div class="ag-auth-error" role="alert">'+e(error)+'</div>':'')+
@@ -40,7 +40,7 @@ export function authScreen({mode='login',error='',info='',configured=false,pendi
        '</form>'+
        (!signup?'<div class="ag-auth-recover"><button type="button" data-auth-recover>Quên mật khẩu?</button></div>':'')+
        '<div class="ag-auth-switch">'+(signup?'Đã có tài khoản?':'Chưa có tài khoản?')+' <button type="button" data-auth-switch>'+(signup?'Đăng nhập':'Đăng ký ngay')+'</button></div>'+
-       '<p class="ag-auth-assurance">Xác thực bằng Firebase. Bản ghi canh tác hiện lưu theo tài khoản trên thiết bị này; chưa đồng bộ liên thiết bị.</p>'+
+       '<p class="ag-auth-assurance">Đăng nhập an toàn để sử dụng AGRIDELTA. Ảnh cây chỉ gửi phân tích khi bạn yêu cầu.</p>'+
       '</div>')+
      '</div></section>'+
    '</main>';

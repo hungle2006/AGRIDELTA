@@ -23,7 +23,7 @@ test('workspace integrates the three feature tabs and preserves original startup
   const ws=readFileSync(new URL('../workspace-v2.js',import.meta.url),'utf8');
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const css=readFileSync(new URL('../farm-intelligence.css',import.meta.url),'utf8');
-  assert.ok(ws.includes("intelligence:()=>'<div id=\"ag-ai-root\"></div>'"));
+  assert.ok(ws.includes('id="ag-ai-root"'));
   assert.ok(ws.includes("intelligence.mount"));
   assert.ok(html.includes('farm-intelligence.css'));
   assert.ok(html.includes('/root-guide.js'));

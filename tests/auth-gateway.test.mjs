@@ -37,15 +37,6 @@ test('Login form provides four requested choices and password recovery',()=>{
  const copy=authScreen({configured:true,mode:'register'});
  assert.match(copy,/Tạo tài khoản/);
 });
-test('Account data and image keys are scoped by Firebase user, legacy import is opt-in',()=>{
- const ws=file('workspace-v2.js');
- assert.match(ws,/firebaseUserStorageKey/);
- assert.match(ws,/scopedPhotoKey/);
- assert.match(ws,/localStorage\.setItem\(firebaseUserStorageKey\(authUser\.uid\)/);
- assert.match(ws,/normalize\(read\(firebaseUserStorageKey\(user\.uid\),blank\(\)\)\)/);
- assert.match(ws,/if\(!confirm\('Nhập dữ liệu AGRI cũ/);
- assert.doesNotMatch(ws,/VITE_SUPABASE_URL|cloudSession|remoteSave|remoteRemove/);
-});
 test('Plant Doctor verifies Firebase token on server before calling AI',()=>{
  const api=file('api/plant-diagnose.js');
  const client=file('farm-intelligence.js');
