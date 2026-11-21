@@ -43,6 +43,25 @@ node --test tests/*.test.mjs
 npm run build
 ```
 
+## Đăng nhập bắt buộc — Google/Gmail, Facebook, GitHub và email
+
+AGRIDELTA mở **trang đăng nhập trước khi cho vào workspace**. Không còn quyền vào hệ thống qua `AGRIDELTAOpenDemo`, đường dẫn `?app=1` hay API điều hướng frontend mà chưa xác minh phiên.
+
+- Nút **Google** là đăng nhập OAuth qua tài khoản Google, bao gồm Gmail.
+- Form **Gmail/email** là **đăng ký và đăng nhập bằng email + mật khẩu**, không dùng mật khẩu tài khoản Google nếu bạn chưa đặt mật khẩu AGRIDELTA.
+- **Facebook** và **GitHub** đăng nhập qua OAuth. Luồng PKCE dùng mã verifier trong sessionStorage, callback tại `https://agridelta.vercel.app/auth/callback`, sau đó gọi Supabase `/auth/v1/user` để xác minh token trước khi hiển thị workspace.
+- Trang giới thiệu có thể mở chủ động bằng `/?intro=1`, song các nút Bắt đầu vẫn yêu cầu xác thực trước.
+
+**Cấu hình còn thiếu trên production (không có đăng nhập giả):**
+
+1. Tạo một Supabase project **riêng cho AGRIDELTA**, không tái sử dụng database của ứng dụng khác. Chạy SQL trong `supabase/agridelta_records.sql`, giữ RLS và quyền sở hữu.
+2. Thêm `VITE_SUPABASE_URL` và `VITE_SUPABASE_PUBLISHABLE_KEY` của project riêng vào Vercel cho Production và Preview, rồi redeploy.
+3. Trong Supabase **Authentication > URL Configuration**, đặt Site URL thành `https://agridelta.vercel.app` và thêm redirect URL `https://agridelta.vercel.app/auth/callback` (thêm preview origin riêng nếu cần). Cấu hình email confirmation và SMTP/email deliverability.
+4. Trong **Authentication > Sign In / Providers**, bật Google, Facebook, GitHub. Mỗi provider yêu cầu OAuth app riêng và Client ID/Secret cấu hình **ở Supabase**, không nhúng secret vào Vite hay mã nguồn. Callback đăng ký trên bảng điều khiển Google/Meta/GitHub phải trỏ đến `https://<project-ref>.supabase.co/auth/v1/callback` (URL cụ thể hiển thị trong Supabase), không trỏ trực tiếp vào Vercel.
+5. Thử OAuth cho cả ba nhà cung cấp bằng tài khoản thật; kiểm tra email signup, refresh session, logout, truy cập thẳng `/?app=1` chưa đăng nhập, và xác nhận mỗi tài khoản không thấy bản ghi của tài khoản khác.
+
+**Quan trọng:** Frontend có route guard, nhưng bảo vệ dữ liệu thực tế phụ thuộc vào Supabase RLS và việc xác thực request trên server. OAuth hiện chỉ có giao diện và luồng mã nguồn; nếu chưa cấu hình Supabase/provider, các nút sẽ thông báo chưa hoạt động, không hiển thị đăng nhập giả.
+
 ## Phát triển
 
 ```bash
