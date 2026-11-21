@@ -32,3 +32,10 @@ export function beanDropPosition(milliseconds,startY,bottomY){
   const bottom=Math.max(from,Number.isFinite(bottomY)?bottomY:from);
   return from+(bottom-from)*progress;
 }
+
+// Separate the spawn points into equal segments so adjacent pods remain legible.
+export function beanDropOrigins(left, right, random = Math.random){
+  const count = 1 + Math.floor(random() * 4);
+  const segment = (right - left) / count;
+  return Array.from({length:count}, (_, index) => left + (index + .2 + .6 * random()) * segment);
+}

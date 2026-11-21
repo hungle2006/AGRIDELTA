@@ -90,7 +90,7 @@
   inset:0;
   z-index:12;
   pointer-events:none;
-  overflow:visible;
+  overflow:clip;
   contain:style;
 }
 .earth-site .bean-fall-item{
@@ -113,11 +113,9 @@
   position:absolute;
   left:50%;
   top:50%;
-  width:clamp(20px,2.4vw,31px);
-  height:clamp(72px,8vw,96px);
-  border-radius:66% 43% 64% 43%;
-  background:linear-gradient(90deg,#286b35,#80b94b 43%,#c2d778 65%,#317f39);
-  box-shadow:inset -4px 2px 7px #204c3175,0 7px 16px #123c302a;
+  width:55%;
+  height:55%;
+  object-fit:contain;
   transform:translate(-50%,-50%) scale(var(--bean-scale,1)) rotate(var(--bean-tilt,0rad));
 }
 @media(max-width:760px){

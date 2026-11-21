@@ -4,7 +4,7 @@ Run blender -b -t 3 --python blender/start_lifecycle.py
 """
 import json
 import struct
-from math import cos, pi, sin
+from math import atan2, cos, pi, sin
 from pathlib import Path
 from random import Random
 
@@ -50,14 +50,15 @@ def material(name, color, roughness=.63, painted=False, translucent=0):
     return result
 
 
-stem_mat = material('Green stem', (.15, .28, .036), .56, translucent=.08)
+stem_mat = material('Green stem', (.17, .31, .034), .47, translucent=.08)
 vein_mat = material('Raised leaf veins', (.22, .37, .065), translucent=.08)
 leaf_mat = material('Variegated leaf lamina', (.11, .25, .030), .64, painted=True, translucent=.12)
 root_mat = material('Warm ivory root', (.56, .33, .16), .76)
 hair_mat = material('Fine capillary root', (.41, .23, .107), .79)
 seed_mat = material('Speckled seed coat', (.39, .16, .064), .55, painted=True)
-petal_mat = material('Bean flower petals', (.82, .74, .49), .51, painted=True, translucent=.12)
-pod_mat = material('Bean pod', (.14, .32, .041), .54, painted=True, translucent=.09)
+petal_mat = material('Bean flower petals', (.64, .46, .78), .49, painted=True, translucent=.12)
+pod_mat = material('Bean pod', (.24, .47, .036), .37, painted=True, translucent=.09)
+anther_mat = material('Golden anthers', (.86, .58, .11), .52, painted=True)
 soil_mat = material('Weathered soil', (.14, .065, .022), .97, painted=True)
 
 
@@ -141,14 +142,14 @@ def lamina(name, base, end, width, roll, frames, tone=1):
     axis = Vector(end) - Vector(base)
     across = axis.normalized().cross(Vector((.11, -1, roll))).normalized()
     normal = across.cross(axis.normalized()).normalized()
-    rows, cols = 28, 12
+    rows, cols = 44, 22
     verts, faces, colors = [], [], []
     phase = rng.uniform(0, 6)
 
     def point(t, q):
-        profile = .006 + sin(pi*t)**.70 * (1.08 - .23*t)
+        profile = .006 + sin(pi*t)**.91 * (1.27 - .53*t)
         edge = 1 + .045 * sin(t * 43 + phase) * abs(q)**2
-        curl = .085 * sin(pi*t) - .15*t**4
+        curl = .11 * sin(pi*t) - .17*t**4
         fold = .048 * sin(pi*t)*(1 - (.7*q*q + .3*abs(q))) + .048*q*sin(pi*t * 1.7 + phase)*sin(pi*t)
         return axis*t + Vector((0, 0, curl)) + across*(width*q*profile*edge) + normal*fold
 
@@ -161,7 +162,7 @@ def lamina(name, base, end, width, roll, frames, tone=1):
             lateral = .05 * max(0, cos(45*t - 6*abs(q)))**5
             variation = noise_vector(Vector((t*13, q*6, phase)))[0] * .13
             shade = tone * (.80 + .23*t + vein + lateral + variation - .08*abs(q))
-            colors.append((.054*shade + .026*vein, .175*shade + .05*vein, .022*shade))
+            colors.append((.046*shade + .026*vein, .188*shade + .05*vein, .012*shade))
     for i in range(rows):
         for j in range(cols):
             a = i*(cols+1)+j
@@ -212,9 +213,9 @@ def blob(name, center, scales, mat, group, phase, frames=None, rotate=0):
 # The shoot emerges from the root crown. Consecutive internodes join at each
 # node with matching cross sections. Petioles and flower stalks share those nodes.
 nodes = [
-    crown, Vector((-.075, -.01, .52)), Vector((-.045, .009, 1.02)),
-    Vector((.06, .065, 1.48)), Vector((.115, .094, 1.94)),
-    Vector((.044, .11, 2.34)), Vector((.115, .12, 2.68)),
+    crown, Vector((-.13, -.05, .52)), Vector((-.09, .023, 1.02)),
+    Vector((.09, .095, 1.48)), Vector((.18, .135, 1.94)),
+    Vector((.076, .13, 2.34)), Vector((.14, .09, 2.68)),
 ]
 radii = [.063, .056, .046, .039, .032, .024, .010]
 timing = [(30, 85), (85, 136), (136, 174), (174, 216), (216, 256), (256, 294)]
@@ -259,6 +260,70 @@ for level, sign, reach, depth, lift, tint in structures:
         tip = prong + Vector((sign*length*(.56 if spread else 1), spread*.60-.13, .045+spread*.47))
         lamina(f'Leaflet {level}.{j}', prong, tip, length*.34, sign*(.52+spread*.77), (start+51, start+105), tint-abs(spread)*.15)
 
+def flower_petal(name, flower, origin, width, height, angle, shade):
+    rows, cols = 24, 24
+    vertices, faces, colors = [], [], []
+    for i in range(rows+1):
+        t = i / rows
+        for j in range(cols+1):
+            q = 2*j/cols-1
+            outline = .06 + sin(pi*t*.86)**.8 * (1.05 + .24*t)
+            x = width*q*outline*(1 + .03*sin(19*t+6*q))
+            z = height*(t - .13*q*q*t)
+            y = .065*t*t - .045*q*q*sin(pi*t) + .009*sin(11*q)*t*t
+            vertices.append((x*cos(angle)+z*sin(angle), y, z*cos(angle)-x*sin(angle)))
+            veins = (.5+.5*cos(33*q+2*sin(pi*t)*q))**12 * sin(pi*t)**.5
+            violet = max(0, min(1, (1-t)*.42 + veins*.38 + shade))
+            ivory = Vector((.91, .79, .73))
+            purple = Vector((.39, .16, .68))
+            colors.append(ivory.lerp(purple, violet))
+    for i in range(rows):
+        for j in range(cols):
+            a = i*(cols+1)+j
+            faces.append((a, a+1, a+cols+2, a+cols+1))
+    petal = mesh(name, vertices, faces, petal_mat, canopy, origin, colors)
+    petal.parent = flower
+
+
+def bean_pod(length, sign):
+    rings, sides = 64, 32
+    vertices, faces, colors = [], [], []
+    centers = path([(0,0,0), (.045*sign,0,-length*.18), (.025*sign,-.006,-length*.43),
+                    (-.08*sign,0,-length*.69), (-.215*sign,.015,-length*.93),
+                    (-.267*sign,.024,-length)], rings)
+    for i, center in enumerate(centers):
+        t = i/rings
+        axis = (centers[min(i+1,rings)]-centers[max(i-1,0)]).normalized()
+        side = Vector((0,1,0)).cross(axis).normalized()
+        seeds = sum(.046 * 2.71828**(-((t-u)/.072)**2) for u in (.24,.43,.62,.80))
+        width = .002 + sin(pi*t)**.76 * (.055 + seeds)
+        for k in range(sides):
+            angle = 2*pi*k/sides
+            seam = abs(cos(angle))**24
+            local = center + side * (width*cos(angle)*(1+.065*seam))
+            local.y += width*.65*sin(angle)
+            vertices.append(local)
+            mottling = noise_vector(local*44)[0]*.10 + .07*cos(angle)
+            light = 1 + mottling + .24*seam
+            colors.append((.128*light, .345*light, .015*light))
+            if i < rings:
+                a = i*sides+k
+                b = i*sides+(k+1)%sides
+                faces.append((a,b,b+sides,a+sides))
+    faces.extend([tuple(reversed(range(sides))), tuple(rings*sides+j for j in range(sides))])
+    for k in range(5):
+        angle = 2*pi*k/5
+        outward = Vector((cos(angle), sin(angle), 0))
+        tangent = Vector((-sin(angle), cos(angle), 0))
+        offset = len(vertices)
+        vertices.extend([outward*.01, outward*.039+tangent*.018+Vector((0,0,-.079)),
+                         outward*.064+Vector((.016*sign,0,-.139)),
+                         outward*.039-tangent*.018+Vector((0,0,-.079))])
+        faces.extend([(offset,offset+1,offset+2), (offset,offset+2,offset+3)])
+        colors.extend([(.15,.31,.031)]*4)
+    return vertices, faces, colors
+
+
 for j, (node, sign) in enumerate([(3, 1), (4, -1), (5, 1)]):
     base = nodes[node]
     bloom = base + Vector((sign*(.36+j*.06), -.33, .19+j*.025))
@@ -268,20 +333,26 @@ for j, (node, sign) in enumerate([(3, 1), (4, -1), (5, 1)]):
     canopy.objects.link(flower)
     flower.location = bloom
     growth(flower, start+35, start+87, (525+j*9, 568+j*8))
-    for k, (x, z, size, tilt) in enumerate([(0,.105,.15,.04),(-.10,.035,.115,.60),(.10,.036,.11,-.54),(-.037,-.051,.10,.24),(.04,-.05,.085,-.30)]):
-        petal = blob(f'Blossom {j+1} petal {k+1}', (x,-.045,z), (size,.036,size*.65), petal_mat, canopy, k+j, rotate=tilt)
-        petal.parent = flower
+    for k, (origin, width, height, angle, pigment) in enumerate([
+        ((0,-.015,.007), .136,.255,-.19,.04),
+        ((-.024,-.071,-.013), .087,.166,-2.25,.43),
+        ((.018,-.087,-.017), .088,.177,1.94,.47),
+        ((-.011,-.121,-.02), .042,.12,-2.78,.41),
+        ((.015,-.132,-.021), .048,.113,2.66,.36),
+    ]):
+        flower_petal(f'Blossom {j+1} petal {k+1}', flower, origin, width, height, angle, pigment)
+    for k in range(5):
+        x = .009*(k-2)
+        filament_verts, filament_faces = tube_data([(0,-.12,-.012), (x*.7,-.145,.004), (x,-.15,.024)], .003, .0015, 7, 5)
+        mesh('Flower filament', filament_verts, filament_faces, vein_mat, canopy).parent = flower
+        blob('Flower anther', (x,-.15,.024), (.005,.006,.007), anther_mat, canopy, k).parent = flower
+    bud_center = bloom + Vector((sign*.10, .035, .14))
+    stem('Flower bud stalk', [base.lerp(bloom,.64), bloom+Vector((0,.03,.105)), bud_center], .011, .006, start+13, start+52, (535+j*9, 584+j*8))
+    blob('Unopened violet flower', bud_center, (.035,.030,.069), petal_mat, canopy, j, (start+31,start+70,(535+j*9,584+j*8)), rotate=-sign*.37)
 
     fruit_start = 526 + j*12
-    bend = .19 * sign
-    pod_length = .55 + j*.08
-    vertices, faces = tube_data([(0,0,0), (bend*.32,-.018,-.14), (bend,.007,-pod_length*.64), (bend*.8,.029,-pod_length)], .052, .004, 24, 12, .12)
-    colors = []
-    for v in vertices:
-        t = max(0,min(1,-v.z/pod_length))
-        bead = 1 + .13*sin(t*8*pi) + .11*noise_vector(v*19)[0]
-        v.x *= .64 + .36*sin(t*pi)**.6 + .3*t
-        colors.append((.12*bead, .29*bead, .031*bead))
+    pod_length = .68 + j*.085
+    vertices, faces, colors = bean_pod(pod_length, sign)
     pod = mesh(f'Fruit bean pod {j+1}', vertices, faces, pod_mat, canopy, bloom, colors)
     growth(pod, fruit_start, fruit_start+106)
     pod['podIndex'] = j
@@ -292,7 +363,7 @@ for j, (node, sign) in enumerate([(3, 1), (4, -1), (5, 1)]):
     impact = first + 16
     rest = impact + 11
     gone = rest + 5
-    landing_rotation = Euler((.10, -sign*1.53, sign*.17))
+    landing_rotation = Euler((.10, -sign*(pi/2 + atan2(.24, pod_length)), sign*.17))
     lowest = min((landing_rotation.to_matrix() @ vertex).z for vertex in vertices)
     landing = Vector((bloom.x+sign*.17, bloom.y-.13, -.035-lowest))
     for frame, point, rotation in [
@@ -444,6 +515,9 @@ for _ in range(850):
         colors.append((.18*pigment,.091*pigment,.036*pigment))
     faces.extend(tuple(offset+i for i in f) for f in stone_faces)
 mesh('Soil granules', verts, faces, soil_mat, soil, colors=colors)['soilGeometry'] = True
+
+for material_slot in (leaf_mat, petal_mat, pod_mat):
+    material_slot.use_backface_culling = False
 
 scene.frame_set(1)
 bpy.ops.wm.save_as_mainfile(filepath=str(PROJECT / 'blender/start_lifecycle.blend'))

@@ -1,15 +1,11 @@
-/**
- * AGRIDELTA Bean Fall: loads the real "Fruit bean pod" geometry exported
- * from blender/start_lifecycle.py in the existing Start GLB. Never uses GIF.
- * One WebGL renderer is moved between scroll dividers, active for only 2 s.
- */
+// Render each batch once and copy the frame to the pods along its divider.
 import {
   Scene, OrthographicCamera, WebGLRenderer, Group, Mesh, MeshStandardMaterial,
   BufferGeometry, Float32BufferAttribute, Color, AmbientLight,
   DirectionalLight, DoubleSide
 } from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
-import {BEAN_DROP_MS, beanDropPose, beanDropPosition} from './bean-drop-state.js';
+import {beanDropPose, beanDropPosition, beanDropOrigins} from './bean-drop-state.js';
 
 const SELECTOR='[data-bean-divider]';
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
@@ -108,10 +104,15 @@ export function initBeanTransitions(site,overlay){
   let sourceBean=fallbackBean();
   pod.add(sourceBean);
 
-  let nativeBean=null,renderer=null;
-  let active=null,frame=0,started=0,item=null;
-  let startX=0,startY=0,endY=0,halfSize=105;
-  const lastCross=new WeakMap();
+  let renderer=null,rendererWidth=0;
+  const batches=new Map();
+  let frame=0, destroyed=false;
+  let scrollY=window.scrollY, scrollingDown=false;
+  const onScroll=()=>{
+    const nextY=window.scrollY;
+    if(nextY!==scrollY)scrollingDown=nextY>scrollY;
+    scrollY=nextY;
+  };
   const reduceListener=()=>{
     if(reduce.matches)stop();
   };
@@ -129,24 +130,18 @@ export function initBeanTransitions(site,overlay){
   // Use the actual Blender bean-pod geometry from the existing GLB asset.
   if(webglAvailable){
     new GLTFLoader().load('/assets/start-lifecycle-live.glb',gltf=>{
-      nativeBean=fromBlender(gltf);
-      if(nativeBean&&sourceBean!==nativeBean){
+      if(destroyed)return;
+      const nativeBean=fromBlender(gltf);
+      if(nativeBean){
         pod.remove(sourceBean);
+        sourceBean.geometry.dispose();
+        sourceBean.material.dispose();
         sourceBean=nativeBean;
         pod.add(sourceBean);
       }
     },undefined,()=>{/* 3D fallback geometry remains available */});
   }
 
-  function ensureItem(){
-    if(!item){
-      item=document.createElement('div');
-      item.className='bean-fall-item';
-      item.setAttribute('aria-hidden','true');
-      overlay.appendChild(item);
-    }
-    return item;
-  }
   function ensureRenderer(){
     if(renderer)return renderer;
     renderer=new WebGLRenderer({alpha:true,antialias:true,powerPreference:'low-power'});
@@ -156,103 +151,147 @@ export function initBeanTransitions(site,overlay){
     renderer.domElement.setAttribute('aria-hidden','true');
     return renderer;
   }
-  function clearDisplay(){
-    if(item){
-      item.style.opacity='0';
-      item.style.transform='translate3d(-9999px,-9999px,0)';
-      item.replaceChildren();
-    }
-  }
   function stop(){
-    if(frame)cancelAnimationFrame(frame);
+    cancelAnimationFrame(frame);
     frame=0;
-    active=null;
-    clearDisplay();
+    for(const batch of batches.values()){
+      for(const {holder} of batch.items)holder.remove();
+    }
+    batches.clear();
   }
-  function mountVisual(){
-    const holder=ensureItem();
-    halfSize=Math.max(75,holder.getBoundingClientRect().width/2||105);
-    holder.replaceChildren();
+
+  function mountVisual(x){
+    const holder=document.createElement('div');
+    holder.className='bean-fall-item';
+    holder.setAttribute('aria-hidden','true');
+    overlay.appendChild(holder);
+    const halfSize=holder.getBoundingClientRect().width/2||105;
     if(webglAvailable){
       try{
         const gl=ensureRenderer();
-        const width=Math.round(halfSize*2);
-        gl.setSize(width,width,false);
-        gl.domElement.setAttribute('aria-hidden','true');
-        holder.appendChild(gl.domElement);
-        return;
+        const canvas=document.createElement('canvas');
+        const context=canvas.getContext('2d');
+        if(context){
+          const width=Math.round(halfSize*2);
+          if(rendererWidth!==width){
+            gl.setSize(width,width,false);
+            rendererWidth=width;
+          }
+          canvas.width=gl.domElement.width;
+          canvas.height=gl.domElement.height;
+          holder.appendChild(canvas);
+          return {holder,context,x,halfSize};
+        }
       }catch{
         renderer?.dispose();
         renderer=null;
+        rendererWidth=0;
       }
     }
-    const fallback=document.createElement('span');
+    const fallback=document.createElement('img');
+    fallback.src='/assets/start-bean-pod.webp';
+    fallback.alt='';
     fallback.className='bean-fallback-pod';
-    fallback.setAttribute('aria-hidden','true');
     holder.appendChild(fallback);
+    return {holder,x,halfSize};
   }
+
   function tick(time){
-    if(!active||site.hidden||document.hidden||reduce.matches){stop();return;}
-    const elapsed=time-started;
-    const pose=beanDropPose(elapsed);
-    if(!pose.visible){stop();return;}
-    const y=beanDropPosition(elapsed,startY,endY);
-    const holder=ensureItem();
-    // Absolute page coordinates: the 3D fruit crosses every section until
-    // it reaches the actual bottom of the Start page, always at the same X.
-    holder.style.transform='translate3d('+(startX-halfSize).toFixed(1)+'px,'+(y-halfSize).toFixed(1)+'px,0)';
-    holder.style.opacity=String(pose.opacity);
-    if(renderer){
-      pod.position.set(0,0,0);
-      pod.rotation.set(.04,pose.tilt*.27,pose.tilt);
-      pod.scale.setScalar(pose.scale);
-      pod.traverse(node=>{if(node.isMesh&&node.material)node.material.opacity=pose.opacity;});
-      renderer.render(scene,camera);
-    }else{
-      holder.style.setProperty('--bean-scale',String(pose.scale));
-      holder.style.setProperty('--bean-tilt',pose.tilt+'rad');
+    frame=0;
+    if(site.hidden||document.hidden||reduce.matches){stop();return;}
+    for(const [divider,{items,started,startY,endY}] of batches){
+      const elapsed=time-started;
+      const pose=beanDropPose(elapsed);
+      if(!pose.visible){
+        for(const {holder} of items)holder.remove();
+        batches.delete(divider);
+        continue;
+      }
+      const y=beanDropPosition(elapsed,startY,endY);
+      if(renderer&&items.some(item=>item.context)){
+        pod.rotation.set(.04,pose.tilt*.27,pose.tilt);
+        pod.scale.setScalar(pose.scale);
+        renderer.render(scene,camera);
+      }
+      for(const {holder,context,x,halfSize} of items){
+        holder.style.transform='translate3d('+(x-halfSize)+'px,'+(y-halfSize)+'px,0)';
+        holder.style.opacity=String(pose.opacity);
+        if(renderer&&context){
+          const {width,height}=context.canvas;
+          context.clearRect(0,0,width,height);
+          context.drawImage(renderer.domElement,0,0,width,height);
+        }else{
+          holder.style.setProperty('--bean-scale',String(pose.scale));
+          holder.style.setProperty('--bean-tilt',pose.tilt+'rad');
+        }
+      }
     }
-    frame=requestAnimationFrame(tick);
+    if(batches.size)frame=requestAnimationFrame(tick);
   }
+
   function trigger(divider){
-    if(site.hidden||document.hidden||reduce.matches)return;
-    const now=performance.now();
-    if(now-(lastCross.get(divider)||-10000)<BEAN_DROP_MS+200)return;
+    if(site.hidden||document.hidden||reduce.matches||batches.has(divider))return;
     const line=divider.querySelector('.bean-transition-line');
     if(!line)return;
     const lineRect=line.getBoundingClientRect();
+    if(!lineRect.width)return;
     const siteRect=site.getBoundingClientRect();
-    // Fixed to the line's midpoint, rather than the divider's mini canvas.
-    startX=lineRect.left+lineRect.width/2-siteRect.left;
-    startY=lineRect.top+lineRect.height/2-siteRect.top;
-    // Use the entire document-height Start, not the current viewport height.
-    endY=Math.max(startY,site.scrollHeight-38);
-    lastCross.set(divider,now);
-    stop();
-    mountVisual();
-    active=divider;
-    started=performance.now();
-    frame=requestAnimationFrame(tick);
+    const padding=Math.min(28,lineRect.width*.1);
+    const left=lineRect.left-siteRect.left+padding;
+    const right=lineRect.right-siteRect.left-padding;
+    const startY=lineRect.top+lineRect.height/2-siteRect.top;
+    const endY=Math.max(startY,site.scrollHeight-38);
+    const items=beanDropOrigins(left,right).map(mountVisual);
+    batches.set(divider,{items,started:performance.now(),startY,endY});
+    if(!frame)frame=requestAnimationFrame(tick);
   }
 
-  const observer=new IntersectionObserver(entries=>{
-    entries.forEach(entry=>{if(entry.isIntersecting)trigger(entry.target);});
-  },{rootMargin:'-24% 0px -24% 0px',threshold:.13});
-  dividers.forEach(el=>observer.observe(el));
-  if(/^#bean-transition-0[1-4]$/.test(window.location.hash)){
-    requestAnimationFrame(()=>{
-      site.querySelector(window.location.hash)?.scrollIntoView({block:'center',behavior:'instant'});
-    });
+  const directDivider=/^#bean-transition-0[1-4]$/.test(window.location.hash)
+    ? site.querySelector(window.location.hash)
+    : null;
+  let directPending=Boolean(directDivider);
+  let observer;
+  function observeDividers(){
+    observer?.disconnect();
+    const margin=Math.round(window.innerHeight*.24);
+    observer=new IntersectionObserver(entries=>{
+      for(const entry of entries){
+        if(!entry.isIntersecting)continue;
+        if(entry.target===directDivider&&directPending){
+          directPending=false;
+          trigger(entry.target);
+        }else if(scrollingDown){
+          trigger(entry.target);
+        }
+      }
+    },{rootMargin:`-${margin}px 0px -${margin}px 0px`,threshold:.13});
+    dividers.forEach(divider=>observer.observe(divider));
   }
+  function onResize(){
+    scrollingDown=false;
+    observeDividers();
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',onResize);
+  observeDividers();
+  const anchorFrame=directDivider&&requestAnimationFrame(()=>{
+    directDivider.scrollIntoView({block:'center',behavior:'instant'});
+  });
+
   const onVisibility=()=>{if(document.hidden)stop();};
   document.addEventListener('visibilitychange',onVisibility);
   reduce.addEventListener?.('change',reduceListener);
   return {destroy(){
+    destroyed=true;
     observer.disconnect();
+    cancelAnimationFrame(anchorFrame);
     stop();
+    window.removeEventListener('scroll',onScroll);
+    window.removeEventListener('resize',onResize);
     document.removeEventListener('visibilitychange',onVisibility);
     reduce.removeEventListener?.('change',reduceListener);
     renderer?.dispose();
-    item?.remove();
+    sourceBean.geometry.dispose();
+    sourceBean.material.dispose();
   }};
 }

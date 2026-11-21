@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {BEAN_DROP_MS,BEAN_DIVIDER_COUNT,beanDropPose,beanDropPosition} from '../bean-drop-state.js';
+import {BEAN_DROP_MS,BEAN_DIVIDER_COUNT,beanDropPose,beanDropPosition,beanDropOrigins} from '../bean-drop-state.js';
 const get=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('The same bean falls straight down to the end of the entire Start page in 2s',()=>{
   assert.equal(BEAN_DROP_MS,2000);
@@ -16,6 +16,23 @@ test('The same bean falls straight down to the end of the entire Start page in 2
   assert.equal(beanDropPose(2000).opacity,0);
   assert.equal(beanDropPose(2000).visible,false);
   assert.equal(beanDropPose(3500).visible,false);
+});
+test('Each drop chooses one to four separate origins on the divider',()=>{
+  for(const count of [1,2,3,4]){
+    const samples=[(count-.5)/4,...Array(count).fill(.25)];
+    const left=50,right=350;
+    const origins=beanDropOrigins(left,right,()=>samples.shift());
+    assert.equal(origins.length,count);
+    const segment=(right-left)/count;
+    for(const [index,x] of origins.entries()){
+      assert.ok(x>left+index*segment&&x<left+(index+1)*segment);
+    }
+  }
+  const positions=value=>{
+    const samples=[.56,value,value,value];
+    return beanDropOrigins(50,350,()=>samples.shift());
+  };
+  assert.notDeepEqual(positions(.1),positions(.9));
 });
 test('Full-page rice-field background and a single shared overlay replace per-divider pictures',()=>{
   const root=get('root-guide.js'),css=get('bean-divider.css');

@@ -13,7 +13,7 @@ PROJECT = Path(__file__).resolve().parents[1]
 bpy.ops.wm.open_mainfile(filepath=str(PROJECT / 'blender/start_lifecycle.blend'))
 scene = bpy.context.scene
 scene.render.engine = 'CYCLES'
-scene.cycles.samples = 16
+scene.cycles.samples = 28
 scene.cycles.use_denoising = False
 scene.cycles.max_bounces = 3
 scene.render.resolution_x = scene.render.resolution_y = 580
@@ -62,9 +62,9 @@ roots = bpy.data.collections['Roots']
 soil = bpy.data.collections['Soil']
 plants = bpy.data.collections['Plant']
 roots.hide_render = True
-camera.location = (0, -10, 3.10)
-aim(camera, (0, 0, 1.23))
-camera.data.ortho_scale = 3.65
+camera.location = (0, -10, 3.30)
+aim(camera, (0, 0, 1.43))
+camera.data.ortho_scale = 3.85
 for i, frame in enumerate((1, 82, 396, 462, 657)):
     scene.frame_set(frame)
     render(f'lifecycle-{i}')
@@ -93,3 +93,18 @@ for marker in [obj for obj in roots.objects if 'rootIndex' in obj]:
     for obj in roots.objects:
         obj.hide_render = obj.type == 'MESH' and obj.parent != marker
     render(f'root-{marker["rootIndex"]}')
+
+
+# Render the same modeled pod in isolation for the section-divider fallback.
+scene.frame_set(657)
+roots.hide_render = True
+plants.hide_render = False
+for obj in plants.objects:
+    obj.hide_render = obj.name != 'Fruit bean pod 1'
+fruit = bpy.data.objects['Fruit bean pod 1']
+focus = fruit.location + Vector((-.07, 0, -.34))
+camera.location = focus + Vector((0,-5,.17))
+aim(camera, focus)
+camera.data.ortho_scale = .78
+scene.render.resolution_x = scene.render.resolution_y = 320
+render('bean-pod')
