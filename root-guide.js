@@ -505,7 +505,15 @@ initAgrideltaMotion(site);
 initBeanTransitions(site, find('#bean-fall-overlay'));
 window.AGRIDELTAStory = {replay: () => { open(); harvestTriggered = false; plant.replay(); }};
  
-// Authentication first for every entry path. Intro is only available when explicitly requested.
+// Keep the immersive Start as the normal public entry point.
+// Only explicit workspace/login routes and OAuth callbacks go directly to authentication.
+// Workspace access still requires a verified session in workspace-v2.js.
 const appRoute = new URLSearchParams(window.location.search);
-if (appRoute.get('intro') === '1') open();
-else enter('home', true);
+const authEntry = appRoute.get('app') === '1'
+  || appRoute.get('login') === '1'
+  || appRoute.has('code')
+  || appRoute.has('error')
+  || window.location.pathname === '/login'
+  || window.location.pathname.startsWith('/auth/');
+if (authEntry && appRoute.get('intro') !== '1') enter('home', true);
+else open();
