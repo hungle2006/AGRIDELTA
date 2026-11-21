@@ -57,7 +57,7 @@ function leafletLoader() {
   }).catch(e=>{leafletPromise=null;throw e;});
   return leafletPromise;
 }
-export function createFarmIntelligence({getFields=()=>[],getSeasons=()=>[] }={}) {
+export function createFarmIntelligence({getFields=()=>[],getSeasons=()=>[],getAccessToken=()=>'' }={}) {
   let root=null,tab="forecast",hours=72,radius=20,area=restoreArea(),places=[],forecast=null,slots=[],index=0,loading=false,error="",lookupBusy=false,lookupError="";
   let map=null,sequence=0,photo=null,photoPreview="",doctorResult=null,doctorError="",doctorBusy=false,doctorCrop="đậu",stage=1,modelLoaded=false;
   let mapGeneration=0;
@@ -268,7 +268,9 @@ export function createFarmIntelligence({getFields=()=>[],getSeasons=()=>[] }={})
     if(!photo||doctorBusy)return;
     doctorBusy=true;doctorError="";doctorResult=null;render();
     try{
-      const data=await requestJSON("/api/plant-diagnose",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image:photo,mimeType:"image/jpeg",crop:doctorCrop})});
+      const token=getAccessToken();
+      if(!token)throw new Error("Bạn cần đăng nhập để phân tích ảnh.");
+      const data=await requestJSON("/api/plant-diagnose",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({image:photo,mimeType:"image/jpeg",crop:doctorCrop})});
       if(!data||!data.condition)throw new Error("Phản hồi AI không hợp lệ");
       doctorResult=data;
     }catch(e){doctorError=e.message?.includes("503")?"Dịch vụ AI chưa được cấu hình. Cần thêm GEMINI_API_KEY trong Environment Variables của Vercel để phân tích ảnh.":(e.message||"Không thể chẩn đoán ảnh");}

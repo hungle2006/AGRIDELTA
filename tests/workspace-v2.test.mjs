@@ -8,7 +8,8 @@ test('Start enters a redesigned, actual CRUD workspace, not the mock main.js',()
  assert.doesNotMatch(html,/src="\/main\.js"/);
  assert.match(html,/href="\/workspace-v2\.css"/);
  for(const name of ['dashboard','fieldsPage','seasonsPage','tasksPage','observationsPage','ordersPage','settingsPage','saveRecord','removeRecord','toggleTask']) assert.ok(app.includes(name),name);
- assert.match(app,/window\.AGRIDELTAOpenDemo/);
+ assert.match(app,/window\.AGRIDELTAEnter/);
+ assert.doesNotMatch(app,/window\.AGRIDELTAOpenDemo/);
  assert.match(app,/window\.AGRIDELTAOpenAuth/);
 });
 test('Workspace does not auto-seed fake data or fake authentication',()=>{

@@ -15,6 +15,19 @@ export default async function handler(req,res){
     res.setHeader("Allow","POST");
     return output(res,405,{error:"Chỉ hỗ trợ POST"});
   }
+  // The workspace is auth-only; the API must independently verify the caller.
+  const supabaseUrl=(process.env.VITE_SUPABASE_URL||'').replace(/\/+$/,'');
+  const pubKey=process.env.VITE_SUPABASE_PUBLISHABLE_KEY||process.env.VITE_SUPABASE_ANON_KEY||'';
+  if(!supabaseUrl||!pubKey)return output(res,503,{error:"AUTH_NOT_CONFIGURED",message:"Dịch vụ xác thực AGRIDELTA chưa được cấu hình."});
+  const bearer=String(req.headers.authorization||'').match(/^Bearer ([A-Za-z0-9._~-]+)$/i);
+  if(!bearer)return output(res,401,{error:"LOGIN_REQUIRED"});
+  try{
+    const auth=await fetch(supabaseUrl+'/auth/v1/user',{
+      method:"GET",headers:{"apikey":pubKey,"Authorization":"Bearer "+bearer[1]}
+    });
+    const user=auth.ok?await auth.json():null;
+    if(!user?.id)return output(res,401,{error:"INVALID_SESSION"});
+  }catch{return output(res,503,{error:"AUTH_TEMPORARILY_UNAVAILABLE"});}
   if(!process.env.GEMINI_API_KEY) return output(res,503,{error:"AI_NOT_CONFIGURED",message:"Cần GEMINI_API_KEY trong Vercel Environment Variables"});
   let body=req.body||{};
   if(typeof body==="string"){try{body=JSON.parse(body);}catch{return output(res,400,{error:"JSON không hợp lệ"});}}
