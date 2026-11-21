@@ -1,4 +1,5 @@
 import {createFarmIntelligence} from './farm-intelligence.js';
+import {authScreen,beginOAuth,consumePKCEVerifier} from './auth-gateway.js';
 const app = document.querySelector('#app');
   const TYPES = ['fields','seasons','tasks','observations','orders'];
   const KEY = 'agridelta_workspace_v2';
@@ -53,6 +54,8 @@ const app = document.querySelector('#app');
   const intelligence=createFarmIntelligence({getFields:()=>records.fields,getSeasons:()=>records.seasons});
   let page='overview', query='', filter='all', modal=null, editing=null, notice='', noticeTimer=0, menuOpen=false, loginMode='login', cloudSession=read(CLOUD_SESSION,null);
   let syncState='local', working=false, authError='', selectedPhoto=null, hydrationToken=0;
+  let authVerified=false, authInfo='', authPending=cloudAvailable&&(Boolean(cloudSession)||new URLSearchParams(location.search).has('code'));
+  const oauthCallbackPath='/auth/callback';
   const NAV=[
     ['overview','Tổng quan','grid'],['fields','Cánh đồng','field'],['seasons','Mùa vụ','calendar'],['tasks','Công việc','clipboard'],
     ['observations','Quan sát','camera'],['intelligence','AI nông nghiệp','sun'],['orders','Đơn hàng','box']
@@ -165,6 +168,12 @@ const app = document.querySelector('#app');
   function content(){return ({overview:dashboard,fields:fieldsPage,seasons:seasonsPage,tasks:tasksPage,observations:observationsPage,intelligence:()=>'<div id="ag-ai-root"></div>',orders:ordersPage,settings:settingsPage})[page]?.() || dashboard();}
   function render(){
     if(!app)return;
+    if(!authVerified){
+      intelligence.detach();
+      app.innerHTML=authScreen({mode:loginMode,error:authError,info:authInfo,configured:cloudAvailable,pending:authPending});
+      document.body.classList.remove('ag-modal-open');
+      return;
+    }
     const focusSearch=document.activeElement?.id==='ag-search';const caret=focusSearch?document.activeElement.selectionStart:null;
     app.innerHTML='<div class="ag-app">'+sidebar()+'<div class="ag-shell">'+header()+'<main id="ag-main" class="ag-main" tabindex="-1">'+content()+'</main><footer class="ag-footer"><span>© 2026 AGRIDELTA</span><span>Gieo điều tốt đẹp, quản lý bằng dữ liệu thật.</span></footer></div>'+mobileNav()+'</div>'+modalView()+'<div id="ag-toast" class="ag-toast" role="status" '+(notice?'':'hidden')+'>'+esc(notice)+'</div>';
     if(focusSearch){const x=app.querySelector('#ag-search');x?.focus();try{x?.setSelectionRange(caret,caret);}catch{}}
@@ -229,6 +238,7 @@ const app = document.querySelector('#app');
     modalCloseTimer=setTimeout(finish,155);
   }
   function navigate(target){
+    if(!authVerified){render();return;}
     const previousPage=page;
     page=target==='home'?'overview':target==='season'?'seasons':target==='scan'?'observations':target;
     if(!titleOf[page])page='overview';
@@ -349,9 +359,32 @@ const app = document.querySelector('#app');
     }
     syncState='ok';toast('Đã gửi '+entries.length+' bản ghi lên tài khoản.');
   }
+  async function authValidate(session){
+    if(!session?.access_token)throw Error('Không có phiên đăng nhập hợp lệ.');
+    const response=await fetch(ENDPOINT+'/auth/v1/user',{
+      headers:{'apikey':PUBLIC_KEY,'Authorization':'Bearer '+session.access_token}
+    });
+    if(!response.ok)throw Error('Phiên đăng nhập chưa được xác thực.');
+    const user=await response.json();
+    if(!user?.id)throw Error('Tài khoản chưa được xác thực.');
+    return {...session,user};
+  }
+  async function acceptAuth(session){
+    const valid=await authValidate(session);
+    cloudSession=valid;
+    localStorage.setItem(CLOUD_SESSION,JSON.stringify(valid));
+    authVerified=true;authPending=false;authError='';authInfo='';page='overview';
+    try{await loadCloudRecords();}
+    catch(e){render();toast('Đăng nhập thành công, nhưng chưa tải được dữ liệu nông trại: '+(e.message||'Lỗi mạng'));}
+  }
   async function authenticate(form){
-    const email=form.email.value.trim(),password=form.password.value;
-    authError='';working=true;
+    if(!cloudAvailable){
+      authError='AGRIDELTA chưa cấu hình dịch vụ tài khoản. Cần một dự án Supabase riêng cho ứng dụng.';
+      render();return;
+    }
+    const email=form.elements.email.value.trim(),password=form.elements.password.value;
+    if(!email||!password)return;
+    authError='';authInfo='';working=true;authPending=true;render();
     try{
       const isNew=loginMode==='register';
       const result=await fetch(ENDPOINT+(isNew?'/auth/v1/signup':'/auth/v1/token?grant_type=password'),{
@@ -359,17 +392,81 @@ const app = document.querySelector('#app');
       });
       const j=await result.json();
       if(!result.ok)throw Error(j.msg||j.error_description||j.message||'Không thể đăng nhập');
-      if(!j.access_token){toast('Kiểm tra email để xác nhận đăng ký trước khi đăng nhập.');loginMode='login';render();return;}
-      cloudSession=j;localStorage.setItem(CLOUD_SESSION,JSON.stringify(j));
-      await loadCloudRecords();
-      toast('Đăng nhập thành công. Chỉ các bản ghi thuộc tài khoản này được hiển thị.');
-    }catch(e){authError=e.message||'Không thể kết nối tài khoản';render();}
-    finally{working=false;}
+      if(!j.access_token){
+        authInfo='Kiểm tra hộp thư để xác nhận tài khoản, sau đó quay lại đăng nhập.';
+        loginMode='login';return;
+      }
+      await acceptAuth(j);
+    }catch(e){authError=e.message||'Không thể kết nối tài khoản';}
+    finally{working=false;authPending=false;render();}
+  }
+  async function startSocial(provider){
+    if(!cloudAvailable){
+      authError='Đăng nhập Google, Facebook và GitHub chưa được kích hoạt vì AGRIDELTA chưa có dự án xác thực riêng.';
+      authInfo='';render();return;
+    }
+    authError='';authInfo='';
+    try{await beginOAuth({endpoint:ENDPOINT,provider,callback:location.origin+oauthCallbackPath});}
+    catch(e){authError=e.message||'Không thể bắt đầu đăng nhập OAuth';render();}
+  }
+  async function finishOAuthRedirect(){
+    const params=new URLSearchParams(location.search);
+    if(location.pathname!==oauthCallbackPath&&!params.has('code')&&!params.has('error'))return false;
+    const reason=params.get('error_description')||params.get('error');
+    history.replaceState({},'', '/');
+    if(reason){authError='Đăng nhập nhà cung cấp không thành công: '+reason;authPending=false;render();return true;}
+    const code=params.get('code');
+    if(!code){authPending=false;render();return true;}
+    const verifier=consumePKCEVerifier();
+    if(!verifier){authPending=false;authError='Phiên OAuth không hợp lệ hoặc đã hết hạn. Vui lòng thử đăng nhập lại.';render();return true;}
+    if(!cloudAvailable){authPending=false;authError='AGRIDELTA chưa kết nối dịch vụ xác thực.';render();return true;}
+    authPending=true;render();
+    try{
+      const response=await fetch(ENDPOINT+'/auth/v1/token?grant_type=pkce',{
+        method:'POST',headers:{'apikey':PUBLIC_KEY,'Content-Type':'application/json'},
+        body:JSON.stringify({auth_code:code,code_verifier:verifier})
+      });
+      const data=await response.json();
+      if(!response.ok)throw Error(data.msg||data.error_description||data.message||'Không thể hoàn tất xác thực OAuth');
+      await acceptAuth(data);
+    }catch(e){
+      authVerified=false;authError=e.message||'Đăng nhập OAuth thất bại.';
+    }finally{authPending=false;render();}
+    return true;
   }
   async function signOut(){
-    if(!confirm('Đăng xuất tài khoản? Dữ liệu trên máy chủ vẫn được giữ.'))return;
-    try{await cloudRequest('/auth/v1/logout',{method:'POST'});}catch{}
-    cloudSession=null;localStorage.removeItem(CLOUD_SESSION);records=local;render();toast('Đã đăng xuất.');
+    if(!confirm('Đăng xuất khỏi AGRIDELTA?'))return;
+    const oldSession=cloudSession;
+    cloudSession=null;authVerified=false;page='overview';records=blank();
+    localStorage.removeItem(CLOUD_SESSION);
+    try{
+      if(oldSession?.access_token&&ENDPOINT){
+        await fetch(ENDPOINT+'/auth/v1/logout',{method:'POST',headers:cloudHeaders(oldSession.access_token)});
+      }
+    }catch{}
+    authError='';authInfo='Bạn đã đăng xuất.';render();
+  }
+  async function restoreSession(){
+    if(await finishOAuthRedirect())return;
+    if(!cloudAvailable||!cloudSession){authVerified=false;authPending=false;render();return;}
+    authPending=true;render();
+    try{
+      let valid;
+      try{valid=await authValidate(cloudSession);}
+      catch{
+        await refreshSession();
+        valid=await authValidate(cloudSession);
+      }
+      cloudSession=valid;
+      localStorage.setItem(CLOUD_SESSION,JSON.stringify(valid));
+      authVerified=true;authError='';authPending=false;
+      await loadCloudRecords();
+    }catch(e){
+      cloudSession=null;authVerified=false;authPending=false;records=blank();
+      localStorage.removeItem(CLOUD_SESSION);
+      authError='Phiên đăng nhập không còn hợp lệ hoặc không thể kết nối máy chủ. Hãy đăng nhập lại.';
+      render();
+    }
   }
   app.addEventListener('error',event=>{
     if(event.target instanceof HTMLImageElement && event.target.classList.contains('ag-dash-photo')){
@@ -378,8 +475,15 @@ const app = document.querySelector('#app');
     }
   },true);
   app.addEventListener('click',async event=>{
-    const target=event.target.closest('[data-go],[data-new],[data-edit],[data-remove],[data-toggle],[data-action],[data-menu],[data-dismiss]');
+    const target=event.target.closest('[data-go],[data-new],[data-edit],[data-remove],[data-toggle],[data-action],[data-menu],[data-dismiss],[data-auth-provider],[data-auth-switch]');
     if(!target)return;
+    if(!authVerified){
+      if(target.dataset.authProvider){await startSocial(target.dataset.authProvider);return;}
+      if(target.hasAttribute('data-auth-switch')){
+        loginMode=loginMode==='register'?'login':'register';authError='';authInfo='';render();return;
+      }
+      return;
+    }
     if(target.hasAttribute('data-menu')){
       menuOpen=!menuOpen;
       app.querySelector('.ag-sidebar')?.classList.toggle('is-open',menuOpen);
@@ -402,8 +506,9 @@ const app = document.querySelector('#app');
     if(action==='switch-auth'){loginMode=loginMode==='register'?'login':'register';authError='';render();}
   });
   app.addEventListener('submit',async e=>{
+    if(e.target.id==='ag-login-form'){e.preventDefault();if(!working)await authenticate(e.target);return;}
+    if(!authVerified){e.preventDefault();return;}
     if(e.target.id==='ag-record-form'){e.preventDefault();if(!working){working=true;try{await saveRecord(e.target);}finally{working=false;}}}
-    if(e.target.id==='ag-login-form'){e.preventDefault();if(!working)await authenticate(e.target);}
   });
   let searchTimer=null;
   app.addEventListener('input',e=>{
@@ -428,13 +533,11 @@ const app = document.querySelector('#app');
       trigger?.focus({preventScroll:true});
     }
   });
-  window.AGRIDELTAOpenDemo = (target='home')=>navigate(target);
-  window.AGRIDELTAOpenAuth = ()=>navigate('settings');
-  window.AGRIDELTAWorkspace = {open:navigate, version:'2.0', cloudAvailable};
+  window.AGRIDELTAEnter = (target='home')=>{
+    if(!authVerified){render();return;}
+    navigate(target);
+  };
+  window.AGRIDELTAOpenAuth = ()=>authVerified?navigate('settings'):render();
+  window.AGRIDELTAWorkspace = {open:navigate,version:'3.1',cloudAvailable,get authenticated(){return authVerified;}};
   render();
-  if(cloudAvailable&&cloudSession){
-    cloudRequest('/auth/v1/user').then(()=>loadCloudRecords()).catch(async()=>{
-      try{await refreshSession();await loadCloudRecords();}
-      catch{cloudSession=null;localStorage.removeItem(CLOUD_SESSION);records=local;render();}
-    });
-  }
+  restoreSession();
