@@ -94,16 +94,12 @@ site.innerHTML = `
         </div>
         <figure class="plant-journey" aria-labelledby="journey-title">
           <div class="plant-art">
-            <div class="plant-art-topline" aria-hidden="true"><span class="plant-live-dot"></span> MÔ PHỎNG SINH TRƯỞNG <span>BLENDER / 3D</span></div>
             <div class="plant-model" id="live-earth" data-scene-state="loading" aria-hidden="true">
               <img class="plant-poster" src="/assets/start-botanical-lifecycle-0.webp" alt="" width="580" height="580" fetchpriority="high">
             </div>
-            <span class="plant-art-side" aria-hidden="true">GROW WITH NATURE</span>
-            <div class="plant-art-groundnote" aria-hidden="true"><span>SOIL / ROOTS / GROWTH</span><span>AGRIDELTA</span></div>
           </div>
           <figcaption class="plant-controls">
             <div class="plant-controls-heading">
-              <span class="plant-controls-kicker">THE GROWTH JOURNEY</span>
               <h2 id="journey-title">Vòng đời<br>cây đậu.</h2>
               <p id="lifecycle-label" aria-live="polite">${stageNotes[0]}</p>
               <button type="button" class="earth-icon-button" data-pause aria-label="Tạm dừng chuyển động" title="Tạm dừng chuyển động">${icon('pause')}</button>
@@ -111,7 +107,6 @@ site.innerHTML = `
             <ol class="plant-stages" aria-label="Các giai đoạn của cây đậu">${stages.map((stage,i) => `
               <li${i === 0 ? ' aria-current="step"' : ''}>${icon(stageIcons[i])}<span>${stage}</span></li>`).join('')}
             </ol>
-            <div class="plant-controls-foot"><span>GIAI ĐOẠN</span><strong id="journey-current-step">01 <small>/ 05</small></strong></div>
           </figcaption>
         </figure>
       </div>
@@ -234,7 +229,6 @@ const find = selector => site.querySelector(selector);
 const stageIndicators = [...site.querySelectorAll('.plant-stages li')];
 const plantControl = find('[data-pause]');
 const lifecycleLabel = find('#lifecycle-label');
-const stageReadout = find('#journey-current-step');
 const phaseNotes = {
   ripe: 'Cây đã có quả. Cuộn xuống để xem thu hoạch.',
   harvesting: 'Quả đậu lần lượt rơi xuống đất.',
@@ -253,7 +247,6 @@ const plant = createLiveEarth(find('#live-earth'), (stage, phase, paused, care) 
     if (index === stage) indicator.setAttribute('aria-current', 'step');
     else indicator.removeAttribute('aria-current');
   });
-  if (stageReadout) stageReadout.innerHTML = `${String(stage+1).padStart(2,'0')} <small>/ 05</small>`;
   lifecycleLabel.textContent = phaseNotes[phase] ?? careNotes[care] ?? stageNotes[stage];
   const playbackLabel = paused ? 'Tiếp tục chuyển động' : 'Tạm dừng chuyển động';
   plantControl.hidden = phase === 'ripe' || phase === 'harvested';

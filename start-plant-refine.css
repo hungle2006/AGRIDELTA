@@ -1,0 +1,226 @@
+/* Start • Pure Growth 2026
+   Remove superfluous captions in the DOM, balance the 3D display with
+   the lifecycle rail and preserve the underlying Blender/scroll behavior.
+   Loaded after Start's prior styles, scoped to the Start experience only. */
+
+.earth-site .plant-journey {
+  grid-template-columns: minmax(0,1fr) clamp(205px,16vw,250px);
+  border-radius: 23px;
+  border: 1px solid #d4e3cd;
+  box-shadow: 0 20px 48px #1e3b281c;
+}
+
+.earth-site .plant-art {
+  display:grid;
+  place-items:center;
+  padding:clamp(12px,2vw,24px);
+  background:radial-gradient(ellipse at 48% 48%,#f8f9ed 2%,#e6efd9 73%,#dce8d2 100%);
+}
+.earth-site .plant-art::before {
+  width:min(80cqw,80cqh);
+  border-color:#8eb0801f;
+  box-shadow:none;
+}
+.earth-site .plant-art::after {display:none}
+.earth-site .plant-model {
+  width:min(91cqw,90cqh);
+  max-width:100%;
+  aspect-ratio:1;
+  transform:translateY(7px);
+  filter:saturate(1.06) drop-shadow(0 11px 13px #35552a20);
+}
+
+.earth-site .plant-controls {
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  margin:0;
+  padding:clamp(20px,2.4vw,30px) clamp(15px,1.6vw,24px) clamp(16px,1.8vw,23px);
+  background:linear-gradient(156deg,#204a35,#163c2a);
+  border-left:1px solid #37644a;
+  box-shadow:none;
+}
+.earth-site .plant-controls-heading {
+  display:block;
+  flex:0 0 auto;
+  position:relative;
+  margin:0 0 clamp(12px,2vh,22px);
+  padding:0 0 clamp(15px,2vh,23px);
+  padding-right:37px;
+  border-bottom:1px solid #ffffff27;
+}
+.earth-site .plant-controls-heading .plant-controls-copy {min-width:0}
+.earth-site .plant-controls h2 {
+  margin:0;
+  font-size:clamp(23px,2.05vw,31px);
+  line-height:1.22;
+  letter-spacing:-.055em;
+  color:#fffef8;
+  text-wrap:balance;
+}
+.earth-site .plant-controls #lifecycle-label {
+  font-size:11px;
+  line-height:1.6;
+  color:#c5ddc9;
+  margin:12px 0 0;
+  padding:0;
+  min-height:0;
+  max-width:30ch;
+}
+.earth-site .plant-controls [data-pause] {
+  position:absolute;
+  top:0;
+  right:0;
+  min-width:34px;
+  width:34px;
+  min-height:34px;
+  height:34px;
+  display:inline-grid;
+  place-items:center;
+  border-radius:10px;
+  border-color:#ffffff35;
+}
+.earth-site .plant-controls [data-pause][hidden] {display:none}
+
+.earth-site .plant-stages {
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-rows:repeat(5,minmax(0,1fr));
+  flex:1 1 auto;
+  min-height:0;
+  gap:clamp(5px,1.1vh,10px);
+  margin:0;
+  padding:0;
+  align-items:stretch;
+}
+.earth-site .plant-stages::before {display:none}
+.earth-site .plant-stages li {
+  width:100%;
+  min-width:0;
+  min-height:0;
+  display:grid;
+  grid-template-columns:29px minmax(0,1fr);
+  align-items:center;
+  justify-items:stretch;
+  align-content:center;
+  column-gap:12px;
+  padding:10px clamp(9px,1vw,13px);
+  border-radius:11px;
+  font-size:12px;
+  font-weight:670;
+  line-height:1.45;
+  color:#d5e5d8;
+  text-align:left;
+}
+.earth-site .plant-stages .earth-icon {
+  display:grid;
+  place-items:center;
+  width:28px;
+  height:28px;
+  font-size:22px;
+  color:#a8d0a9;
+}
+.earth-site .plant-stages li[aria-current="step"] {
+  background:#cfe5b0;
+  color:#193d2a;
+  border:1px solid #b4d19d;
+  box-shadow:0 6px 16px #10291924;
+}
+.earth-site .plant-stages li[aria-current="step"] .earth-icon {color:#266543}
+
+/* Medium desktop: protect the timeline from crowding on small-height laptops. */
+@media (min-width:901px) and (max-width:1210px) {
+  .earth-site .plant-journey {
+    grid-template-columns:minmax(0,1fr) clamp(188px,17vw,212px);
+    height:clamp(435px,65svh,540px);
+  }
+  .earth-site .plant-controls {padding:18px 13px}
+  .earth-site .plant-controls h2 {font-size:24px}
+  .earth-site .plant-stages li {gap:8px;padding-inline:8px;font-size:11px}
+  .earth-site .plant-model {width:min(89cqw,89cqh)}
+}
+@media (min-width:901px) and (max-height:690px) {
+  .earth-site .plant-journey {height:clamp(390px,67svh,495px)}
+  .earth-site .plant-controls {padding-block:17px 15px}
+  .earth-site .plant-controls-heading {margin-bottom:10px;padding-bottom:12px}
+  .earth-site .plant-stages {gap:4px}
+  .earth-site .plant-stages li {padding-block:7px}
+}
+
+/* Tablet: keep both columns useful until the stack breakpoint. */
+@media (min-width:601px) and (max-width:900px) {
+  .earth-site .plant-journey {
+    grid-template-columns:minmax(0,1fr) clamp(190px,26vw,226px);
+    height:clamp(405px,58svh,540px);
+  }
+  .earth-site .plant-controls {padding:21px 16px}
+  .earth-site .plant-model {width:min(89cqw,90cqh)}
+}
+
+/* Mobile: spacious plant, compact five-step overview directly beneath. */
+@media (max-width:600px) {
+  .earth-site .plant-journey {
+    grid-template-columns:minmax(0,1fr);
+    height:auto;
+    border-radius:17px;
+  }
+  .earth-site .plant-art {
+    height:clamp(285px,81vw,405px);
+    padding:9px;
+  }
+  .earth-site .plant-art::before {display:none}
+  .earth-site .plant-model {width:min(94cqw,94cqh);transform:translateY(5px)}
+  .earth-site .plant-controls {
+    height:auto;
+    padding:15px 12px 12px;
+    border-left:0;
+    border-top:1px solid #41674b;
+  }
+  .earth-site .plant-controls-heading {
+    display:grid;
+    grid-template-columns:1fr;
+    gap:0;
+    margin:0 0 10px;
+    padding:0 43px 0 2px;
+    border:0;
+  }
+  .earth-site .plant-controls h2 {font-size:16px;line-height:1.3}
+  .earth-site .plant-controls h2 br {display:none}
+  .earth-site .plant-controls #lifecycle-label {
+    margin-top:4px;
+    font-size:10px;
+    line-height:1.45;
+    max-width:none;
+  }
+  .earth-site .plant-controls [data-pause] {top:0;right:0}
+  .earth-site .plant-stages {
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    grid-template-rows:auto;
+    gap:3px;
+    flex:none;
+  }
+  .earth-site .plant-stages li {
+    display:grid;
+    grid-template-columns:1fr;
+    justify-items:center;
+    align-content:center;
+    gap:5px;
+    min-height:57px;
+    padding:6px 2px;
+    border-radius:9px;
+    text-align:center;
+    font-size:9px;
+    line-height:1.35;
+  }
+  .earth-site .plant-stages .earth-icon {width:21px;height:21px;font-size:19px}
+}
+@media (max-width:370px) {
+  .earth-site .plant-art {height:clamp(270px,82vw,306px)}
+  .earth-site .plant-stages li {font-size:8px;padding-inline:0}
+}
+@media (prefers-reduced-motion:reduce) {
+  .earth-site .plant-model,
+  .earth-site .plant-stages li {transition:none!important}
+}
