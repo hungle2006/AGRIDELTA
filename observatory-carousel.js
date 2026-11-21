@@ -78,7 +78,9 @@ export function mountObservatory(observatory, initial, onChange = () => {}) {
     cancelHover();
     spotlight = slide;
     spotlight.classList.add('is-spotlit');
-    move(slides.indexOf(slide));
+    const target = slides.indexOf(slide);
+    // Avoid unnecessary scrolling when the hovered card is already centered.
+    if (target !== current || Math.abs(geometry()[target].distance) > 3) move(target);
   }
   slides.forEach(slide => {
     slide.addEventListener('pointerenter', event => {

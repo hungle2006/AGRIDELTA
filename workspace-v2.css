@@ -282,3 +282,114 @@ body.rg-app-mode #app { display: block !important; min-height: 100dvh; }
   .ag-carousel-slide.is-spotlit .ag-photo-card { transform: none; transition: none; }
   .ag-carousel-slide.is-spotlit .ag-photo-card { outline: 2px solid #d7b980; }
 }
+
+
+/* Observatory-only viewport layout: no vertical page scroll in this screen.
+   Other tools and the Start 3D experience keep their normal document scrolling. */
+html:has(body.rg-app-mode .ag-observatory) { height: 100%; overflow: hidden; }
+body.rg-app-mode:has(.ag-observatory) { height: 100dvh; overflow: hidden; overscroll-behavior: none; }
+body.rg-app-mode:has(.ag-observatory) #app { height: 100dvh; min-height: 0; overflow: hidden; }
+.ag-app:has(.ag-observatory) { height: 100dvh; min-height: 0; overflow: hidden; }
+.ag-app:has(.ag-observatory) .ag-top-header { flex: 0 0 auto; }
+.ag-app:has(.ag-observatory) .ag-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-block: clamp(8px,1.8dvh,18px);
+  overflow: hidden;
+}
+.ag-app:has(.ag-observatory) .ag-bottom-footer {
+  flex: 0 0 auto;
+  padding-block: clamp(8px,1.2dvh,15px);
+}
+.ag-app:has(.ag-observatory) .ag-observatory {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr) auto;
+  gap: clamp(6px,1.5dvh,16px);
+  min-height: 0;
+  width: 100%;
+}
+.ag-app:has(.ag-observatory) .ag-tool-heading {
+  min-height: 0;
+  padding-top: 8px;
+}
+.ag-app:has(.ag-observatory) .ag-tool-heading h1 {
+  font-size: clamp(35px,min(5.7vw,9dvh),78px);
+}
+.ag-app:has(.ag-observatory) .ag-carousel-track {
+  min-height: 0;
+  max-height: 100%;
+  align-items: stretch;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior: contain;
+  touch-action: pan-x;
+  scrollbar-width: none;
+}
+.ag-app:has(.ag-observatory) .ag-carousel-slide {
+  align-self: stretch;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+.ag-app:has(.ag-observatory) .ag-photo-card {
+  height: min(392px, 80%);
+  margin: 0;
+  transform-origin: center center;
+  transition:
+    transform 520ms cubic-bezier(.18,.78,.22,1),
+    opacity 280ms ease,
+    box-shadow 520ms cubic-bezier(.18,.78,.22,1);
+}
+.ag-app:has(.ag-observatory) .ag-carousel-controls {
+  min-height: 44px;
+  flex: 0 0 auto;
+}
+@media(hover:hover) and (pointer:fine) {
+  /* Enlarge immediately on hover; the 2-second hold then brings the card to the center. */
+  .ag-app:has(.ag-observatory) .ag-carousel-slide:hover { z-index: 30; }
+  .ag-app:has(.ag-observatory) .ag-carousel-slide:hover .ag-photo-card,
+  .ag-app:has(.ag-observatory) .ag-carousel-slide.is-spotlit .ag-photo-card {
+    transform: perspective(1000px) rotateY(0) translateY(-2px) scale(1.15);
+    opacity: 1;
+    box-shadow: 0 22px 54px #1430194d;
+  }
+  .ag-app:has(.ag-observatory) .ag-carousel-slide:hover .ag-photo-caption { opacity: 1; }
+}
+.ag-app:has(.ag-observatory) .ag-carousel-slide:focus-within .ag-photo-card {
+  transform: perspective(1000px) rotateY(0) scale(1.12);
+  opacity: 1;
+}
+@media(max-width:600px) {
+  .ag-app:has(.ag-observatory) .ag-content { padding-block: 8px; }
+  .ag-app:has(.ag-observatory) .ag-observatory { gap: 6px; }
+  .ag-app:has(.ag-observatory) .ag-tool-heading { padding-top: 5px; gap: 5px; }
+  .ag-app:has(.ag-observatory) .ag-tool-heading h1 { font-size: clamp(33px,9vw,48px); }
+  .ag-app:has(.ag-observatory) .ag-tool-heading p { font-size: 11px; padding-bottom: 0; }
+  .ag-app:has(.ag-observatory) .ag-carousel-track { --ag-slot: clamp(210px,76vw,390px); gap: 10px; }
+  .ag-app:has(.ag-observatory) .ag-photo-card { height: min(360px,80%); }
+  .ag-app:has(.ag-observatory) .ag-carousel-controls { min-height: 40px; }
+  .ag-app:has(.ag-observatory) .ag-carousel-positions button { height: 40px; }
+  .ag-app:has(.ag-observatory) .ag-carousel-arrow { width: 40px; height: 40px; }
+}
+@media(max-height:540px) {
+  .ag-app:has(.ag-observatory) .ag-header-row { min-height: 48px; }
+  .ag-app:has(.ag-observatory) .ag-home-brand { min-height: 34px; width: 105px; }
+  .ag-app:has(.ag-observatory) .ag-header-action { min-height: 34px; }
+  .ag-app:has(.ag-observatory) .ag-bottom-footer { padding-block: 4px; }
+  .ag-app:has(.ag-observatory) .ag-tool-heading h1 { font-size: clamp(28px,5dvh,38px); }
+  .ag-app:has(.ag-observatory) .ag-photo-card { height: 76%; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .ag-app:has(.ag-observatory) .ag-photo-card,
+  .ag-app:has(.ag-observatory) .ag-carousel-slide:hover .ag-photo-card,
+  .ag-app:has(.ag-observatory) .ag-carousel-slide.is-spotlit .ag-photo-card,
+  .ag-app:has(.ag-observatory) .ag-carousel-slide:focus-within .ag-photo-card {
+    transition: none !important;
+    transform: none !important;
+  }
+}

@@ -26,3 +26,22 @@ test('photo source dropdown is not visible in the footer',()=>{
   assert.doesNotMatch(ws,/\$\{photoCredits\(\)\}/);
   assert.match(ws,/photo-credits\.html/);
 });
+
+
+test('hover enlarges immediately and auto-centers after two seconds',()=>{
+  const js=readFileSync(new URL('../observatory-carousel.js',import.meta.url),'utf8');
+  assert.match(js,/hoverTimer = setTimeout\(\(\) => preview\(slide\), 2000\)/);
+  assert.match(js,/Math\.abs\(geometry\(\)\[target\]\.distance\) > 3/);
+  const css=readFileSync(new URL('../workspace-v2.css',import.meta.url),'utf8');
+  assert.match(css,/\.ag-carousel-slide:hover \.ag-photo-card/);
+  assert.match(css,/scale\(1\.15\)/);
+});
+test('observatory viewport never vertically scrolls but horizontal swipes remain',()=>{
+  const css=readFileSync(new URL('../workspace-v2.css',import.meta.url),'utf8');
+  assert.match(css,/body\.rg-app-mode:has\(\.ag-observatory\) \{ height: 100dvh; overflow: hidden/);
+  assert.match(css,/grid-template-rows: auto minmax\(0,1fr\) auto/);
+  assert.match(css,/touch-action: pan-x/);
+  assert.match(css,/overflow-x: auto/);
+  assert.match(css,/overflow-y: hidden/);
+  assert.match(css,/@media\(max-width:600px\)/);
+});
