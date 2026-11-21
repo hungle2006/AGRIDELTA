@@ -202,7 +202,7 @@ site.innerHTML = `
   <footer class="earth-footer">
     <div class="earth-container earth-footer-inner">
       <a class="earth-brand" href="#rg-top" aria-label="AGRIDELTA — Về đầu trang">${brand}</a>
-      <span>© 2026 AGRIDELTA</span><span class="start-photo-credit"><a href="https://unsplash.com/license" target="_blank" rel="noopener noreferrer">Ảnh chụp thực tế · Unsplash Free License</a></span>
+      <span>© 2026 AGRIDELTA</span>
       <button type="button" data-open-guide="0">Hướng dẫn sử dụng ${icon('right')}</button>
     </div>
   </footer>
