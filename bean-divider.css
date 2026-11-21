@@ -48,38 +48,41 @@
 .earth-site .root-features{
   background:rgba(234,244,230,.62);
 }
-/* A thin separator remains; it does not contain a background nor the pod. */
-.earth-site .bean-transition{
+/* Zero-gap section boundary. This is a one-pixel trigger for IntersectionObserver,
+   not a 150px visual section. The falling fruit lives in the page-wide overlay. */
+.earth-site .bean-transition,
+.earth-site .bean-transition--hero,
+.earth-site .bean-transition--secondary{
   display:block;
   position:relative;
   isolation:auto;
+  height:1px;
+  min-height:1px;
+  max-height:1px;
+  width:100%;
+  margin:0;
+  padding:0;
+  border:0;
   background:transparent;
+  box-shadow:none;
   overflow:visible;
-  min-height:clamp(106px,10vw,148px);
-  border-block:0;
 }
-.earth-site .bean-transition--hero{min-height:clamp(125px,12vw,165px)}
 .earth-site .bean-transition::before,
 .earth-site .bean-transition::after{content:none}
 .earth-site .bean-transition-line{
   position:absolute;
   z-index:1;
-  top:50%;
   left:max(18px,5vw);
   right:max(18px,5vw);
-  border-top:1px solid rgba(255,255,247,.95);
-  box-shadow:0 1px 0 rgba(54,104,64,.22);
+  top:0;
+  height:1px;
+  border:0;
+  background:linear-gradient(90deg,transparent,rgba(84,132,91,.45) 16%,rgba(84,132,91,.55) 50%,rgba(84,132,91,.45) 84%,transparent);
+  box-shadow:none;
   pointer-events:none;
 }
 .earth-site .bean-transition-line::before,
-.earth-site .bean-transition-line::after{
-  content:"";
-  position:absolute;
-  top:-3px;width:6px;height:6px;border-radius:50%;
-  background:#7faf78;border:1px solid #e5f3de;
-}
-.earth-site .bean-transition-line::before{left:0}
-.earth-site .bean-transition-line::after{right:0}
+.earth-site .bean-transition-line::after{content:none}
 /* This overlay covers the entire Start document (full page height).
    It never blocks clicking, tapping, scrolling, or opening dialogs. */
 .earth-site > .bean-fall-overlay{
@@ -124,8 +127,10 @@
       linear-gradient(180deg,rgba(249,252,245,.81),rgba(242,249,239,.83)),
       url("/assets/start-landscape-clear.webp");
   }
-  .earth-site .bean-transition{min-height:clamp(90px,22vw,125px)}
-  .earth-site .bean-transition--hero{min-height:clamp(105px,26vw,135px)}
+  /* Keep the same zero-gap rule on iPhone; only the line's side margins shrink. */
+  .earth-site .bean-transition,
+  .earth-site .bean-transition--hero,
+  .earth-site .bean-transition--secondary{height:1px;min-height:1px;max-height:1px}
   .earth-site .bean-transition-line{left:17px;right:17px}
   .earth-site .bean-fall-item{width:clamp(136px,42vw,200px)}
 }

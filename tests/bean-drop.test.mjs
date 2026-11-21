@@ -46,3 +46,16 @@ test('Real Blender fruit uses one shared WebGL renderer and full site coordinate
   assert.match(js,/reduce\.matches/);
   assert.doesNotMatch(js,/\.gif/);
 });
+
+test('Section dividers render only a hairline, with no spacer block or decorative dots',()=>{
+  const css=get('bean-divider.css');
+  assert.match(css,/\.earth-site \.bean-transition,\s*\.earth-site \.bean-transition--hero/);
+  assert.match(css,/height:1px;\s*min-height:1px;\s*max-height:1px/);
+  assert.match(css,/\.earth-site \.bean-transition-line\s*\{[\s\S]*?top:0;[\s\S]*?height:1px;/);
+  assert.match(css,/background:linear-gradient\(90deg,transparent/);
+  assert.match(css,/\.earth-site \.bean-transition-line::before,\s*\.earth-site \.bean-transition-line::after\{content:none\}/);
+  assert.doesNotMatch(css,/\.bean-transition\s*\{[^}]*min-height:clamp/);
+  const js=get('bean-drop-scene.js');
+  assert.match(js,/divider\.querySelector\('\.bean-transition-line'\)/);
+  assert.match(js,/startY=lineRect\.top/);
+});
