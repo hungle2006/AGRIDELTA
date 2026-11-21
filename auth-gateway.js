@@ -26,11 +26,12 @@ export function authScreen({mode='login',error='',info='',configured=false,pendi
        (info?'<div class="ag-auth-info" role="status">'+e(info)+'</div>':'')+
        (!configured?'<div class="ag-auth-config" role="status"><strong>Chưa kích hoạt đăng nhập</strong><span>AGRIDELTA cần được kết nối với dự án Supabase riêng trước khi sử dụng các tài khoản thật. Không có chế độ demo hoặc tài khoản giả.</span></div>':'')+
        '<div class="ag-auth-social">'+
+        '<button type="button" data-auth-email><span class="ag-auth-provider ag-auth-gmail" aria-hidden="true">✉</span>Tiếp tục bằng Gmail / Email</button>'+
         '<button type="button" data-auth-provider="google"><span class="ag-auth-provider ag-auth-google" aria-hidden="true">G</span>Tiếp tục với Google <small>(Gmail)</small></button>'+
         '<button type="button" data-auth-provider="facebook"><span class="ag-auth-provider ag-auth-facebook" aria-hidden="true">f</span>Tiếp tục với Facebook</button>'+
         '<button type="button" data-auth-provider="github"><span class="ag-auth-provider ag-auth-github" aria-hidden="true">GH</span>Tiếp tục với GitHub</button>'+
        '</div>'+
-       '<div class="ag-auth-divider"><span>hoặc đăng nhập bằng Gmail / email</span></div>'+
+       '<div class="ag-auth-divider"><span>Đăng nhập bằng email và mật khẩu</span></div>'+
        '<form id="ag-login-form" class="ag-auth-form"><label for="ag-auth-email">Email (có thể dùng Gmail)</label>'+
         '<input id="ag-auth-email" type="email" name="email" placeholder="tenban@gmail.com" autocomplete="email" maxlength="254" required />'+
         '<label for="ag-auth-password">Mật khẩu</label>'+
