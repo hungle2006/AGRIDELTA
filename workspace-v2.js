@@ -69,10 +69,10 @@ const app = document.querySelector('#app');
   function toast(text){notice=text;renderToast();clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>{notice='';renderToast();},3700);}
   function renderToast(){let node=document.querySelector('#ag-toast'); if(node){node.textContent=notice;node.hidden=!notice;}}
   function header(){
-    return '<header class="ag-header"><div class="ag-mobile-header"><button class="ag-icon-btn" data-menu aria-label="Mở điều hướng">'+I('menu')+'</button><span>AGRIDELTA</span></div><div class="ag-breadcrumb">KHÔNG GIAN CANH TÁC <span>/</span> '+esc(titleOf[page]||'Tổng quan')+'</div><div class="ag-head-actions"><span class="ag-storage '+(cloudSession?'is-cloud':'')+'">'+I(cloudSession?'wifi':'shield',15)+' '+(cloudSession?'Tài khoản đồng bộ':cloudAvailable?'Chế độ thiết bị':'Lưu trên thiết bị')+'</span><button class="ag-icon-btn" data-go="settings" aria-label="Tài khoản và dữ liệu">'+I('user')+'</button></div></header>';
+    return '<header class="ag-header"><div class="ag-mobile-header"><button class="ag-icon-btn" data-menu aria-controls="ag-app-sidebar" aria-expanded="false" aria-label="Mở điều hướng">'+I('menu')+'</button><span>AGRIDELTA</span></div><div class="ag-breadcrumb">KHÔNG GIAN CANH TÁC <span>/</span> '+esc(titleOf[page]||'Tổng quan')+'</div><div class="ag-head-actions"><span class="ag-storage '+(cloudSession?'is-cloud':'')+'">'+I(cloudSession?'wifi':'shield',15)+' '+(cloudSession?'Tài khoản đồng bộ':cloudAvailable?'Chế độ thiết bị':'Lưu trên thiết bị')+'</span><button class="ag-icon-btn" data-go="settings" aria-label="Tài khoản và dữ liệu">'+I('user')+'</button></div></header>';
   }
   function sidebar(){
-    return '<aside class="ag-sidebar '+(menuOpen?'is-open':'')+'"><div class="ag-brand"><img class="ag-eco-wordmark" src="/assets/agridelta-eco-logo.svg" alt="AGRIDELTA" width="2172" height="724" decoding="async"/><button class="ag-sidebar-close" data-menu aria-label="Đóng điều hướng">'+I('close',18)+'</button></div><div class="ag-nav-kicker">KHÔNG GIAN LÀM VIỆC</div><nav class="ag-nav" aria-label="Quản lý canh tác">'+NAV.map(([p,label,ico])=>'<button type="button" class="'+(page===p?'is-active':'')+'" data-go="'+p+'">'+I(ico,19)+' <span>'+label+'</span>'+(p==='tasks'&&records.tasks.filter(t=>!t.done).length?'<small>'+records.tasks.filter(t=>!t.done).length+'</small>':'')+'</button>').join('')+'</nav><div class="ag-nav-spacer"></div><button class="ag-side-settings '+(page==='settings'?'is-active':'')+'" data-go="settings">'+I('settings',18)+' Cài đặt & dữ liệu</button><div class="ag-sidebar-foot"><span class="ag-live-mark"></span><span><strong>Vườn của bạn, theo cách của bạn.</strong><small>'+ (cloudSession?'Dữ liệu thuộc tài khoản đang đăng nhập.':'Dữ liệu được giữ trên trình duyệt này.')+'</small></span></div><button class="ag-back-start" data-action="start">'+I('arrow',16)+' Về trang giới thiệu</button></aside><div class="ag-side-overlay '+(menuOpen?'is-open':'')+'" data-menu></div>';
+    return '<aside id="ag-app-sidebar" class="ag-sidebar '+(menuOpen?'is-open':'')+'"><div class="ag-brand"><img class="ag-eco-wordmark" src="/assets/agridelta-eco-logo.svg" alt="AGRIDELTA" width="2172" height="724" decoding="async"/><button class="ag-sidebar-close" data-menu aria-label="Đóng điều hướng">'+I('close',18)+'</button></div><div class="ag-nav-kicker">KHÔNG GIAN LÀM VIỆC</div><nav class="ag-nav" aria-label="Quản lý canh tác">'+NAV.map(([p,label,ico])=>'<button type="button" class="'+(page===p?'is-active':'')+'" data-go="'+p+'">'+I(ico,19)+' <span>'+label+'</span>'+(p==='tasks'&&records.tasks.filter(t=>!t.done).length?'<small>'+records.tasks.filter(t=>!t.done).length+'</small>':'')+'</button>').join('')+'</nav><div class="ag-nav-spacer"></div><button class="ag-side-settings '+(page==='settings'?'is-active':'')+'" data-go="settings">'+I('settings',18)+' Cài đặt & dữ liệu</button><div class="ag-sidebar-foot"><span class="ag-live-mark"></span><span><strong>Vườn của bạn, theo cách của bạn.</strong><small>'+ (cloudSession?'Dữ liệu thuộc tài khoản đang đăng nhập.':'Dữ liệu được giữ trên trình duyệt này.')+'</small></span></div><button class="ag-back-start" data-action="start">'+I('arrow',16)+' Về trang giới thiệu</button></aside><div class="ag-side-overlay '+(menuOpen?'is-open':'')+'" data-menu></div>';
   }
   function mobileNav(){return '<nav class="ag-mobile-nav" aria-label="Điều hướng điện thoại">'+[['overview','Tổng quan','grid'],['fields','Cánh đồng','field'],['tasks','Công việc','clipboard'],['observations','Quan sát','camera'],['settings','Thêm','menu']].map(([p,label,ico])=>'<button data-go="'+p+'" class="'+(page===p?'is-active':'')+'">'+I(ico,20)+'<span>'+label+'</span></button>').join('')+'</nav>';}
   function pageHead(kicker,heading,description,kind,btn='Thêm mới'){
@@ -201,12 +201,38 @@ const app = document.querySelector('#app');
     const db=await imageDB();if(!db)return;
     return new Promise(resolve=>{const tx=db.transaction('images','readwrite');tx.objectStore('images').delete(id);tx.oncomplete=()=>{db.close();resolve();};tx.onerror=()=>{db.close();resolve();};});
   }
-  function openModal(kind,id=null){modal=kind;editing=id;render();app.querySelector('#ag-dialog-title')?.focus?.();app.querySelector('#ag-record-form input:not([type="hidden"])')?.focus();}
-  function closeModal(){modal=null;editing=null;render();}
+  let modalCloseTimer=null;
+  function openModal(kind,id=null){
+    clearTimeout(modalCloseTimer);
+    modal=kind;editing=id;
+    document.body.classList.add('ag-modal-open');
+    render();
+    app.querySelector('#ag-record-form input:not([type="hidden"])')?.focus({preventScroll:true});
+  }
+  function closeModal(){
+    if(!modal)return;
+    clearTimeout(modalCloseTimer);
+    const previousKind=modal;
+    const finish=()=>{
+      modal=null;editing=null;
+      document.body.classList.remove('ag-modal-open');
+      render();
+      app.querySelector('[data-new="'+previousKind+'"]')?.focus({preventScroll:true});
+    };
+    const backdrop=app.querySelector('.ag-dialog-backdrop');
+    if(!backdrop||matchMedia('(prefers-reduced-motion: reduce)').matches){finish();return;}
+    backdrop.classList.add('is-leaving');
+    modalCloseTimer=setTimeout(finish,155);
+  }
   function navigate(target){
+    const previousPage=page;
     page=target==='home'?'overview':target==='season'?'seasons':target==='scan'?'observations':target;
     if(!titleOf[page])page='overview';
-    query='';filter='all';menuOpen=false;modal=null;render();window.scrollTo({top:0,behavior:'instant'});
+    query='';filter='all';menuOpen=false;modal=null;
+    document.body.classList.remove('ag-modal-open');
+    render();
+    if(previousPage!==page)app.querySelector('.ag-main')?.classList.add('ag-page-enter');
+    window.scrollTo({top:0,behavior:'instant'});
   }
   async function saveRecord(form){
     const kind=form.dataset.type, data=Object.fromEntries(new FormData(form).entries());
@@ -222,7 +248,7 @@ const app = document.querySelector('#app');
     if((kind==='observations'||kind==='fields')&&photo instanceof File&&photo.size){if(photo.size>8*1024*1024){toast('Ảnh không được vượt quá 8MB.');return;}if(!(await imagePut(id,photo))){toast('Không thể lưu ảnh trên thiết bị này.');return;}}
     const rows=[...records[kind]],at=rows.findIndex(x=>x.id===id);if(at<0)rows.unshift(row);else rows[at]=row;records[kind]=rows;
     if(!cloudSession){local=records;persist();}
-    modal=null;editing=null;render();toast('Đã lưu '+(kind==='observations'?'quan sát':'thông tin')+'.');
+    modal=null;editing=null;document.body.classList.remove('ag-modal-open');render();toast('Đã lưu '+(kind==='observations'?'quan sát':'thông tin')+'.');
     if(cloudSession)remoteSave(kind,row).catch(()=>{syncState='error';toast('Mất kết nối. Thay đổi chưa đồng bộ lên máy chủ.');});
   }
   async function removeRecord(kind,id){
@@ -350,7 +376,13 @@ const app = document.querySelector('#app');
   app.addEventListener('click',async event=>{
     const target=event.target.closest('[data-go],[data-new],[data-edit],[data-remove],[data-toggle],[data-action],[data-menu],[data-dismiss]');
     if(!target)return;
-    if(target.hasAttribute('data-menu')){menuOpen=!menuOpen;render();return;}
+    if(target.hasAttribute('data-menu')){
+      menuOpen=!menuOpen;
+      app.querySelector('.ag-sidebar')?.classList.toggle('is-open',menuOpen);
+      app.querySelector('.ag-side-overlay')?.classList.toggle('is-open',menuOpen);
+      app.querySelector('.ag-mobile-header [data-menu]')?.setAttribute('aria-expanded',String(menuOpen));
+      return;
+    }
     if(target.hasAttribute('data-dismiss')){if(target.classList.contains('ag-dialog-backdrop')&&target!==event.target)return;closeModal();return;}
     if(target.dataset.go){navigate(target.dataset.go);return;}
     if(target.dataset.new){openModal(target.dataset.new);return;}
@@ -369,13 +401,29 @@ const app = document.querySelector('#app');
     if(e.target.id==='ag-record-form'){e.preventDefault();if(!working){working=true;try{await saveRecord(e.target);}finally{working=false;}}}
     if(e.target.id==='ag-login-form'){e.preventDefault();if(!working)await authenticate(e.target);}
   });
+  let searchTimer=null;
   app.addEventListener('input',e=>{
-    if(e.target.id==='ag-search'){query=e.target.value;render();}
+    if(e.target.id==='ag-search'){
+      query=e.target.value;
+      clearTimeout(searchTimer);
+      searchTimer=setTimeout(()=>{if(!modal)render();},125);
+    }
   });
   app.addEventListener('change',async e=>{
     if(e.target.id==='ag-import'&&e.target.files?.[0])await importJSON(e.target.files[0]);
   });
-  window.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal)closeModal();});
+  window.addEventListener('keydown',e=>{
+    if(e.key!=='Escape')return;
+    if(modal){closeModal();return;}
+    if(menuOpen){
+      menuOpen=false;
+      app.querySelector('.ag-sidebar')?.classList.remove('is-open');
+      app.querySelector('.ag-side-overlay')?.classList.remove('is-open');
+      const trigger=app.querySelector('.ag-mobile-header [data-menu]');
+      trigger?.setAttribute('aria-expanded','false');
+      trigger?.focus({preventScroll:true});
+    }
+  });
   window.AGRIDELTAOpenDemo = (target='home')=>navigate(target);
   window.AGRIDELTAOpenAuth = ()=>navigate('settings');
   window.AGRIDELTAWorkspace = {open:navigate, version:'2.0', cloudAvailable};

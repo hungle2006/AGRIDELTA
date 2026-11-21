@@ -1,0 +1,74 @@
+/* AGRIDELTA Motion System: meaningful response without motion overload. */
+:root{--ag-kinetic:cubic-bezier(.2,0,0,1);--ag-fast:135ms;--ag-mid:220ms;-webkit-tap-highlight-color:transparent}
+.earth-site :is(button,a),.ag-app :is(button,a),.ag-dialog-backdrop button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.earth-site button,.ag-app button,.ag-dialog-backdrop button{user-select:none;-webkit-user-select:none}
+.earth-site :is(.earth-primary,.earth-secondary,.earth-icon-button,.earth-login,.root-next,.workflow-card,.start-dock-button),
+.ag-app :is(.ag-btn,.ag-icon-btn,.ag-nav button,.ag-mobile-nav button,.ag-check,.ag-card-actions button,.ag-back-start,.ag-side-settings),
+.ag-dialog-backdrop :is(.ag-btn,.ag-icon-btn){
+ transition:transform var(--ag-fast) var(--ag-kinetic),
+ background-color var(--ag-fast) var(--ag-kinetic),
+ border-color var(--ag-fast) var(--ag-kinetic),
+ box-shadow var(--ag-mid) var(--ag-kinetic);
+}
+.earth-site :is(.earth-primary,.earth-secondary,.earth-icon-button,.earth-login,.root-next,.workflow-card,.start-dock-button).ag-pressing,
+.ag-app :is(.ag-btn,.ag-icon-btn,.ag-nav button,.ag-mobile-nav button,.ag-check,.ag-card-actions button,.ag-back-start,.ag-side-settings).ag-pressing,
+.ag-dialog-backdrop :is(.ag-btn,.ag-icon-btn).ag-pressing{transform:scale(.96)}
+.earth-site .root-feature.ag-pressing{background:#c0dda9;box-shadow:0 0 0 6px #b3d69377}
+.earth-site :is(.earth-primary,.root-next),.ag-app .ag-btn-primary,.ag-dialog-backdrop .ag-btn-primary{position:relative;isolation:isolate;overflow:hidden}
+.ag-tap-ripple{position:absolute;width:26px;height:26px;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%) scale(.2);background:radial-gradient(circle,#ffffff75,#ffffff20 65%,transparent);animation:ag-ripple 430ms var(--ag-kinetic) both}
+@keyframes ag-ripple{from{opacity:.8;transform:translate(-50%,-50%) scale(.2)}to{opacity:0;transform:translate(-50%,-50%) scale(11)}}
+.earth-site button:focus-visible,.earth-site a:focus-visible,.ag-app button:focus-visible,.ag-app a:focus-visible,.ag-dialog-backdrop :focus-visible{outline:3px solid #8eae6e;outline-offset:3px}
+.earth-site [data-ag-reveal]{animation:none!important;transition:opacity 290ms var(--ag-kinetic),translate 290ms var(--ag-kinetic),box-shadow var(--ag-mid) var(--ag-kinetic);transition-delay:var(--ag-stagger,0ms)}
+.earth-site [data-ag-reveal="pending"]{opacity:0;translate:0 12px}
+.earth-site [data-ag-reveal="shown"]{opacity:1;translate:0 0}
+.earth-site .earth-header{transition:background-color var(--ag-mid) var(--ag-kinetic),box-shadow var(--ag-mid) var(--ag-kinetic)}
+.earth-site .earth-header.ag-raised{background:#f8faf3f8;box-shadow:0 9px 25px #25412a19}
+.earth-site .plant-stages li{transition:background-color var(--ag-mid) var(--ag-kinetic),color var(--ag-fast) var(--ag-kinetic),box-shadow var(--ag-mid) var(--ag-kinetic)}
+.earth-site .plant-stages li[aria-current="step"]{animation:ag-stage 280ms var(--ag-kinetic)}
+@keyframes ag-stage{from{box-shadow:0 0 0 0 #c3dfa800}55%{box-shadow:0 0 0 5px #c3dfa857}to{box-shadow:0 6px 16px #10291924}}
+.earth-site .earth-dialog[open] .earth-dialog-inner{animation:ag-dialog-in 300ms var(--ag-kinetic) both}
+.earth-site .earth-dialog[open]::backdrop{animation:ag-fade-in 160ms var(--ag-kinetic) both}
+@keyframes ag-dialog-in{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes ag-fade-in{from{opacity:0}to{opacity:1}}
+.ag-app .ag-main.ag-page-enter{animation:ag-page-in 220ms var(--ag-kinetic) both}
+@keyframes ag-page-in{from{opacity:.72;transform:translateY(8px)}to{opacity:1;transform:none}}
+.ag-app .ag-toast:not([hidden]){animation:ag-toast-in 250ms var(--ag-kinetic) both}
+@keyframes ag-toast-in{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.ag-dialog-backdrop{animation:ag-fade-in 150ms var(--ag-kinetic) both}
+.ag-dialog{animation:ag-dialog-in 300ms var(--ag-kinetic) both;overscroll-behavior:contain}
+.ag-dialog-backdrop.is-leaving{animation:ag-fade-out 150ms var(--ag-kinetic) both;pointer-events:none}
+.ag-dialog-backdrop.is-leaving .ag-dialog{animation:ag-dialog-out 150ms var(--ag-kinetic) both}
+@keyframes ag-fade-out{to{opacity:0}}
+@keyframes ag-dialog-out{to{opacity:0;transform:translateY(-6px) scale(.99)}}
+body.ag-modal-open{overflow:hidden}
+.ag-app :is(.ag-form-field input,.ag-form-field select,.ag-form-field textarea,.ag-search){transition:border-color 150ms var(--ag-kinetic),box-shadow 180ms var(--ag-kinetic)}
+/* Drawer stays mounted so transforms can interpolate on open and close. */
+@media(max-width:930px){
+ .ag-app .ag-sidebar{transition:transform 310ms var(--ag-kinetic);overscroll-behavior:contain}
+ .ag-app .ag-side-overlay{display:block;position:fixed;inset:0;z-index:65;background:#11241991;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 180ms var(--ag-kinetic),visibility 180ms}
+ .ag-app .ag-side-overlay.is-open{opacity:1;visibility:visible;pointer-events:auto}
+}
+@media(max-width:760px){
+ .earth-site .earth-nav{display:grid!important;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-8px) scale(.98);transform-origin:top right;transition:opacity 150ms var(--ag-kinetic),transform 205ms var(--ag-kinetic),visibility 150ms}
+ .earth-site.earth-menu-open .earth-nav{opacity:1;visibility:visible;pointer-events:auto;transform:none}
+ .earth-site .earth-menu{min-width:44px;min-height:44px}
+ .ag-dialog-backdrop{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+}
+@media(hover:none),(pointer:coarse){
+ .earth-site :is(.workflow-card,.start-dock-button):hover,.ag-app :is(.ag-field-card,.ag-observe-card):hover{transform:none}
+ .earth-site :is(.workflow-card,.start-dock-button):hover img{transform:none;filter:none}
+ .earth-site :is(.earth-primary,.earth-icon-button):not(.ag-pressing):hover,.ag-app .ag-btn:not(.ag-pressing):hover{transform:none}
+ .ag-app :is(input,textarea,select),.ag-dialog-backdrop :is(input,textarea,select),.earth-site .earth-search-input input{font-size:16px!important}
+}
+@media(hover:hover) and (pointer:fine){
+ .earth-site :is(.workflow-card,.start-dock-button):hover{box-shadow:0 15px 31px #214e2b27}
+ .ag-app :is(.ag-field-card,.ag-observe-card):hover{box-shadow:0 14px 30px #214e2b19}
+ .ag-app .ag-nav button:hover{background:#e6f1df}
+}
+@media(prefers-reduced-motion:reduce){
+ .earth-site [data-ag-reveal]{opacity:1!important;translate:none!important;animation:none!important;transition:none!important}
+ .earth-site .plant-stages li[aria-current="step"],.earth-site .earth-dialog[open] .earth-dialog-inner,.earth-site .earth-dialog[open]::backdrop,
+ .ag-app .ag-main.ag-page-enter,.ag-app .ag-toast:not([hidden]),.ag-dialog-backdrop,.ag-dialog-backdrop.is-leaving,.ag-dialog-backdrop .ag-dialog{animation:none!important}
+ .ag-app .ag-sidebar,.earth-site .earth-nav{transition-duration:75ms!important}
+ .ag-tap-ripple{display:none!important}
+}

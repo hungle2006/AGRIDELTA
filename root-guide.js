@@ -1,4 +1,5 @@
 import {createLiveEarth, createRootEarth} from './live-earth.js';
+import {initAgrideltaMotion} from './interaction-motion.js';
 import {storyProgress, rootCountAt, rootRevealAt, rootScrollTarget} from './scroll-story-state.js';
 import {FEATURES, guideIndex, searchGuides} from './root-guide-data.js';
 import {START_IMAGES, startPhoto} from './start-photography.js';
@@ -500,6 +501,7 @@ site.addEventListener('keydown', event => {
 });
 
 window.AGRIDELTARootGuide = {open, close: () => enter(), go: enter};
+initAgrideltaMotion(site);
 window.AGRIDELTAStory = {replay: () => { open(); harvestTriggered = false; plant.replay(); }};
  
 // Shareable, reload-safe entrance to the operational workspace.
