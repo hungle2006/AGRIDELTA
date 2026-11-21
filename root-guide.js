@@ -44,7 +44,7 @@ const workflow = [
   {title: 'Ghi việc chăm sóc', detail: 'Theo dõi ngày tưới, bón phân và các việc đã làm.'},
 ];
 const rootPoints = [[8.8,51.3],[25.9,67.9],[52.4,78.2],[72.6,70.9],[91.4,47.8]];
-const brand = `<img src="/assets/agridelta-brand-mark.webp" alt="" width="38" height="38"><strong>AGRIDELTA</strong>`;
+const brand = `<img class="ag-eco-wordmark" src="/assets/agridelta-eco-logo.svg" alt="" width="2172" height="724" decoding="async">`;
 const site = document.createElement('div');
 site.id = 'rg-site';
 site.className = 'earth-site';

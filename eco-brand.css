@@ -1,0 +1,48 @@
+/* Brand refresh · vector-traced from the user's approved AGRIDELTA eco logo.
+   One full wordmark for Start and app; icon-only favicon. The former markup
+   had a different emblem plus CSS text and could look inconsistent. */
+.earth-site .earth-brand {
+  display:inline-flex;align-items:center;
+  gap:0;flex:0 0 auto;
+  line-height:1;max-width:100%;
+}
+.earth-site .earth-brand img.ag-eco-wordmark {
+  display:block;
+  width:clamp(162px,14.2vw,194px);
+  height:auto;aspect-ratio:2172/724;
+  max-width:100%;
+  object-fit:contain;
+  border:0;
+  image-rendering:auto;
+}
+.earth-site .earth-brand:hover img.ag-eco-wordmark {filter:saturate(1.08)}
+.ag-app .ag-brand {
+  display:flex;align-items:center;
+  gap:8px;padding:0 8px 37px;
+  min-width:0;
+}
+.ag-app .ag-brand img.ag-eco-wordmark {
+  width:183px;height:auto;
+  max-width:calc(100% - 3px);
+  display:block;object-fit:contain;border-radius:0;
+  image-rendering:auto;
+}
+@media (max-width:980px) {
+  .earth-site .earth-brand img.ag-eco-wordmark {width:177px}
+}
+@media (max-width:760px) {
+  .earth-site .earth-header-inner {min-width:0}
+  .earth-site .earth-brand {min-width:0;margin-right:auto}
+  .earth-site .earth-brand img.ag-eco-wordmark {
+    width:clamp(148px,45vw,181px);
+    height:auto;max-width:100%;
+  }
+  .earth-site .earth-header-actions {flex:0 0 auto}
+}
+@media (max-width:365px) {
+  .earth-site .earth-brand img.ag-eco-wordmark {width:clamp(136px,45vw,164px)}
+  .ag-app .ag-brand img.ag-eco-wordmark {width:174px}
+}
+@media (prefers-reduced-motion:reduce) {
+  .earth-site .earth-brand img.ag-eco-wordmark {transition:none!important}
+}
