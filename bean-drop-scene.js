@@ -192,6 +192,14 @@ export function initBeanTransitions(site){
     entries.forEach(entry=>{if(entry.isIntersecting)trigger(entry.target);});
   },{rootMargin:'-24% 0px -24% 0px',threshold:.13});
   dividers.forEach(el=>observer.observe(el));
+  // Direct links to a divider also move the camera there once the Start
+  // markup has been mounted dynamically, allowing the same 2-second drop.
+  if(/^#bean-transition-0[1-4]$/.test(window.location.hash)){
+    requestAnimationFrame(()=>{
+      const selected=site.querySelector(window.location.hash);
+      selected?.scrollIntoView({block:'center',behavior:'instant'});
+    });
+  }
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
   return {destroy(){observer.disconnect();stop();renderer?.dispose();clearTimeout(cssTimeout);}};
 }
