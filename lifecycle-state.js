@@ -1,7 +1,10 @@
 export const LIFECYCLE_SECONDS = 28;
 export const HARVEST_SECONDS = 32.5;
-export const GROWTH_RATE = 2.8;
-export const SCROLL_GROWTH_RATE = 5;
+// The 28-second Blender timeline plays at 0.52x (~54 seconds) to show
+// leaves and stems unfurl gradually. Scrolling never accelerates the growth.
+export const GROWTH_RATE = 0.52;
+export const SCROLL_GROWTH_RATE = GROWTH_RATE;
+export const HARVEST_RATE = 0.8;
 
 export function plantPhase(time, harvestRequested) {
   if (time < LIFECYCLE_SECONDS) return 'growing';
@@ -14,7 +17,7 @@ export function advancePlantTime(time, elapsed, harvestRequested) {
     const rate = harvestRequested ? SCROLL_GROWTH_RATE : GROWTH_RATE;
     return Math.min(LIFECYCLE_SECONDS, time + rate*elapsed);
   }
-  return harvestRequested ? Math.min(HARVEST_SECONDS, time+elapsed) : time;
+  return harvestRequested ? Math.min(HARVEST_SECONDS, time+HARVEST_RATE*elapsed) : time;
 }
 export const careAt = time => time >= .33 && time < 3.5 ? 'watering'
   : time >= 3.70 && time < 6.3 ? 'fertilizing' : '';

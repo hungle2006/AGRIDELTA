@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {
- advancePlantTime, careAt, HARVEST_SECONDS, LIFECYCLE_SECONDS, nextRoot, plantPhase, stageAt, STAGE_TIMES,
+ advancePlantTime, careAt, HARVEST_SECONDS, LIFECYCLE_SECONDS, GROWTH_RATE, SCROLL_GROWTH_RATE, HARVEST_RATE, nextRoot, plantPhase, stageAt, STAGE_TIMES,
 } from '../lifecycle-state.js';
 test('one deliberate gesture unlocks one new branch, retaining previous branches',()=>{
  let count=0,active=-1;for(let i=0;i<5;i++){const next=nextRoot(count,active);assert.deepEqual(next,{count:i+1,index:i});count=next.count;active=next.index;}
@@ -29,9 +29,10 @@ test('lifecycle includes flower and fruit after germination in botanical order',
 
 
 test('growth holds the ripe pods until harvest is requested', () => {
- assert.ok(advancePlantTime(0, 1, false) > 1);
- assert.ok(advancePlantTime(0, 1, true) > advancePlantTime(0, 1, false));
- assert.equal(advancePlantTime(0, 20, true), LIFECYCLE_SECONDS);
+ assert.ok(advancePlantTime(0, 1, false) > 0);
+ assert.ok(advancePlantTime(0, 1, false) < 1,'Seedling should not jump forward in one second');
+ assert.equal(advancePlantTime(0, 1, false), advancePlantTime(0, 1, true),'Scrolling does not accelerate growth');
+ assert.equal(advancePlantTime(0, 60, true), LIFECYCLE_SECONDS);
  assert.equal(advancePlantTime(LIFECYCLE_SECONDS, 30, false), LIFECYCLE_SECONDS);
  assert.equal(plantPhase(LIFECYCLE_SECONDS, false), 'ripe');
  assert.equal(plantPhase(LIFECYCLE_SECONDS, true), 'harvesting');
@@ -85,4 +86,24 @@ test('Blender animates the farm care and lets each pod rest before the next drop
  }
  assert.ok(previousGone <= HARVEST_SECONDS);
 
+});
+
+test('Bean grows smoothly across all five stages in roughly 54 seconds',()=>{
+ assert.equal(GROWTH_RATE,SCROLL_GROWTH_RATE);
+ assert.ok(GROWTH_RATE>=.45 && GROWTH_RATE<=.6);
+ assert.ok(LIFECYCLE_SECONDS/GROWTH_RATE>=45 && LIFECYCLE_SECONDS/GROWTH_RATE<=65);
+ assert.ok(HARVEST_RATE>0 && HARVEST_RATE<1);
+ const stages=[0,2.5,7.5,17.4,22.5,LIFECYCLE_SECONDS];
+ for(let i=1;i<stages.length;i++)assert.ok((stages[i]-stages[i-1])/GROWTH_RATE>4);
+ const play=scroll=>Array.from({length:50},()=>1).reduce((t,delta)=>advancePlantTime(t,delta,scroll),0);
+ assert.equal(play(false),play(true));
+ assert.ok(play(false)<LIFECYCLE_SECONDS);
+});
+test('No pause button or pause logic is shipped in the Start experience',()=>{
+ const root=readFileSync(new URL('../root-guide.js',import.meta.url),'utf8');
+ const live=readFileSync(new URL('../live-earth.js',import.meta.url),'utf8');
+ assert.doesNotMatch(root,/data-pause|plantControl|togglePause|Tạm dừng chuyển động/);
+ assert.doesNotMatch(live,/togglePause|paused\s*=/);
+ assert.match(root,/id="live-earth"/);
+ assert.match(root,/id="lifecycle-label"/);
 });

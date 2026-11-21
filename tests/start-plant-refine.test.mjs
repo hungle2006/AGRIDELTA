@@ -17,7 +17,7 @@ test('3D display has no microcopy or duplicated stage counter in the DOM',()=>{
 test('Plant lifecycle and interaction are retained with evenly spaced stages',()=>{
   assert.match(root,/id="live-earth"/);
   assert.match(root,/id="lifecycle-label"/);
-  assert.match(root,/data-pause/);
+  assert.doesNotMatch(root,/data-pause/);
   assert.match(root,/createLiveEarth/);
   assert.match(root,/stageIndicators\.forEach/);
   assert.match(css,/grid-template-rows:repeat\(5,minmax\(0,1fr\)\)/);

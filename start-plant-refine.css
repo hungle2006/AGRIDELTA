@@ -48,7 +48,7 @@
   position:relative;
   margin:0 0 clamp(12px,2vh,22px);
   padding:0 0 clamp(15px,2vh,23px);
-  padding-right:37px;
+  padding-right:0;
   border-bottom:1px solid #ffffff27;
 }
 .earth-site .plant-controls-heading .plant-controls-copy {min-width:0}
@@ -183,7 +183,7 @@
     grid-template-columns:1fr;
     gap:0;
     margin:0 0 10px;
-    padding:0 43px 0 2px;
+    padding:0 2px;
     border:0;
   }
   .earth-site .plant-controls h2 {font-size:16px;line-height:1.3}

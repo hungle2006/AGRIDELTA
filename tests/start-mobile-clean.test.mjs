@@ -17,6 +17,6 @@ test('mobile layout removes repetitive and decorative elements, preserves 3D and
   assert.match(css,/max-width:370px/);
   assert.match(js,/id="live-earth"/);
   assert.match(js,/id="lifecycle-label"/);
-  assert.match(js,/data-pause/);
+  assert.doesNotMatch(js,/data-pause/);
   assert.match(js,/id="rg-roots"/);
 });

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
 import {
-  LIFECYCLE_SECONDS, HARVEST_SECONDS, GROWTH_RATE, SCROLL_GROWTH_RATE, stageAt, careAt, plantPhase, advancePlantTime,
+  LIFECYCLE_SECONDS, HARVEST_SECONDS, GROWTH_RATE, SCROLL_GROWTH_RATE, HARVEST_RATE, stageAt, careAt, plantPhase, advancePlantTime,
 } from './lifecycle-state.js';
 import {rootRevealAt} from './scroll-story-state.js';
 import {mountPlantFallback, mountRootFallback} from './earth-fallback.js';
@@ -65,7 +65,6 @@ export function createLiveEarth(host, onUpdate) {
   const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
   let time = motionPreference.matches ? LIFECYCLE_SECONDS : 0;
   let harvestRequested = false;
-  let paused = false;
   let lastFrame = null;
   let frame = 0;
   let inView = false;
@@ -79,12 +78,12 @@ export function createLiveEarth(host, onUpdate) {
   const camera = orthographicCamera(3.85, 3.30, 1.43);
 
   function shouldAdvance(phase = plantPhase(time, harvestRequested)) {
-    return (mixer || fallback) && visible && inView && !paused && !document.hidden
+    return (mixer || fallback) && visible && inView && !document.hidden
       && (phase === 'growing' || phase === 'harvesting');
   }
 
   function syncFallback(phase) {
-    const rate = phase === 'growing' ? (harvestRequested ? SCROLL_GROWTH_RATE : GROWTH_RATE) : 1;
+    const rate = phase === 'growing' ? (harvestRequested ? SCROLL_GROWTH_RATE : GROWTH_RATE) : HARVEST_RATE;
     fallback?.(time, Boolean(shouldAdvance(phase)), rate);
   }
 
@@ -95,7 +94,7 @@ export function createLiveEarth(host, onUpdate) {
     if (host.dataset.harvestState !== phase) host.dataset.harvestState = phase;
     const care = careAt(time);
     if (host.dataset.careAction !== care) host.dataset.careAction = care;
-    onUpdate(stage, phase, paused, care);
+    onUpdate(stage, phase, care);
     syncFallback(phase);
     if (shouldAdvance(phase)) {
       if (!frame) frame = requestAnimationFrame(tick);
@@ -182,7 +181,6 @@ export function createLiveEarth(host, onUpdate) {
   motionPreference.addEventListener('change', event => {
     if (!event.matches) return;
     time = harvestRequested ? HARVEST_SECONDS : LIFECYCLE_SECONDS;
-    paused = false;
     draw();
   });
   update();
@@ -197,14 +195,8 @@ export function createLiveEarth(host, onUpdate) {
     replay() {
       time = motionPreference.matches ? LIFECYCLE_SECONDS : 0;
       harvestRequested = false;
-      paused = false;
       lastFrame = null;
       draw();
-    },
-    togglePause() {
-      paused = !paused;
-      lastFrame = null;
-      update();
     },
     setVisible(value) {
       visible = value;

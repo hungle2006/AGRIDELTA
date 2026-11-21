@@ -8,7 +8,7 @@ test('Start editorial redesign keeps the fully functional WebGL lifecycle and na
   assert.match(root,/id="live-earth"/);
   assert.match(root,/class="plant-art"/);
   assert.match(root,/class="plant-controls"/);
-  assert.match(root,/data-pause/);
+  assert.doesNotMatch(root,/data-pause/);
   assert.match(root,/id="lifecycle-label"/);
   assert.match(root,/data-enter-page="home"/);
   assert.match(root,/href="#rg-roots"/);

@@ -16,16 +16,14 @@ import leftIcon from '@phosphor-icons/core/assets/regular/arrow-left.svg?raw';
 import downIcon from '@phosphor-icons/core/assets/regular/arrow-down.svg?raw';
 import closeIcon from '@phosphor-icons/core/assets/regular/x.svg?raw';
 import menuIcon from '@phosphor-icons/core/assets/regular/list.svg?raw';
-import playIcon from '@phosphor-icons/core/assets/regular/play-circle.svg?raw';
 import seedIcon from '@phosphor-icons/core/assets/regular/grains.svg?raw';
 import flowerIcon from '@phosphor-icons/core/assets/regular/flower-lotus.svg?raw';
-import pauseIcon from '@phosphor-icons/core/assets/regular/pause.svg?raw';
 
 const icons = {
   farm: farmIcon, calendar: calendarIcon, clipboard: clipboardIcon, plant: plantIcon,
   cube: cubeIcon, leaf: leafIcon, book: bookIcon, search: searchIcon, right: rightIcon,
-  left: leftIcon, down: downIcon, close: closeIcon, menu: menuIcon, play: playIcon,
-  pause: pauseIcon, seed: seedIcon, flower: flowerIcon,
+  left: leftIcon, down: downIcon, close: closeIcon, menu: menuIcon,
+  seed: seedIcon, flower: flowerIcon,
 };
 const icon = name => `<span class="earth-icon" aria-hidden="true">${icons[name]}</span>`;
 const titles = ['Quản lý cánh đồng', 'Quản lý mùa vụ', 'Công việc hằng ngày', 'Quan sát cây trồng', 'Quản lý đơn hàng'];
@@ -103,7 +101,6 @@ site.innerHTML = `
             <div class="plant-controls-heading">
               <h2 id="journey-title">Vòng đời<br>cây đậu.</h2>
               <p id="lifecycle-label" aria-live="polite">${stageNotes[0]}</p>
-              <button type="button" class="earth-icon-button" data-pause aria-label="Tạm dừng chuyển động" title="Tạm dừng chuyển động">${icon('pause')}</button>
             </div>
             <ol class="plant-stages" aria-label="Các giai đoạn của cây đậu">${stages.map((stage,i) => `
               <li${i === 0 ? ' aria-current="step"' : ''}>${icon(stageIcons[i])}<span>${stage}</span></li>`).join('')}
@@ -228,7 +225,6 @@ site.addEventListener('error', event => {
 
 const find = selector => site.querySelector(selector);
 const stageIndicators = [...site.querySelectorAll('.plant-stages li')];
-const plantControl = find('[data-pause]');
 const lifecycleLabel = find('#lifecycle-label');
 const phaseNotes = {
   ripe: 'Cây đã có quả. Cuộn xuống để xem thu hoạch.',
@@ -240,8 +236,8 @@ const careNotes = {
   fertilizing: 'Hạt phân rơi xuống quanh mầm đậu.',
 };
 let plantUI = '';
-const plant = createLiveEarth(find('#live-earth'), (stage, phase, paused, care) => {
-  const key = `${stage}:${phase}:${paused}:${care}`;
+const plant = createLiveEarth(find('#live-earth'), (stage, phase, care) => {
+  const key = `${stage}:${phase}:${care}`;
   if (key === plantUI) return;
   plantUI = key;
   stageIndicators.forEach((indicator, index) => {
@@ -249,11 +245,6 @@ const plant = createLiveEarth(find('#live-earth'), (stage, phase, paused, care) 
     else indicator.removeAttribute('aria-current');
   });
   lifecycleLabel.textContent = phaseNotes[phase] ?? careNotes[care] ?? stageNotes[stage];
-  const playbackLabel = paused ? 'Tiếp tục chuyển động' : 'Tạm dừng chuyển động';
-  plantControl.hidden = phase === 'ripe' || phase === 'harvested';
-  plantControl.innerHTML = icon(paused ? 'play' : 'pause');
-  plantControl.title = playbackLabel;
-  plantControl.setAttribute('aria-label', playbackLabel);
 });
 
 const rootSection = find('.root-features');
@@ -479,7 +470,6 @@ site.addEventListener('click', event => {
   else if (button.hasAttribute('data-open-guide')) openGuide(button.dataset.openGuide);
   else if (button.hasAttribute('data-enter-page')) enter(button.dataset.enterPage);
   else if (button.hasAttribute('data-enter-auth')) enter('home', true);
-  else if (button === plantControl) plant.togglePause();
   else if (button === growButton) growNext();
   else if (button.hasAttribute('data-search')) {
     setMenu(false);

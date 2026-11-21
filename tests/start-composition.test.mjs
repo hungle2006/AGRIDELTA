@@ -5,7 +5,7 @@ const html=readFileSync(new URL('../root-guide.js',import.meta.url),'utf8');
 const css=readFileSync(new URL('../start-composition.css',import.meta.url),'utf8');
 const index=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 test('Start has actual three-zone storytelling with real source photo and live Blender',()=>{
- for(const token of ['hero-editorial-note','START_IMAGES.hero','plant-art','plant-controls','lifecycle-label','hero-bottom-rail','id="live-earth"','data-pause','href="#rg-roots"']) assert.ok(html.includes(token),token);
+ for(const token of ['hero-editorial-note','START_IMAGES.hero','plant-art','plant-controls','lifecycle-label','hero-bottom-rail','id="live-earth"','href="#rg-roots"']) assert.ok(html.includes(token),token);
  assert.doesNotMatch(html,/stageReadout\.innerHTML/);
  assert.ok(index.includes('/start-composition.css'));
  assert.match(css,/grid-template-columns:minmax\(0,1fr\) clamp\(175px,14vw,230px\)/);
