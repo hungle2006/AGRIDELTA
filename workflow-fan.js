@@ -33,6 +33,8 @@ export function initWorkflowFan(site) {
   }
   function schedule() {if (!frame) frame = requestAnimationFrame(render);}
   function measure() {
+    // The Start DOM is initially hidden. Read geometry only once it is visible.
+    if (site.hidden) return;
     // offset positions ignore transforms; all cards start at the first card's origin.
     const first = items[0];
     geometry = items.map(card => ({x:first.offsetLeft-card.offsetLeft,y:first.offsetTop-card.offsetTop}));
@@ -41,9 +43,10 @@ export function initWorkflowFan(site) {
     travel = Math.max(180,(parseFloat(computed.paddingBottom)||450)-24);
     headerHeight = header?.getBoundingClientRect().height || 68;
     render();
+    section.dataset.workflowReady = 'true';
   }
-  section.dataset.workflowReady = 'true';
   measure();
+  site.addEventListener('agridelta-start-open',measure,{signal});
   window.addEventListener('scroll',schedule,{passive:true,signal});
   window.addEventListener('resize',measure,{passive:true,signal});
   const observer = new ResizeObserver(measure);

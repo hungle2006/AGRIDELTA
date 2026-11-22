@@ -578,6 +578,7 @@ function open() {
     window.history.replaceState(window.history.state, '', url);
   }
   site.hidden = false;
+  site.dispatchEvent(new Event('agridelta-start-open'));
   document.body.classList.add('rg-experience-mode');
   document.body.classList.remove('rg-app-mode');
   setStartScrollLocked(!heroTextComplete);
