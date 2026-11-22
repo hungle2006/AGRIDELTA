@@ -240,12 +240,12 @@ body:has(.ag-auth) #app { height: 100dvh; min-height: 0; overflow: hidden; }
 }
 .ag-auth-intro {
   display: grid;
-  row-gap: clamp(6px,1.1dvh,11px);
+  row-gap: clamp(16px,2.6dvh,22px);
   margin-block: 0 clamp(18px,3.2dvh,28px);
 }
 .ag-auth-intro h1 {
   margin: 0;
-  line-height: 1.03;
+  line-height: 1.16;
   letter-spacing: -.045em;
 }
 .ag-auth-sub {
@@ -306,7 +306,7 @@ body:has(.ag-auth) #app { height: 100dvh; min-height: 0; overflow: hidden; }
   .ag-auth-switch { margin-top: clamp(14px,2.5dvh,19px); }
 }
 @media(max-height:640px) {
-  .ag-auth-intro { row-gap: 5px; margin-bottom: 13px; }
+  .ag-auth-intro { row-gap: 12px; margin-bottom: 13px; }
   .ag-auth-form > label { margin-bottom: 6px; }
   .ag-auth-form > input { min-height: 40px; }
   .ag-auth-form > .ag-auth-label-row { min-height: 23px; margin: 11px 0 6px; }

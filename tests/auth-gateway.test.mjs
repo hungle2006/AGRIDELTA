@@ -67,7 +67,9 @@ test('Login and signup prevent document scrolling while fitting the viewport',()
 test('Login form uses consistent label and section spacing',()=>{
  const css=file('auth-gateway.css');
  assert.match(css,/Authentication typography rhythm/);
- assert.match(css,/\.ag-auth-intro \{[\s\S]*?row-gap: clamp\(6px,1\.1dvh,11px\)/);
+ assert.match(css,/\.ag-auth-intro \{[\s\S]*?row-gap: clamp\(16px,2\.6dvh,22px\)/);
+ assert.match(css,/\.ag-auth-intro h1 \{[\s\S]*?line-height: 1\.16;/);
+ assert.match(css,/\.ag-auth-intro \{ row-gap: 12px; margin-bottom: 13px; \}/);
  assert.match(css,/\.ag-auth-form > label \{[\s\S]*?margin: 0 0 8px/);
  assert.match(css,/\.ag-auth-form > \.ag-auth-label-row \{[\s\S]*?margin: clamp\(14px,2\.5dvh,22px\) 0 8px/);
  assert.match(css,/\.ag-auth-switch \{[\s\S]*?line-height: 1\.6/);
