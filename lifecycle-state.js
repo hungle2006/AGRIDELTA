@@ -1,9 +1,8 @@
 export const LIFECYCLE_SECONDS = 28;
 export const HARVEST_SECONDS = 32.5;
-// 3x faster than the previously deployed 1.04x Start playback.
-// 28 Blender seconds now play in about 9 real seconds, before harvest.
-// Root exploration and the three pod-drop animation keep their existing timing.
-export const GROWTH_RATE = 3.12;
+// The 28-second Blender growth clip runs in roughly 6.5 real seconds.
+// Harvest and the three bean-pod falls preserve their separate timing.
+export const GROWTH_RATE = 4.3;
 export const SCROLL_GROWTH_RATE = GROWTH_RATE;
 export const HARVEST_RATE = 0.8;
 
