@@ -73,3 +73,12 @@ test('Login form uses consistent label and section spacing',()=>{
  assert.match(css,/\.ag-auth-switch \{[\s\S]*?line-height: 1\.6/);
  assert.match(css,/@media\(max-height:640px\)/);
 });
+test('Authentication image contains no visible attribution links',()=>{
+ const html=authScreen({configured:true});
+ assert.match(html,/class="ag-auth-visual-image"/);
+ assert.match(html,/Đọc dấu hiệu/);
+ assert.doesNotMatch(html,/Ảnh Basile Morin|CC BY-SA 4\.0|creativecommons\.org|commons\.wikimedia\.org/);
+ const credits=file('public/photo-credits.html');
+ assert.match(credits,/Basile Morin/);
+ assert.match(credits,/CC BY-SA 4\.0/);
+});

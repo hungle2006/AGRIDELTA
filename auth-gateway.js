@@ -11,8 +11,6 @@ export function authScreen({mode='login',error='',info='',configured=false,pendi
       <img class="ag-auth-visual-image" src="/assets/observatory-forecast.webp" width="1080" height="720" alt="">
       <div class="ag-auth-visual-copy">
         <p>Đọc dấu hiệu<br>từ đồng ruộng.</p>
-        <a href="https://commons.wikimedia.org/wiki/File:Water_reflection_of_mountains,_hut,_green_rice_sheaves_scattered_in_a_paddy_field_and_clouds_with_blue_sky_in_Vang_Vieng,_Laos.jpg">Ảnh Basile Morin</a>
-        <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>
       </div>
     </div>
     <div class="ag-auth-content">

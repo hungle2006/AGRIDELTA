@@ -41,7 +41,6 @@
 }
 .ag-auth-visual-copy { margin: clamp(28px,5vw,78px); color: #fffaf1; }
 .ag-auth-visual-copy p { margin: 0 0 22px; font: 500 clamp(43px,6.3vw,97px)/.96 var(--ag-display); letter-spacing: -.045em; }
-.ag-auth-visual-copy a { color: #f2e5cc; margin-inline-end: 8px; font-size: 11px; text-underline-offset: 3px; }
 .ag-auth-content {
   min-width: 0;
   display: grid;
