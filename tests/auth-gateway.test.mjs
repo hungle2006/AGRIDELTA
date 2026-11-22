@@ -50,3 +50,16 @@ test('Firebase error display is user friendly',()=>{
  assert.match(friendlyFirebaseError({code:'auth/unauthorized-domain'}),/Domain/);
  assert.match(friendlyFirebaseError({code:'auth/popup-blocked'}),/pop-up/);
 });
+
+
+test('Login and signup prevent document scrolling while fitting the viewport',()=>{
+ const css=file('auth-gateway.css');
+ assert.match(css,/html:has\(\.ag-auth\), body:has\(\.ag-auth\)/);
+ assert.match(css,/body:has\(\.ag-auth\) #app \{ height: 100dvh; min-height: 0; overflow: hidden/);
+ assert.match(css,/\.ag-auth \{[\s\S]*?max-height: 100dvh;/);
+ assert.match(css,/\.ag-auth-visual \{ height: 100%; min-height: 0;/);
+ assert.match(css,/grid-template-rows: auto minmax\(0,1fr\)/);
+ assert.match(css,/@media\(max-width:820px\)/);
+ assert.match(css,/@media\(max-height:650px\)/);
+ assert.match(css,/overflow-y: auto;/);
+});
