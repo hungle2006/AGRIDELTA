@@ -6,6 +6,19 @@ export const GROWTH_RATE = 1.04;
 export const SCROLL_GROWTH_RATE = GROWTH_RATE;
 export const HARVEST_RATE = 0.8;
 
+// The GLB already animates three bean pods falling one after another.
+// Add horizontal motion after Blender's falling keyframes (not before).
+export const POD_FALL_DIRECTIONS = Object.freeze([-1,1,0]);
+export function podFallOffset(index, ripeY, animatedY) {
+  const direction = POD_FALL_DIRECTIONS[index] ?? 0;
+  const drop = Math.max(0, ripeY - animatedY);
+  const span = Math.max(.65, Math.abs(ripeY) * .8);
+  const progress = Math.min(1, Math.max(0, (drop - .035) / span));
+  const smooth = progress * progress * (3 - 2 * progress);
+  return {x: direction * 1.15 * smooth, tilt: direction * -.18 * smooth, progress};
+}
+
+
 export function plantPhase(time, harvestRequested) {
   if (time < LIFECYCLE_SECONDS) return 'growing';
   if (time >= HARVEST_SECONDS) return 'harvested';

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
 import {
-  LIFECYCLE_SECONDS, HARVEST_SECONDS, GROWTH_RATE, SCROLL_GROWTH_RATE, HARVEST_RATE, stageAt, careAt, plantPhase, advancePlantTime,
+  LIFECYCLE_SECONDS, HARVEST_SECONDS, GROWTH_RATE, SCROLL_GROWTH_RATE, HARVEST_RATE, stageAt, careAt, plantPhase, advancePlantTime, podFallOffset,
 } from './lifecycle-state.js';
 import {rootRevealAt} from './scroll-story-state.js';
 import {mountPlantFallback, mountRootFallback} from './earth-fallback.js';
@@ -71,6 +71,7 @@ export function createLiveEarth(host, onUpdate) {
   let visible = true;
   let renderer, observer, mixer, action, fallback;
   const careMeshes = [];
+  const podNodes = [];
   const scene = createScene();
   // Keep the tallest bean foliage inside the square WebGL frame.
   // Higher camera and look-at preserve the viewing angle while bringing the plant
@@ -109,6 +110,15 @@ export function createLiveEarth(host, onUpdate) {
     if (mixer) {
       action.reset().play();
       mixer.setTime(time);
+      // Preserve each bean's existing drop, landing and fade; add a distinct
+      // horizontal trajectory only once its own Blender fall begins.
+      if (harvestRequested && time > LIFECYCLE_SECONDS) {
+        podNodes.forEach(({node, index, ripeY}) => {
+          const {x, tilt} = podFallOffset(index, ripeY, node.position.y);
+          node.position.x += x;
+          node.rotation.z += tilt;
+        });
+      }
       const activeCare = careAt(time);
       careMeshes.forEach(({mesh, kind}) => { mesh.visible = kind === activeCare; });
       renderer.render(scene, camera);
@@ -159,6 +169,9 @@ export function createLiveEarth(host, onUpdate) {
       const model = original.clone(true);
       model.traverse(obj => {
         if (Number.isInteger(obj.userData.rootIndex)) obj.visible = false;
+        if (Number.isInteger(obj.userData.podIndex)) {
+          podNodes.push({node:obj,index:obj.userData.podIndex,ripeY:0});
+        }
         const kind = obj.userData.careKind;
         if (kind) careMeshes.push({mesh: obj, kind: kind === 'Water droplet' ? 'watering' : 'fertilizing'});
       });
@@ -166,6 +179,8 @@ export function createLiveEarth(host, onUpdate) {
       mixer = new THREE.AnimationMixer(model);
       action = mixer.clipAction(animations[0]).setLoop(THREE.LoopOnce, 1);
       action.clampWhenFinished = true;
+      mixer.setTime(LIFECYCLE_SECONDS);
+      podNodes.forEach(pod => { pod.ripeY = pod.node.position.y; });
       draw();
     }).catch(showFallback);
   } catch {

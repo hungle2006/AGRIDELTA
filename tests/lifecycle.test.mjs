@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {
- advancePlantTime, careAt, HARVEST_SECONDS, LIFECYCLE_SECONDS, GROWTH_RATE, SCROLL_GROWTH_RATE, HARVEST_RATE, nextRoot, plantPhase, stageAt, STAGE_TIMES,
+ advancePlantTime, careAt, HARVEST_SECONDS, LIFECYCLE_SECONDS, GROWTH_RATE, SCROLL_GROWTH_RATE, HARVEST_RATE, nextRoot, plantPhase, stageAt, STAGE_TIMES, POD_FALL_DIRECTIONS, podFallOffset,
 } from '../lifecycle-state.js';
 test('one deliberate gesture unlocks one new branch, retaining previous branches',()=>{
  let count=0,active=-1;for(let i=0;i<5;i++){const next=nextRoot(count,active);assert.deepEqual(next,{count:i+1,index:i});count=next.count;active=next.index;}
@@ -106,4 +106,18 @@ test('No pause button or pause logic is shipped in the Start experience',()=>{
  assert.doesNotMatch(live,/togglePause|paused\s*=/);
  assert.match(root,/id="live-earth"/);
  assert.match(root,/id="lifecycle-label"/);
+});
+
+test('The three pods move to the left, right and downward only when falling',()=>{
+  assert.deepEqual(POD_FALL_DIRECTIONS,[-1,1,0]);
+  for(let i=0;i<3;i++)assert.equal(podFallOffset(i,2.2,2.2).x,0);
+  const left=podFallOffset(0,2.2,.4);
+  const right=podFallOffset(1,2.2,.4);
+  const down=podFallOffset(2,2.2,.4);
+  assert.ok(left.x < -.8 && right.x > .8);
+  assert.equal(down.x,0);
+  assert.equal(down.tilt,0);
+  const renderer=readFileSync(new URL('../live-earth.js',import.meta.url),'utf8');
+  assert.match(renderer,/pod\.ripeY = pod\.node\.position\.y/);
+  assert.match(renderer,/node\.position\.x \+= x/);
 });
