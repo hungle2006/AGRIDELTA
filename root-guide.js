@@ -439,7 +439,39 @@ function growNext() {
 
 const dialog = find('#earth-dialog');
 const dialogContent = find('#earth-dialog-content');
+const rootVisual = find('.root-visual');
+let selectedRootButton = null;
+let rootZoomTimer = 0;
 let activeGuide = 0;
+
+// Root markers are hotspots on the *real* Blender model. Bring the chosen
+// segment closer, enlarge its button and warm its palette before the guide opens.
+function clearRootZoom() {
+  window.clearTimeout(rootZoomTimer);
+  rootZoomTimer = 0;
+  selectedRootButton?.classList.remove('is-selected');
+  selectedRootButton = null;
+  rootVisual.classList.remove('is-root-zoomed');
+  rootVisual.style.removeProperty('--root-zoom-x');
+  rootVisual.style.removeProperty('--root-zoom-y');
+}
+function selectRootPoint(button) {
+  clearRootZoom();
+  selectedRootButton = button;
+  button.classList.add('is-selected');
+  const style = getComputedStyle(button);
+  rootVisual.style.setProperty('--root-zoom-x', style.getPropertyValue('--root-x').trim() || '50%');
+  rootVisual.style.setProperty('--root-zoom-y', style.getPropertyValue('--root-y').trim() || '50%');
+  rootVisual.classList.add('is-root-zoomed');
+
+  // Keep a short visual beat before the modal covers the scene.
+  const delay = reducedMotion.matches ? 0 : 400;
+  rootZoomTimer = window.setTimeout(() => {
+    rootZoomTimer = 0;
+    if (site.hidden || selectedRootButton !== button || button.hidden) return;
+    openGuide(button.dataset.openGuide);
+  }, delay);
+}
 
 function displayDialog(content, focusSelector = '[data-close-dialog]') {
   dialogContent.innerHTML = content;
@@ -450,7 +482,10 @@ function displayDialog(content, focusSelector = '[data-close-dialog]') {
   find(focusSelector)?.focus({preventScroll: true});
 }
 
-dialog.addEventListener('close', () => document.body.classList.remove('earth-modal-open'));
+dialog.addEventListener('close', () => {
+  document.body.classList.remove('earth-modal-open');
+  clearRootZoom();
+});
 dialog.addEventListener('click', event => {
   if (event.target === dialog || event.target.closest('[data-close-dialog]')) dialog.close();
 });
@@ -517,6 +552,7 @@ function setMenu(expanded) {
 
 function enter(page = 'home', auth = false) {
   if (dialog.open) dialog.close();
+  clearRootZoom();
   setMenu(false);
   site.hidden = true;
   clearHeroUnlock();
@@ -556,6 +592,7 @@ site.addEventListener('click', event => {
   if (event.target.closest('.earth-nav a')) setMenu(false);
   if (!button) return;
   if (button === menu) setMenu(menu.getAttribute('aria-expanded') === 'false');
+  else if (button.hasAttribute('data-root-point')) selectRootPoint(button);
   else if (button.hasAttribute('data-open-guide')) openGuide(button.dataset.openGuide);
   else if (button.hasAttribute('data-enter-page')) enter(button.dataset.enterPage);
   else if (button.hasAttribute('data-enter-auth')) enter('home', true);
