@@ -1,0 +1,49 @@
+/* AGRIDELTA Start: stacked first card opens left-to-right into the existing three. */
+.earth-site .start-workflow[data-workflow-fan] {
+  --workflow-travel:clamp(390px,78svh,790px);
+  padding-top:clamp(24px,4.3vw,60px);
+  padding-bottom:var(--workflow-travel);
+}
+.earth-site .start-workflow .start-workflow-stage {
+  position:sticky;
+  top:calc(var(--header-height,68px) + 12px);
+  width:100%;
+  min-width:0;
+  isolation:isolate;
+}
+.earth-site .start-workflow[data-workflow-fan] .workflow-steps {position:relative;overflow:visible;}
+.earth-site .start-workflow[data-workflow-fan] .workflow-steps > li {
+  position:relative;min-width:0;
+  animation:none!important;translate:none!important;
+  backface-visibility:hidden;will-change:transform,opacity,clip-path;
+}
+.earth-site .start-workflow[data-workflow-fan] .workflow-steps > li:nth-child(1) {z-index:3;}
+.earth-site .start-workflow[data-workflow-fan] .workflow-steps > li:nth-child(2) {z-index:2;}
+.earth-site .start-workflow[data-workflow-fan] .workflow-steps > li:nth-child(3) {z-index:1;}
+.earth-site .start-workflow[data-workflow-fan]:not([data-workflow-ready]) .workflow-steps > li:nth-child(n+2) {
+  opacity:0;visibility:hidden;pointer-events:none;
+}
+.earth-site .start-workflow[data-workflow-fan] .workflow-card {height:100%;}
+@media(max-width:760px) {
+  .earth-site .start-workflow[data-workflow-fan] {--workflow-travel:clamp(310px,74svh,560px);padding-top:19px;}
+  .earth-site .start-workflow .start-workflow-stage {top:calc(var(--header-height,61px) + 6px);}
+  .earth-site .start-workflow[data-workflow-fan] .workflow-steps {gap:clamp(8px,1.7svh,12px);}
+  .earth-site .start-workflow[data-workflow-fan] .workflow-card {min-height:clamp(106px,18svh,143px);max-height:143px;}
+  .earth-site .start-workflow[data-workflow-fan] .workflow-card img {min-height:0;height:100%;}
+  .earth-site .start-workflow[data-workflow-fan] .workflow-content {padding-block:10px;}
+}
+@media(max-width:760px) and (max-height:620px) {
+  .earth-site .start-workflow .start-workflow-stage {position:relative;top:auto;}
+  .earth-site .start-workflow[data-workflow-fan] {--workflow-travel:390px;}
+  .earth-site .start-workflow[data-workflow-fan] .workflow-card {max-height:122px;min-height:106px;}
+  .earth-site .start-workflow[data-workflow-fan] .workflow-content > span:last-child {
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .earth-site .start-workflow[data-workflow-fan] {--workflow-travel:0px;padding-bottom:clamp(36px,6vw,74px);}
+  .earth-site .start-workflow .start-workflow-stage {position:static;}
+  .earth-site .start-workflow[data-workflow-fan] .workflow-steps > li {
+    visibility:visible!important;opacity:1!important;clip-path:none!important;transform:none!important;will-change:auto;
+  }
+}

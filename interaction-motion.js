@@ -5,7 +5,7 @@
 const INTERACT='.earth-site button,.earth-site .earth-secondary,.earth-site .hero-bottom-rail a,.ag-app button,.ag-app .ag-btn';
 const PRIMARY='.earth-site .earth-primary,.earth-site .root-next,.ag-app .ag-btn-primary';
 // Feature cards use the original scroll-driven guide-spread (NOT the generic reveal).
-const REVEALS='.workflow-card,.guide-intro,.start-workflow-head,.root-discovery,.start-close-frame';
+const REVEALS='.guide-intro,.start-workflow-head,.root-discovery,.start-close-frame';
 const DOCK_CARDS='.start-feature-dock .start-dock-button';
 export function initAgrideltaMotion(site){
   if(document.documentElement.dataset.agMotionReady==='true')return;

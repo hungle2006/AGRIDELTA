@@ -1,5 +1,6 @@
 import {createLiveEarth, createRootEarth} from './live-earth.js';
 import {initAgrideltaMotion} from './interaction-motion.js';
+import {initWorkflowFan} from './workflow-fan.js';
 import {initBeanTransitions} from './bean-drop-scene.js';
 import {storyProgress, rootCountAt, rootRevealAt, rootScrollTarget} from './scroll-story-state.js';
 import {FEATURES, guideIndex, searchGuides} from './root-guide-data.js';
@@ -122,7 +123,8 @@ site.innerHTML = `
     </section>
 
     ${beanDivider('01','hero')}
-    <section class="start-workflow earth-container" aria-labelledby="workflow-title">
+    <section class="start-workflow earth-container" data-workflow-fan aria-labelledby="workflow-title">
+      <div class="start-workflow-stage">
       <div class="start-workflow-head">
         <div><p class="earth-eyebrow">01 / KHỞI ĐẦU</p><h2 id="workflow-title">Bắt đầu một mùa vụ.</h2></div>
         <p>Ba bước đơn giản để biến việc chăm sóc cây trồng thành một hành trình rõ ràng, từ gieo hạt đến thu hoạch.</p>
@@ -141,6 +143,7 @@ site.innerHTML = `
             </button>
           </li>`).join('')}
       </ol>
+      </div>
     </section>
 
     ${beanDivider('02','secondary')}
@@ -618,6 +621,7 @@ site.addEventListener('keydown', event => {
 
 window.AGRIDELTARootGuide = {open, close: () => enter(), go: enter};
 initAgrideltaMotion(site);
+initWorkflowFan(site);
 initBeanTransitions(site, find('#bean-fall-overlay'));
 window.AGRIDELTAStory = {replay: () => { harvestTriggered = false; resetHeroEntrance(); plant.replay(); open(); }};
  
