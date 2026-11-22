@@ -9,10 +9,11 @@ test('Visible Unsplash license credit is removed from Start footer',()=>{
   assert.match(html,/root-story-balance\.css/);
 });
 test('Root story controls use consistent hierarchy and equal mobile touch targets',()=>{
-  for(const token of ['root-story-title','root-story-desc','root-progress-meter','root-discovery-actions','root-next','root-skip'])assert.ok(layout.includes(token),token);
+  for(const token of ['root-story-title','root-story-desc','root-discovery-actions','root-next','root-skip'])assert.ok(layout.includes(token),token);
+  assert.doesNotMatch(layout,/root-progress-meter|\.root-progress\{/);
+  assert.doesNotMatch(root,/root-progress-text|root-progress-meter|class="root-progress"/);
   assert.match(layout,/grid-template-areas:"copy" "scene"/);
   assert.match(layout,/min-height:46px/);
-  assert.match(layout,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
   assert.match(layout,/prefers-reduced-motion:reduce/);
   assert.match(root,/data-grow-root/);
   assert.match(root,/data-root-point/);
