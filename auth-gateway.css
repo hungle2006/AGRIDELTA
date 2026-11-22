@@ -154,14 +154,17 @@
 }
 
 
-/* Keep login and registration within the visible viewport; do not affect Start or tools. */
-html:has(.ag-auth), body:has(.ag-auth) {
+/* Lock the document only while the *active* workspace is the auth screen.
+   The app DOM remains mounted but hidden during Start; an unscoped :has(.ag-auth)
+   previously kept the Start page unscrollable even after the bean finished. */
+html:has(body.rg-app-mode #app > .ag-auth),
+body.rg-app-mode:has(#app > .ag-auth) {
   height: 100%;
   overflow: hidden;
   overscroll-behavior: none;
 }
-body:has(.ag-auth) { height: 100dvh; min-height: 0; }
-body:has(.ag-auth) #app { height: 100dvh; min-height: 0; overflow: hidden; }
+body.rg-app-mode:has(#app > .ag-auth) { height: 100dvh; min-height: 0; }
+body.rg-app-mode:has(#app > .ag-auth) #app { height: 100dvh; min-height: 0; overflow: hidden; }
 .ag-auth {
   height: 100dvh;
   min-height: 0;

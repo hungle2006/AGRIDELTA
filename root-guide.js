@@ -295,7 +295,23 @@ function unlockAfterText() {
   heroTextComplete = true;
   clearHeroUnlock();
   setStartScrollLocked(false);
+  // Replace the transient harvesting status once the last text element appears.
+  if (find('#live-earth').dataset.harvestState === 'harvested') {
+    lifecycleLabel.textContent = 'Hoàn tất. Cuộn xuống để khám phá bộ rễ.';
+  }
 }
+// A missing CSS transitionend (browser restore / tab switch) must not strand
+// visitors at the Start hero after all of its text is visibly in place.
+function unlockIfIntroVisible() {
+  if (site.hidden || heroTextComplete || !heroEntranceFinished) return;
+  if (Number.parseFloat(getComputedStyle(lastHeroElement).opacity) >= .995) {
+    unlockAfterText();
+  }
+}
+site.addEventListener('wheel', unlockIfIntroVisible, {passive:true});
+site.addEventListener('touchstart', unlockIfIntroVisible, {passive:true});
+site.addEventListener('keydown', unlockIfIntroVisible);
+window.addEventListener('pageshow', unlockIfIntroVisible);
 function centerHeroSpecimen() {
   if (site.hidden || heroEntranceFinished) return;
   if (window.innerWidth <= 900) {

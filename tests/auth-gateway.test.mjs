@@ -54,8 +54,9 @@ test('Firebase error display is user friendly',()=>{
 
 test('Login and signup prevent document scrolling while fitting the viewport',()=>{
  const css=file('auth-gateway.css');
- assert.match(css,/html:has\(\.ag-auth\), body:has\(\.ag-auth\)/);
- assert.match(css,/body:has\(\.ag-auth\) #app \{ height: 100dvh; min-height: 0; overflow: hidden/);
+ assert.match(css,/html:has\(body\.rg-app-mode #app > \.ag-auth\)/);
+ assert.match(css,/body\.rg-app-mode:has\(#app > \.ag-auth\) #app \{ height: 100dvh; min-height: 0; overflow: hidden/);
+ assert.doesNotMatch(css,/html:has\(\.ag-auth\)|body:has\(\.ag-auth\)/);
  assert.match(css,/\.ag-auth \{[\s\S]*?max-height: 100dvh;/);
  assert.match(css,/\.ag-auth-visual \{ height: 100%; min-height: 0;/);
  assert.match(css,/grid-template-rows: auto minmax\(0,1fr\)/);
@@ -83,4 +84,15 @@ test('Authentication image contains no visible attribution links',()=>{
  const credits=file('public/photo-credits.html');
  assert.match(credits,/Basile Morin/);
  assert.match(credits,/CC BY-SA 4\.0/);
+});
+
+test('Hidden authentication DOM must never lock the public Start scroll',()=>{
+ const authCss=file('auth-gateway.css');
+ const startCss=file('start-hero-sequence.css');
+ const root=file('root-guide.js');
+ assert.match(authCss,/body\.rg-app-mode:has\(#app > \.ag-auth\)/);
+ assert.match(root,/document\.body\.classList\.add\('rg-experience-mode'\)/);
+ assert.match(root,/document\.body\.classList\.remove\('rg-app-mode'\)/);
+ assert.match(startCss,/html\.ag-start-scroll-locked/);
+ assert.doesNotMatch(authCss,/^html:has\(\.ag-auth\)/m);
 });

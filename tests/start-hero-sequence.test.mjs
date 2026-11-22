@@ -11,6 +11,10 @@ test('Start waits for Blender completion before revealing the intro from the lef
  assert.match(js,/hero\.dataset\.heroEntrance = 'complete'/);
  assert.match(js,/lastHeroElement\.addEventListener\('transitionend'/);
  assert.match(js,/setStartScrollLocked\(false\)/);
+ assert.match(js,/function unlockIfIntroVisible\(\)/);
+ assert.match(js,/site\.addEventListener\('wheel', unlockIfIntroVisible/);
+ assert.match(js,/site\.addEventListener\('touchstart', unlockIfIntroVisible/);
+ assert.match(js,/Hoàn tất\. Cuộn xuống để khám phá bộ rễ\./);
  assert.doesNotMatch(js,/window\.scrollY > 45/);
  assert.match(css,/html\.ag-start-scroll-locked/);
  assert.match(css,/\.plant-art::before/);
