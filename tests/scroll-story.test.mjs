@@ -39,7 +39,10 @@ test('Start scroll story keeps native scrolling and clips the Blender geometry b
  const fallback=readFileSync(new URL('../earth-fallback.js',import.meta.url),'utf8');
  assert.ok(script.includes("window.addEventListener('scroll'"));
  assert.ok(script.includes('earth.setScrollRoots(progress)'));
- assert.ok(!script.includes("addEventListener('wheel'"));
+ // Passive wheel listeners may restore scrolling after the Start text reveal;
+ // native wheel motion must never be intercepted or cancelled.
+ assert.match(script,/site\\.addEventListener\\('wheel', unlockIfIntroVisible, \\{passive:true\\}\\)/);
+ assert.doesNotMatch(script,/event\\.preventDefault\\(\\)/);
  assert.match(css,/position:\s*sticky/);
  assert.match(css,/root-scroll-track::after\s*\{/);
  assert.ok(live.includes('vRootTravel > uRootGrowth'));
