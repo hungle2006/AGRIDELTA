@@ -76,7 +76,7 @@ site.innerHTML = `
     </div>
   </header>
   <main id="rg-main" tabindex="-1">
-    <section class="start-hero" aria-labelledby="start-title">
+    <section class="start-hero" data-hero-entrance="growing" aria-labelledby="start-title">
       <div class="earth-container hero-layout">
         <div class="earth-intro">
           <div class="hero-kicker-row">
@@ -247,6 +247,7 @@ const careNotes = {
   fertilizing: 'Hạt phân rơi xuống quanh mầm đậu.',
 };
 let plantUI = '';
+let revealHeroAfterGrowth = () => {};
 const plant = createLiveEarth(find('#live-earth'), (stage, phase, care) => {
   const key = `${stage}:${phase}:${care}`;
   if (key === plantUI) return;
@@ -256,6 +257,7 @@ const plant = createLiveEarth(find('#live-earth'), (stage, phase, care) => {
     else indicator.removeAttribute('aria-current');
   });
   lifecycleLabel.textContent = phaseNotes[phase] ?? careNotes[care] ?? stageNotes[stage];
+  if (phase !== 'growing') revealHeroAfterGrowth();
 });
 
 const rootSection = find('.root-features');
@@ -268,6 +270,40 @@ const growButton = find('[data-grow-root]');
 const earth = createRootEarth(find('.root-model'), rootButtons);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const hero = find('.start-hero');
+const heroCopy = find('.earth-intro');
+const heroScene = find('.plant-journey');
+let heroEntranceFinished = false;
+function centerHeroSpecimen() {
+  if (site.hidden || heroEntranceFinished) return;
+  if (window.innerWidth <= 900) {
+    hero.style.removeProperty('--hero-center-offset');
+    return;
+  }
+  const rect = heroScene.getBoundingClientRect();
+  const previous = parseFloat(hero.style.getPropertyValue('--hero-center-offset')) || 0;
+  const withoutShift = rect.left + rect.width / 2 - previous;
+  const delta = window.innerWidth / 2 - withoutShift;
+  const minimum = 16 - (rect.left - previous);
+  const maximum = window.innerWidth - 16 - (rect.right - previous);
+  const offset = Math.min(maximum, Math.max(minimum, delta));
+  hero.style.setProperty('--hero-center-offset', offset.toFixed(1) + 'px');
+}
+function finishHeroEntrance() {
+  if (heroEntranceFinished) return;
+  heroEntranceFinished = true;
+  hero.dataset.heroEntrance = 'complete';
+  heroCopy.inert = false;
+}
+function resetHeroEntrance() {
+  heroEntranceFinished = false;
+  hero.dataset.heroEntrance = 'growing';
+  heroCopy.inert = true;
+  centerHeroSpecimen();
+}
+revealHeroAfterGrowth = finishHeroEntrance;
+heroCopy.inert = !reducedMotion.matches;
+if (reducedMotion.matches || find('#live-earth').dataset.harvestState !== 'growing') finishHeroEntrance();
+window.addEventListener('resize', centerHeroSpecimen, {passive:true});
 if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
   hero.addEventListener('pointermove', event => {
     if (reducedMotion.matches) return;
@@ -473,6 +509,8 @@ function open() {
   document.body.classList.add('rg-experience-mode');
   document.body.classList.remove('rg-app-mode');
   plant.setVisible(true);
+  if (find('#live-earth').dataset.harvestState !== 'growing') finishHeroEntrance();
+  centerHeroSpecimen();
   window.scrollTo({top: 0, behavior: 'instant'});
   scheduleRoots();
 }
@@ -508,7 +546,7 @@ site.addEventListener('keydown', event => {
 window.AGRIDELTARootGuide = {open, close: () => enter(), go: enter};
 initAgrideltaMotion(site);
 initBeanTransitions(site, find('#bean-fall-overlay'));
-window.AGRIDELTAStory = {replay: () => { open(); harvestTriggered = false; plant.replay(); }};
+window.AGRIDELTAStory = {replay: () => { harvestTriggered = false; resetHeroEntrance(); open(); plant.replay(); }};
  
 // Keep the immersive Start as the normal public entry point.
 // A dedicated query restores the observatory on reload. Login callbacks still enter authentication.

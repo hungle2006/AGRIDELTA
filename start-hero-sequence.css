@@ -1,0 +1,49 @@
+/* AGRIDELTA: specimen-first Start, timed to the real Blender completion. */
+.earth-site .start-hero .plant-journey {
+  transform:translate3d(0,0,0);
+  transition:transform 1080ms cubic-bezier(.19,.82,.24,1),grid-template-columns 1080ms cubic-bezier(.19,.82,.24,1);
+}
+.earth-site .start-hero[data-hero-entrance="growing"] .plant-journey {
+  transform:translate3d(var(--hero-center-offset,0px),0,0);
+  grid-template-columns:minmax(0,1fr) 0px;
+  transition:none;
+}
+.earth-site .start-hero .plant-controls {
+  opacity:1;visibility:visible;
+  transition:opacity 650ms ease 420ms,visibility 650ms ease 420ms;
+}
+.earth-site .start-hero[data-hero-entrance="growing"] .plant-controls {
+  opacity:0;visibility:hidden;pointer-events:none;transition:none;
+}
+.earth-site .start-hero .earth-intro > :is(.hero-kicker-row,h1,.earth-intro-copy,.earth-intro-actions,.hero-editorial-note) {
+  opacity:1;transform:translate3d(0,0,0);
+  transition:opacity 760ms ease,transform 970ms cubic-bezier(.18,.78,.24,1);
+}
+.earth-site .start-hero[data-hero-entrance="growing"] .earth-intro > :is(.hero-kicker-row,h1,.earth-intro-copy,.earth-intro-actions,.hero-editorial-note) {
+  opacity:0;transform:translate3d(-64px,0,0);pointer-events:none;transition:none;
+}
+.earth-site .start-hero[data-hero-entrance="complete"] .hero-kicker-row {transition-delay:180ms;}
+.earth-site .start-hero[data-hero-entrance="complete"] .earth-intro > h1 {transition-delay:330ms;}
+.earth-site .start-hero[data-hero-entrance="complete"] .earth-intro > .earth-intro-copy {transition-delay:480ms;}
+.earth-site .start-hero[data-hero-entrance="complete"] .earth-intro-actions {transition-delay:650ms;}
+.earth-site .start-hero[data-hero-entrance="complete"] .hero-editorial-note {transition-delay:810ms;}
+@media(max-width:900px) {
+  .earth-site .start-hero .earth-intro {max-height:1100px;overflow:clip;transition:max-height 1080ms cubic-bezier(.19,.82,.24,1);}
+  .earth-site .start-hero[data-hero-entrance="growing"] .hero-layout {
+    min-height:calc(100svh - var(--header-height,66px));justify-content:center;
+  }
+  .earth-site .start-hero[data-hero-entrance="growing"] .earth-intro {
+    max-height:0;min-height:0;margin:0;padding:0;pointer-events:none;transition:none;
+  }
+  .earth-site .start-hero .plant-journey {transform:none!important;}
+  .earth-site .start-hero[data-hero-entrance="growing"] .plant-journey {grid-template-columns:minmax(0,1fr);}
+  .earth-site .start-hero[data-hero-entrance="growing"] .plant-controls {display:none;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .earth-site .start-hero .plant-journey,
+  .earth-site .start-hero .plant-controls,
+  .earth-site .start-hero .earth-intro,
+  .earth-site .start-hero .earth-intro > :is(.hero-kicker-row,h1,.earth-intro-copy,.earth-intro-actions,.hero-editorial-note) {
+    animation:none!important;transition:none!important;
+  }
+}

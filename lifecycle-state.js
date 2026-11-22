@@ -1,8 +1,8 @@
 export const LIFECYCLE_SECONDS = 28;
 export const HARVEST_SECONDS = 32.5;
-// The 28-second Blender timeline plays at 0.52x (~54 seconds) to show
-// leaves and stems unfurl gradually. Scrolling never accelerates the growth.
-export const GROWTH_RATE = 0.52;
+// Twice the previous 0.52x speed: 28 Blender seconds play in about 27 seconds.
+// Scrolling never accelerates the same growing timeline.
+export const GROWTH_RATE = 1.04;
 export const SCROLL_GROWTH_RATE = GROWTH_RATE;
 export const HARVEST_RATE = 0.8;
 

@@ -30,7 +30,7 @@ test('lifecycle includes flower and fruit after germination in botanical order',
 
 test('growth holds the ripe pods until harvest is requested', () => {
  assert.ok(advancePlantTime(0, 1, false) > 0);
- assert.ok(advancePlantTime(0, 1, false) < 1,'Seedling should not jump forward in one second');
+ assert.ok(advancePlantTime(0, 1, false) < 1.2,'Seedling should advance smoothly at double speed');
  assert.equal(advancePlantTime(0, 1, false), advancePlantTime(0, 1, true),'Scrolling does not accelerate growth');
  assert.equal(advancePlantTime(0, 60, true), LIFECYCLE_SECONDS);
  assert.equal(advancePlantTime(LIFECYCLE_SECONDS, 30, false), LIFECYCLE_SECONDS);
@@ -88,14 +88,14 @@ test('Blender animates the farm care and lets each pod rest before the next drop
 
 });
 
-test('Bean grows smoothly across all five stages in roughly 54 seconds',()=>{
+test('Bean grows smoothly across all five stages in roughly 27 seconds at double speed',()=>{
  assert.equal(GROWTH_RATE,SCROLL_GROWTH_RATE);
- assert.ok(GROWTH_RATE>=.45 && GROWTH_RATE<=.6);
- assert.ok(LIFECYCLE_SECONDS/GROWTH_RATE>=45 && LIFECYCLE_SECONDS/GROWTH_RATE<=65);
+ assert.equal(GROWTH_RATE,1.04);
+ assert.ok(LIFECYCLE_SECONDS/GROWTH_RATE>=25 && LIFECYCLE_SECONDS/GROWTH_RATE<=30);
  assert.ok(HARVEST_RATE>0 && HARVEST_RATE<1);
  const stages=[0,2.5,7.5,17.4,22.5,LIFECYCLE_SECONDS];
- for(let i=1;i<stages.length;i++)assert.ok((stages[i]-stages[i-1])/GROWTH_RATE>4);
- const play=scroll=>Array.from({length:50},()=>1).reduce((t,delta)=>advancePlantTime(t,delta,scroll),0);
+ for(let i=1;i<stages.length;i++)assert.ok((stages[i]-stages[i-1])/GROWTH_RATE>2);
+ const play=scroll=>Array.from({length:15},()=>1).reduce((t,delta)=>advancePlantTime(t,delta,scroll),0);
  assert.equal(play(false),play(true));
  assert.ok(play(false)<LIFECYCLE_SECONDS);
 });
