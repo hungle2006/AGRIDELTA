@@ -1,6 +1,6 @@
 /* AGRIDELTA Start: stacked first card opens left-to-right into the existing three. */
 .earth-site .start-workflow[data-workflow-fan] {
-  --workflow-travel:clamp(390px,78svh,790px);
+  --workflow-travel:clamp(70px,14svh,150px);
   padding-top:clamp(24px,4.3vw,60px);
   padding-bottom:var(--workflow-travel);
 }
@@ -25,8 +25,8 @@
 }
 .earth-site .start-workflow[data-workflow-fan] .workflow-card {height:100%;}
 @media(max-width:760px) {
-  .earth-site .start-workflow[data-workflow-fan] {--workflow-travel:clamp(310px,74svh,560px);padding-top:19px;}
-  .earth-site .start-workflow .start-workflow-stage {top:calc(var(--header-height,61px) + 6px);}
+  .earth-site .start-workflow[data-workflow-fan] {--workflow-travel:clamp(58px,11svh,112px);padding-top:19px;}
+  .earth-site .start-workflow .start-workflow-stage {position:relative;top:auto;}
   .earth-site .start-workflow[data-workflow-fan] .workflow-steps {gap:clamp(8px,1.7svh,12px);}
   .earth-site .start-workflow[data-workflow-fan] .workflow-card {min-height:clamp(106px,18svh,143px);max-height:143px;}
   .earth-site .start-workflow[data-workflow-fan] .workflow-card img {min-height:0;height:100%;}
@@ -34,7 +34,7 @@
 }
 @media(max-width:760px) and (max-height:620px) {
   .earth-site .start-workflow .start-workflow-stage {position:relative;top:auto;}
-  .earth-site .start-workflow[data-workflow-fan] {--workflow-travel:390px;}
+  .earth-site .start-workflow[data-workflow-fan] {--workflow-travel:58px;}
   .earth-site .start-workflow[data-workflow-fan] .workflow-card {max-height:122px;min-height:106px;}
   .earth-site .start-workflow[data-workflow-fan] .workflow-content > span:last-child {
     display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;

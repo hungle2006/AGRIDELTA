@@ -1,4 +1,12 @@
-/** Scroll-controlled, reversible one-to-three card fan on the Start page. */
+/** Scroll-controlled, reversible one-to-three card fan on the Start page.
+ *  The cards must have fully opened by the time the section title is near
+ *  the top of the screen; the prior header-relative progress waited too long.
+ */
+export function workflowRevealProgress(sectionTop, viewportHeight) {
+  const enter = viewportHeight * .86;
+  const complete = viewportHeight * .36;
+  return Math.max(0, Math.min(1, (enter - sectionTop) / Math.max(1, enter-complete)));
+}
 export function initWorkflowFan(site) {
   const section = site.querySelector('.start-workflow[data-workflow-fan]');
   if (!section) return () => {};
@@ -10,14 +18,16 @@ export function initWorkflowFan(site) {
   const smooth = n => n*n*(3-2*n);
   const controller = new AbortController();
   const {signal} = controller;
-  let frame = 0, geometry = [], paddingTop = 0, travel = 1, headerHeight = 68;
-  const header = site.querySelector('.earth-header');
+  let frame = 0, geometry = [];
+
 
   function render() {
     frame = 0;
     if (site.hidden || !panel.isConnected) return;
     const rect = section.getBoundingClientRect();
-    const progress = reduced.matches ? 1 : clamp((headerHeight + 12 - rect.top - paddingTop) / travel);
+    // Reveal while the heading and first card enter the viewport,
+    // not after the user scrolls below the cards.
+    const progress = reduced.matches ? 1 : workflowRevealProgress(rect.top, window.innerHeight);
     const phases = [1, smooth(clamp((progress - .10)/.38)), smooth(clamp((progress - .51)/.39))];
     items.forEach((card,i) => {
       const phase = phases[i];
@@ -38,10 +48,6 @@ export function initWorkflowFan(site) {
     // offset positions ignore transforms; all cards start at the first card's origin.
     const first = items[0];
     geometry = items.map(card => ({x:first.offsetLeft-card.offsetLeft,y:first.offsetTop-card.offsetTop}));
-    const computed = getComputedStyle(section);
-    paddingTop = parseFloat(computed.paddingTop) || 0;
-    travel = Math.max(180,(parseFloat(computed.paddingBottom)||450)-24);
-    headerHeight = header?.getBoundingClientRect().height || 68;
     render();
     section.dataset.workflowReady = 'true';
   }
