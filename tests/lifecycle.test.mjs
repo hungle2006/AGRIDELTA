@@ -30,7 +30,7 @@ test('lifecycle includes flower and fruit after germination in botanical order',
 
 test('growth holds the ripe pods until harvest is requested', () => {
  assert.ok(advancePlantTime(0, 1, false) > 0);
- assert.ok(advancePlantTime(0, 1, false) < 1.2,'Seedling should advance smoothly at double speed');
+ assert.equal(advancePlantTime(0, 1, false),3.12,'One second advances 3.12 Blender seconds at 3x the previous rate');
  assert.equal(advancePlantTime(0, 1, false), advancePlantTime(0, 1, true),'Scrolling does not accelerate growth');
  assert.equal(advancePlantTime(0, 60, true), LIFECYCLE_SECONDS);
  assert.equal(advancePlantTime(LIFECYCLE_SECONDS, 30, false), LIFECYCLE_SECONDS);
@@ -88,16 +88,21 @@ test('Blender animates the farm care and lets each pod rest before the next drop
 
 });
 
-test('Bean grows smoothly across all five stages in roughly 27 seconds at double speed',()=>{
+test('Bean grows across all five stages in roughly 9 seconds at 3x the previous speed',()=>{
  assert.equal(GROWTH_RATE,SCROLL_GROWTH_RATE);
- assert.equal(GROWTH_RATE,1.04);
- assert.ok(LIFECYCLE_SECONDS/GROWTH_RATE>=25 && LIFECYCLE_SECONDS/GROWTH_RATE<=30);
+ assert.equal(GROWTH_RATE,3.12);
+ assert.equal(GROWTH_RATE,1.04*3);
+ assert.ok(LIFECYCLE_SECONDS/GROWTH_RATE>=8.5 && LIFECYCLE_SECONDS/GROWTH_RATE<=9.5);
  assert.ok(HARVEST_RATE>0 && HARVEST_RATE<1);
  const stages=[0,2.5,7.5,17.4,22.5,LIFECYCLE_SECONDS];
- for(let i=1;i<stages.length;i++)assert.ok((stages[i]-stages[i-1])/GROWTH_RATE>2);
- const play=scroll=>Array.from({length:15},()=>1).reduce((t,delta)=>advancePlantTime(t,delta,scroll),0);
+ for(let i=1;i<stages.length;i++)assert.ok((stages[i]-stages[i-1])/GROWTH_RATE>.7);
+ const play=scroll=>Array.from({length:5},()=>1).reduce((t,delta)=>advancePlantTime(t,delta,scroll),0);
  assert.equal(play(false),play(true));
  assert.ok(play(false)<LIFECYCLE_SECONDS);
+ assert.equal(advancePlantTime(0,10,false),LIFECYCLE_SECONDS);
+ assert.equal(advancePlantTime(LIFECYCLE_SECONDS,1,false),LIFECYCLE_SECONDS);
+ assert.equal(advancePlantTime(LIFECYCLE_SECONDS,1,true),LIFECYCLE_SECONDS + HARVEST_RATE);
+ assert.equal(HARVEST_RATE,.8,'The three falling pods keep their current animation rate');
 });
 test('No pause button or pause logic is shipped in the Start experience',()=>{
  const root=readFileSync(new URL('../root-guide.js',import.meta.url),'utf8');

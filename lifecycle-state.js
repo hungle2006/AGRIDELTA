@@ -1,8 +1,9 @@
 export const LIFECYCLE_SECONDS = 28;
 export const HARVEST_SECONDS = 32.5;
-// Twice the previous 0.52x speed: 28 Blender seconds play in about 27 seconds.
-// Scrolling never accelerates the same growing timeline.
-export const GROWTH_RATE = 1.04;
+// 3x faster than the previously deployed 1.04x Start playback.
+// 28 Blender seconds now play in about 9 real seconds, before harvest.
+// Root exploration and the three pod-drop animation keep their existing timing.
+export const GROWTH_RATE = 3.12;
 export const SCROLL_GROWTH_RATE = GROWTH_RATE;
 export const HARVEST_RATE = 0.8;
 
