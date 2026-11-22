@@ -47,3 +47,26 @@
     animation:none!important;transition:none!important;
   }
 }
+
+/* Growing and three-pod sequence: transparent scene, no pale/white panel. */
+.earth-site .start-hero[data-hero-entrance="growing"] .plant-journey {
+  background:transparent;
+  border-color:transparent;
+  box-shadow:none;
+}
+.earth-site .start-hero[data-hero-entrance="growing"] .plant-art {
+  background:transparent;
+}
+.earth-site .start-hero[data-hero-entrance="growing"] .plant-art::before,
+.earth-site .start-hero[data-hero-entrance="growing"] .plant-art::after {
+  display:none;
+}
+/* Block scrolling on Start only, until every line, button and final photo is visible. */
+html.ag-start-scroll-locked,
+body.ag-start-scroll-locked {
+  height:100%;
+  overflow:hidden!important;
+  overscroll-behavior:none;
+}
+body.ag-start-scroll-locked {touch-action:none;}
+.earth-site.start-scroll-locked {overscroll-behavior:contain;}

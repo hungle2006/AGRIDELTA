@@ -238,26 +238,29 @@ const find = selector => site.querySelector(selector);
 const stageIndicators = [...site.querySelectorAll('.plant-stages li')];
 const lifecycleLabel = find('#lifecycle-label');
 const phaseNotes = {
-  ripe: 'Cây đã có quả. Cuộn xuống để xem thu hoạch.',
-  harvesting: 'Quả đậu lần lượt rơi xuống đất.',
-  harvested: 'Cây đậu đã thu hoạch xong.',
+  ripe: 'Ba quả đậu đã chín, chuẩn bị tách khỏi cành.',
+  harvesting: 'Ba quả lần lượt rơi: trái, phải và thẳng xuống.',
+  harvested: 'Ba quả đã rơi. Phần giới thiệu đang xuất hiện.',
 };
 const careNotes = {
   watering: 'Giọt nước rơi xuống làm ẩm đất.',
   fertilizing: 'Hạt phân rơi xuống quanh mầm đậu.',
 };
 let plantUI = '';
-let revealHeroAfterGrowth = () => {};
+let harvestTriggered = false;
+let onPlantPhase = () => {};
 const plant = createLiveEarth(find('#live-earth'), (stage, phase, care) => {
   const key = `${stage}:${phase}:${care}`;
-  if (key === plantUI) return;
-  plantUI = key;
-  stageIndicators.forEach((indicator, index) => {
-    if (index === stage) indicator.setAttribute('aria-current', 'step');
-    else indicator.removeAttribute('aria-current');
-  });
-  lifecycleLabel.textContent = phaseNotes[phase] ?? careNotes[care] ?? stageNotes[stage];
-  if (phase !== 'growing') revealHeroAfterGrowth();
+  if (key !== plantUI) {
+    plantUI = key;
+    stageIndicators.forEach((indicator, index) => {
+      if (index === stage) indicator.setAttribute('aria-current', 'step');
+      else indicator.removeAttribute('aria-current');
+    });
+    lifecycleLabel.textContent = phaseNotes[phase] ?? careNotes[care] ?? stageNotes[stage];
+  }
+  // Check phase even if the stage label has not changed.
+  onPlantPhase(phase);
 });
 
 const rootSection = find('.root-features');
@@ -273,6 +276,28 @@ const hero = find('.start-hero');
 const heroCopy = find('.earth-intro');
 const heroScene = find('.plant-journey');
 let heroEntranceFinished = false;
+let heroTextComplete = false;
+let introUnlockTimer = 0;
+let lastTextTransition = null;
+const lastHeroElement = find('.hero-editorial-note');
+function setStartScrollLocked(locked) {
+  const enabled = locked && !site.hidden && !reducedMotion.matches;
+  site.classList.toggle('start-scroll-locked', enabled);
+  document.documentElement.classList.toggle('ag-start-scroll-locked', enabled);
+  document.body.classList.toggle('ag-start-scroll-locked', enabled);
+}
+function clearHeroUnlock() {
+  window.clearTimeout(introUnlockTimer);
+  introUnlockTimer = 0;
+  if (lastTextTransition) lastHeroElement.removeEventListener('transitionend', lastTextTransition);
+  lastTextTransition = null;
+}
+function unlockAfterText() {
+  if (!heroEntranceFinished) return;
+  heroTextComplete = true;
+  clearHeroUnlock();
+  setStartScrollLocked(false);
+}
 function centerHeroSpecimen() {
   if (site.hidden || heroEntranceFinished) return;
   if (window.innerWidth <= 900) {
@@ -293,16 +318,35 @@ function finishHeroEntrance() {
   heroEntranceFinished = true;
   hero.dataset.heroEntrance = 'complete';
   heroCopy.inert = false;
+  if (reducedMotion.matches) { unlockAfterText(); return; }
+  // The final small photo reveals last. Only then may the user swipe down.
+  lastTextTransition = event => {
+    if (event.target === lastHeroElement && event.propertyName === 'transform') unlockAfterText();
+  };
+  lastHeroElement.addEventListener('transitionend', lastTextTransition);
+  introUnlockTimer = window.setTimeout(unlockAfterText, 2350);
 }
 function resetHeroEntrance() {
+  clearHeroUnlock();
   heroEntranceFinished = false;
+  heroTextComplete = false;
   hero.dataset.heroEntrance = 'growing';
   heroCopy.inert = true;
+  setStartScrollLocked(true);
   centerHeroSpecimen();
+  if (reducedMotion.matches) finishHeroEntrance();
 }
-revealHeroAfterGrowth = finishHeroEntrance;
-heroCopy.inert = !reducedMotion.matches;
-if (reducedMotion.matches || find('#live-earth').dataset.harvestState !== 'growing') finishHeroEntrance();
+onPlantPhase = phase => {
+  if (site.hidden) return;
+  if (phase === 'ripe' && !harvestTriggered) {
+    harvestTriggered = true;
+    plant.harvest();
+  } else if (phase === 'harvested') {
+    finishHeroEntrance();
+  }
+};
+heroCopy.inert = true;
+if (reducedMotion.matches) finishHeroEntrance();
 window.addEventListener('resize', centerHeroSpecimen, {passive:true});
 if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
   hero.addEventListener('pointermove', event => {
@@ -367,20 +411,14 @@ function scheduleRoots() {
   if (!storyFrame) storyFrame = requestAnimationFrame(renderRoots);
 }
 
-const plantJourney = find('.plant-journey');
-let previousScroll = window.scrollY;
-let harvestTriggered = false;
-window.addEventListener('scroll', () => {
-  if (!harvestTriggered && !site.hidden && window.scrollY > 45 && window.scrollY > previousScroll) {
-    const bounds = plantJourney.getBoundingClientRect();
-    if (bounds.top < window.innerHeight && bounds.bottom > header.offsetHeight) {
-      harvestTriggered = true;
-      plant.harvest();
-    }
-  }
-  previousScroll = window.scrollY;
-  scheduleRoots();
-}, {passive: true});
+// The 3D harvest is automatic; scrolling no longer triggers falling beans.
+window.addEventListener('scroll', scheduleRoots, {passive: true});
+site.addEventListener('wheel', event => {
+  if (!site.hidden && !heroTextComplete && !dialog.open) event.preventDefault();
+}, {passive:false});
+site.addEventListener('touchmove', event => {
+  if (!site.hidden && !heroTextComplete && !dialog.open) event.preventDefault();
+}, {passive:false});
 function sizeRootSpread() {
   if (!spread.offsetHeight) return;
   const rootTop = Math.min(header.offsetHeight, innerHeight - spread.offsetHeight - 10);
@@ -487,9 +525,12 @@ function setMenu(expanded) {
 
 function enter(page = 'home', auth = false) {
   if (dialog.open) dialog.close();
-  plant.setVisible(false);
   setMenu(false);
   site.hidden = true;
+  clearHeroUnlock();
+  if (heroEntranceFinished) heroTextComplete = true;
+  setStartScrollLocked(false);
+  plant.setVisible(false);
   document.body.classList.remove('rg-experience-mode', 'earth-modal-open');
   document.body.classList.add('rg-app-mode');
   window.AGRIDELTAEnter?.(auth ? 'settings' : page);
@@ -508,8 +549,11 @@ function open() {
   site.hidden = false;
   document.body.classList.add('rg-experience-mode');
   document.body.classList.remove('rg-app-mode');
+  setStartScrollLocked(!heroTextComplete);
   plant.setVisible(true);
-  if (find('#live-earth').dataset.harvestState !== 'growing') finishHeroEntrance();
+  const phase = find('#live-earth').dataset.harvestState;
+  if (phase === 'ripe' && !harvestTriggered) onPlantPhase(phase);
+  if (phase === 'harvested') finishHeroEntrance();
   centerHeroSpecimen();
   window.scrollTo({top: 0, behavior: 'instant'});
   scheduleRoots();
@@ -546,7 +590,7 @@ site.addEventListener('keydown', event => {
 window.AGRIDELTARootGuide = {open, close: () => enter(), go: enter};
 initAgrideltaMotion(site);
 initBeanTransitions(site, find('#bean-fall-overlay'));
-window.AGRIDELTAStory = {replay: () => { harvestTriggered = false; resetHeroEntrance(); open(); plant.replay(); }};
+window.AGRIDELTAStory = {replay: () => { harvestTriggered = false; resetHeroEntrance(); plant.replay(); open(); }};
  
 // Keep the immersive Start as the normal public entry point.
 // A dedicated query restores the observatory on reload. Login callbacks still enter authentication.

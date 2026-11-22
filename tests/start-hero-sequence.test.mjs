@@ -5,8 +5,16 @@ const file = name => readFileSync(new URL('../'+name,import.meta.url),'utf8');
 test('Start waits for Blender completion before revealing the intro from the left',()=>{
  const js=file('root-guide.js'), css=file('start-hero-sequence.css');
  assert.match(js,/data-hero-entrance="growing"/);
- assert.match(js,/if \(phase !== 'growing'\) revealHeroAfterGrowth\(\)/);
+ assert.match(js,/if \(phase === 'ripe' && !harvestTriggered\)/);
+ assert.match(js,/plant\.harvest\(\)/);
+ assert.match(js,/phase === 'harvested'/);
  assert.match(js,/hero\.dataset\.heroEntrance = 'complete'/);
+ assert.match(js,/lastHeroElement\.addEventListener\('transitionend'/);
+ assert.match(js,/setStartScrollLocked\(false\)/);
+ assert.doesNotMatch(js,/window\.scrollY > 45/);
+ assert.match(css,/html\.ag-start-scroll-locked/);
+ assert.match(css,/\.plant-art::before/);
+ assert.match(css,/background:transparent/);
  assert.match(js,/heroCopy\.inert = true/);
  assert.match(file('index.html'),/start-hero-sequence\.css/);
  assert.match(css,/--hero-center-offset/);
