@@ -15,7 +15,11 @@ export function podFallOffset(index, ripeY, animatedY) {
   const span = Math.max(.65, Math.abs(ripeY) * .8);
   const progress = Math.min(1, Math.max(0, (drop - .035) / span));
   const smooth = progress * progress * (3 - 2 * progress);
-  return {x: direction * 1.15 * smooth, tilt: direction * -.18 * smooth, progress};
+  return {
+    x: direction === 0 || smooth === 0 ? 0 : direction * 1.15 * smooth,
+    tilt: direction === 0 || smooth === 0 ? 0 : direction * -.18 * smooth,
+    progress,
+  };
 }
 
 

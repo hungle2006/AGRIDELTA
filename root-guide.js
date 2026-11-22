@@ -413,12 +413,6 @@ function scheduleRoots() {
 
 // The 3D harvest is automatic; scrolling no longer triggers falling beans.
 window.addEventListener('scroll', scheduleRoots, {passive: true});
-site.addEventListener('wheel', event => {
-  if (!site.hidden && !heroTextComplete && !dialog.open) event.preventDefault();
-}, {passive:false});
-site.addEventListener('touchmove', event => {
-  if (!site.hidden && !heroTextComplete && !dialog.open) event.preventDefault();
-}, {passive:false});
 function sizeRootSpread() {
   if (!spread.offsetHeight) return;
   const rootTop = Math.min(header.offsetHeight, innerHeight - spread.offsetHeight - 10);
