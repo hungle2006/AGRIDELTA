@@ -578,9 +578,9 @@ function open() {
     window.history.replaceState(window.history.state, '', url);
   }
   site.hidden = false;
-  site.dispatchEvent(new Event('agridelta-start-open'));
   document.body.classList.add('rg-experience-mode');
   document.body.classList.remove('rg-app-mode');
+  site.dispatchEvent(new Event('agridelta-start-open'));
   setStartScrollLocked(!heroTextComplete);
   plant.setVisible(true);
   const phase = find('#live-earth').dataset.harvestState;
