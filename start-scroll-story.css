@@ -25,19 +25,6 @@
   font-size: 14px;
   line-height: 1.7;
 }
-.root-progress {
-  max-width: 320px;
-  display: grid;
-  gap: 7px;
-  margin-top: 28px;
-  color: #345f43;
-  font-size: 12px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.root-progress-meter { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.root-progress-meter i { display: block; height: 4px; border-radius: 4px; background: #c6d3bb; }
-.root-progress-meter i.is-grown { background: #3f754e; }
 .root-discovery-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 11px 19px; margin-top: 18px; }
 .root-discovery :is(.root-next, .root-skip) {
   display: inline-flex;
@@ -128,7 +115,6 @@
   .root-story-title { font-size: clamp(32px, 7.6vw, 52px); margin-top: 5px !important; }
   .root-story-title br { display: none; }
   .root-discovery .root-story-desc { font-size: 12px; line-height: 1.55; margin-top: 7px; }
-  .root-progress { margin-top: 12px; }
   .root-discovery-actions { margin-top: 7px; gap: 7px 16px; }
   .root-visual { height: min(47svh, 410px); min-height: 235px; }
   .root-visual-label { left: 10px; top: 10px; }

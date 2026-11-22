@@ -151,10 +151,6 @@ site.innerHTML = `
             <p class="earth-eyebrow">${icon('plant')} Bên dưới mặt đất</p>
             <h2 id="root-title" class="root-story-title">Một mùa vụ<br> bắt đầu từ rễ.</h2>
             <p class="root-story-desc">Cuộn xuống để xem rễ chính vươn sâu và các rễ bên tỏa ra. Chạm vào một điểm trên rễ để mở hướng dẫn tương ứng.</p>
-            <div class="root-progress" aria-label="Số nhánh rễ đã hiện">
-              <span id="root-progress-text" role="status">01 / 05 nhánh rễ</span>
-              <span class="root-progress-meter" aria-hidden="true">${'<i></i>'.repeat(5)}</span>
-            </div>
             <div class="root-discovery-actions">
               <button type="button" class="root-next" data-grow-root>Nhánh tiếp theo ${icon('down')}</button>
               <a class="root-skip" href="#rg-guides">Xem tính năng ${icon('right')}</a>
@@ -268,7 +264,6 @@ const track = find('.root-scroll-track');
 const spread = find('.root-spread');
 const header = find('.earth-header');
 const rootButtons = [...site.querySelectorAll('[data-root-point]')];
-const meter = [...site.querySelectorAll('.root-progress-meter i')];
 const growButton = find('[data-grow-root]');
 const earth = createRootEarth(find('.root-model'), rootButtons);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -401,9 +396,7 @@ function renderRoots(now) {
   const count = rootCountAt(progress);
   if (rootCount !== count) {
     rootCount = count;
-    find('#root-progress-text').textContent = `0${count} / 05 nhánh rễ`;
     growButton.innerHTML = count >= 5 ? `Xem các hướng dẫn ${icon('right')}` : `Nhánh tiếp theo ${icon('down')}`;
-    meter.forEach((bar,i) => bar.classList.toggle('is-grown', i < count));
   }
   if (progress !== target) storyFrame = requestAnimationFrame(renderRoots);
   else lastTick = 0;

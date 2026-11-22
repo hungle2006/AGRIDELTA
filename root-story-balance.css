@@ -1,5 +1,5 @@
 /* AGRIDELTA / Root story balance V2
-   One rhythm for eyebrow → title → description → progress → actions.
+   One rhythm for eyebrow → title → description → actions.
    Does not alter the scroll progress, root hotspot controls or 3D rendering. */
 .earth-site .root-features{
   background:linear-gradient(122deg,#f2f6ec,#e8f0e3 68%,#e2ecde);
@@ -15,7 +15,7 @@
   grid-template-columns:minmax(0,1fr);
   align-content:center;
   justify-items:start;
-  gap:clamp(16px,1.8vw,25px);
+  gap:clamp(18px,2.1vw,29px);
   width:100%;
   max-width:560px;
   min-width:0;
@@ -42,44 +42,16 @@
 }
 .earth-site .root-discovery .root-story-desc{
   margin:0;
-  max-width:47ch;
+  max-width:44ch;
   font-size:clamp(13px,1.06vw,16px);
   line-height:1.75;
   color:#587262;
-}
-.earth-site .root-progress{
-  display:grid;
-  grid-template-columns:minmax(0,1fr);
-  gap:9px;
-  width:min(100%,360px);
-  max-width:none;
-  margin:0;
-  font-size:12px;
-  font-weight:750;
-  color:#326346;
-}
-.earth-site .root-progress-meter{
-  display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr));
-  align-items:center;
-  gap:6px;
-  width:100%;
-}
-.earth-site .root-progress-meter i{
-  display:block;
-  height:4px;
-  border-radius:999px;
-  background:#c9d8c2;
-  transition:background-color 180ms cubic-bezier(.2,0,0,1);
-}
-.earth-site .root-progress-meter i.is-grown{
-  background:#3b8257;
 }
 .earth-site .root-discovery-actions{
   display:flex;
   align-items:center;
   justify-content:flex-start;
-  gap:10px;
+  gap:clamp(10px,1.2vw,16px);
   flex-wrap:wrap;
   width:100%;
   margin:0;
@@ -125,7 +97,7 @@
     gap:clamp(22px,3vw,39px);
   }
   .earth-site .root-discovery{
-    gap:clamp(14px,1.8vw,20px);
+    gap:clamp(16px,2vw,23px);
   }
   .earth-site .root-story-title{
     font-size:clamp(39px,4.6vw,54px);
@@ -145,7 +117,7 @@
     width:100%;
     margin-inline:auto;
     padding:0;
-    gap:clamp(13px,3vw,20px);
+    gap:clamp(15px,3.5vw,21px);
   }
   .earth-site .root-story-title{
     font-size:clamp(36px,8.4vw,53px);
@@ -158,11 +130,6 @@
     font-size:clamp(12px,2.9vw,14px);
     max-width:50ch;
     line-height:1.65;
-  }
-  .earth-site .root-progress{
-    width:min(100%,350px);
-    gap:8px;
-    font-size:11px;
   }
   .earth-site .root-discovery-actions{
     width:100%;
@@ -185,7 +152,7 @@
 }
 @media(max-width:380px){
   .earth-site .root-story-title{font-size:clamp(33px,8.8vw,38px)}
-  .earth-site .root-discovery{gap:12px}
+  .earth-site .root-discovery{gap:14px}
   .earth-site .root-discovery-actions{gap:7px}
   .earth-site .root-discovery :is(.root-next,.root-skip){
     font-size:10px;
@@ -193,7 +160,6 @@
   }
 }
 @media(prefers-reduced-motion:reduce){
-  .earth-site .root-progress-meter i,
   .earth-site .root-discovery :is(.root-next,.root-skip){
     transition:none!important;
   }
