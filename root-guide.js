@@ -340,7 +340,12 @@ onPlantPhase = phase => {
   if (site.hidden) return;
   if (phase === 'ripe' && !harvestTriggered) {
     harvestTriggered = true;
-    plant.harvest();
+    // Defer until the current 3D update returns. Calling harvest() inside
+    // its own update callback would cancel the freshly scheduled frame.
+    queueMicrotask(() => {
+      if (site.hidden) { harvestTriggered = false; return; }
+      plant.harvest();
+    });
   } else if (phase === 'harvested') {
     finishHeroEntrance();
   }
