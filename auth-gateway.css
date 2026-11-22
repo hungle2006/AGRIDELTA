@@ -232,3 +232,87 @@ body:has(.ag-auth) #app { height: 100dvh; min-height: 0; overflow: hidden; }
   .ag-auth-content { padding-inline: clamp(16px,5vw,26px); }
   .ag-auth h1 { font-size: clamp(34px,7dvh,50px); }
 }
+
+
+/* Authentication typography rhythm — visually balanced labels, fields and actions. */
+.ag-auth-form-wrap {
+  align-content: center;
+  text-wrap: pretty;
+}
+.ag-auth-intro {
+  display: grid;
+  row-gap: clamp(6px,1.1dvh,11px);
+  margin-block: 0 clamp(18px,3.2dvh,28px);
+}
+.ag-auth-intro h1 {
+  margin: 0;
+  line-height: 1.03;
+  letter-spacing: -.045em;
+}
+.ag-auth-sub {
+  margin: 0;
+  line-height: 1.6;
+}
+.ag-auth-form {
+  display: grid;
+  grid-template-columns: minmax(0,1fr);
+  align-items: stretch;
+  row-gap: 0;
+}
+.ag-auth-form > label {
+  display: block;
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+.ag-auth-form > input {
+  display: block;
+  margin: 0;
+  min-height: 46px;
+}
+.ag-auth-form > .ag-auth-label-row {
+  min-height: 26px;
+  margin: clamp(14px,2.5dvh,22px) 0 8px;
+  align-items: center;
+}
+.ag-auth-label-row > label {
+  line-height: 1.5;
+}
+.ag-auth .ag-auth-text-button {
+  line-height: 1.4;
+}
+.ag-auth .ag-auth-submit {
+  min-height: 46px;
+  margin-block-start: clamp(16px,2.7dvh,22px);
+}
+.ag-auth-divider {
+  justify-content: center;
+  min-height: 18px;
+  margin-block: clamp(15px,2.9dvh,22px) clamp(10px,1.8dvh,15px);
+  line-height: 1.5;
+}
+.ag-auth-social { gap: clamp(8px,1.4vw,12px); }
+.ag-auth-social button {
+  min-height: 43px;
+  line-height: 1.45;
+}
+.ag-auth-switch {
+  margin: clamp(16px,2.7dvh,22px) 0 0;
+  line-height: 1.6;
+}
+@media(max-width:820px) {
+  .ag-auth-intro { margin-bottom: clamp(16px,2.7dvh,23px); }
+  .ag-auth-form > .ag-auth-label-row { margin-top: clamp(14px,2.5dvh,18px); }
+  .ag-auth .ag-auth-submit { margin-top: clamp(15px,2.6dvh,20px); }
+  .ag-auth-divider { margin-block: clamp(14px,2.5dvh,19px) clamp(10px,1.8dvh,14px); }
+  .ag-auth-switch { margin-top: clamp(14px,2.5dvh,19px); }
+}
+@media(max-height:640px) {
+  .ag-auth-intro { row-gap: 5px; margin-bottom: 13px; }
+  .ag-auth-form > label { margin-bottom: 6px; }
+  .ag-auth-form > input { min-height: 40px; }
+  .ag-auth-form > .ag-auth-label-row { min-height: 23px; margin: 11px 0 6px; }
+  .ag-auth .ag-auth-submit { min-height: 42px; margin-top: 12px; }
+  .ag-auth-divider { margin-block: 12px 9px; }
+  .ag-auth-social button { min-height: 40px; }
+  .ag-auth-switch { margin-top: 12px; }
+}
